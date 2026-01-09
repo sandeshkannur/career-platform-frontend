@@ -352,19 +352,30 @@ class AssessmentOut(BaseModel):
 
 
 class AssessmentResponseCreate(BaseModel):
-    question_id: str = Field(..., example="V1_Q1")
-    answer: constr(pattern=r"^[1-5]$") = Field(..., example="5")
+    question_id: str = Field(
+        ...,
+        json_schema_extra={"example": "V1_Q1"},
+    )
+    answer: constr(pattern=r"^[1-5]$") = Field(
+        ...,
+        json_schema_extra={"example": "5"},
+    )
+
 
 
 class AssessmentResponseOut(BaseModel):
-    question_id: str = Field(..., example="V1_Q1")
-    answer: str = Field(..., example="5")
+    question_id: str = Field(
+        ...,
+        json_schema_extra={"example": "V1_Q1"},
+    )
+    answer: str = Field(
+        ...,
+        json_schema_extra={"example": "5"},
+    )
 
     class Config:
         from_attributes = True
         orm_mode = True
-
-
 class AssessmentResultOut(BaseModel):
     assessment_id: int
     recommended_stream: Optional[str] = None
@@ -530,16 +541,16 @@ class RandomQuestionsResponse(BaseModel):
 # ===============================
 
 class StudentQuestionItemOut(BaseModel):
-    question_id: str = Field(..., example="V1_Q1")
-    skill_id: int = Field(..., example=1)
-    question_text: str = Field(..., example="I enjoy solving logical puzzles.")
+    question_id: str = Field(..., json_schema_extra={"example": "V1_Q1"})
+    skill_id: int = Field(..., json_schema_extra={"example": 1})
+    question_text: str = Field(..., json_schema_extra={"example": "I enjoy solving logical puzzles."})
 
 
 class StudentQuestionsResponse(BaseModel):
-    assessment_version: str = Field(..., example="v1")
-    lang: Optional[str] = Field(None, example="hi")
-    lang_used: str = Field(..., example="hi")
-    count_returned: int = Field(..., example=2)
+    assessment_version: str = Field(..., json_schema_extra={"example": "v1"})
+    lang: Optional[str] = Field(None, json_schema_extra={"example": "hi"})
+    lang_used: str = Field(..., json_schema_extra={"example": "hi"})
+    count_returned: int = Field(..., json_schema_extra={"example": 2})
     questions: List[StudentQuestionItemOut] = Field(default_factory=list)
 
 
