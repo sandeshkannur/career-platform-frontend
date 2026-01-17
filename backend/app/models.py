@@ -70,6 +70,61 @@ class Student(Base):
 
     # 1:1 relationship to User (optional until backfilled)
     user = relationship("User", backref="student_profile", uselist=False)
+    
+# =========================================================
+# Context Profile (CPS) — Hybrid Model external factors
+# =========================================================
+
+class ContextProfile(Base):
+    """
+    ContextProfile — captures external/context factors for a specific assessment run.
+
+    Stored per-assessment for strict replayability:
+    old results can be recomputed using the exact context factors at run-time.
+    """
+    __tablename__ = "context_profile"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Pin to the immutable assessment run (1:1)
+    assessment_id = Column(
+        Integer,
+        ForeignKey("assessments.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    # Student reference
+    student_id = Column(
+        Integer,
+        ForeignKey("students.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Version pins (for strict audit/replay)
+    assessment_version = Column(String(32), nullable=False, index=True, default="v1")
+    scoring_config_version = Column(String(32), nullable=False, index=True, default="v1")
+
+    # Context inputs
+    ses_band = Column(String(32), nullable=False)            # e.g. "EWS", "LIG", "MIG", "HIG"
+    education_board = Column(String(32), nullable=False)     # e.g. "CBSE", "ICSE", "State"
+    support_level = Column(String(32), nullable=False)       # e.g. "Low", "Medium", "High"
+    resource_access = Column(String(32), nullable=True)      # optional for now
+
+    # Computed output (0–100)
+    cps_score = Column(Float, nullable=False, default=0.0)
+
+    computed_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("ix_context_profile_student_version", "student_id", "scoring_config_version"),
+    )
+
+    # Relationships (additive & safe)
+    student = relationship("Student", backref="context_profiles")
+    assessment = relationship("Assessment", backref="context_profile")
 
 
 # =========================================================
