@@ -199,8 +199,14 @@ def submit_responses(
                 detail="Immutable answers: this question_id was already submitted for this assessment.",
             )
 
-    # ✅ Do NOT pass request-scoped db into background task
-    background_tasks.add_task(generate_result, assessment_id, current_user.id)
+    # M4-A4: Avoid duplicate background jobs on offline replay
+    result_exists = (
+    db.query(models.AssessmentResult.id)
+    .filter(models.AssessmentResult.assessment_id == assessment_id)
+    .first()
+    )
+    if not result_exists:
+        background_tasks.add_task(generate_result, assessment_id, current_user.id)
 
     # ---- Resume pointer (deterministic) ----
     total_questions = db.query(func.count(models.Question.id)).scalar() or 0
