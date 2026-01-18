@@ -187,6 +187,7 @@ def submit_responses(
                 .limit(1)
                 .scalar()
             )
+    is_complete = (next_qid is None) and (answered_count >= total_questions)        
 
     # For the response payload, report the last question_id from THIS request (string)
     last_submitted_qid = responses[-1].question_id
@@ -199,6 +200,7 @@ def submit_responses(
         last_answered_question_id=str(last_qid) if last_qid is not None else None,
         next_question_id=str(next_qid) if next_qid is not None else None,
         total_questions=int(total_questions),
+        is_complete=is_complete,
     )
 
 # ----------------------------------------------------------
@@ -422,6 +424,9 @@ def get_active_assessment(
                     .limit(1)
                     .scalar()
                 )
+    is_complete = (next_qid is None) and (answered_count >= total_questions)            
+
+
 
     return ActiveAssessmentResponse(
         active=True,
@@ -432,6 +437,7 @@ def get_active_assessment(
         last_answered_question_id=str(last_qid) if last_qid is not None else None,
         next_question_id=str(next_qid) if next_qid is not None else None,
         total_questions=int(total_questions),
+        is_complete=is_complete,
     )
 
 # ----------------------------------------------------------
