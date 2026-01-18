@@ -54,3 +54,21 @@ backend_snapshot*.txt
 backend/New Microsoft Excel Worksheet.xlsx
 frontend/New Text Document.txt
 frontend/e2e/New Text Document.txt
+
+# --- Local-only automation helpers / scratch ---
+auto_update.py
+generate_snapshot.py
+tmp/
+**/tmp/
+
+# --- Backend generated exports ---
+backend/openapi.json
+backend/questions_v1.csv
+
+# --- Backend scripts folder (local-only helpers; commit only if you intend to ship it) ---
+backend/app/scripts/
+
+# --- Alembic migration drafts (ONLY ignore if you don't want to commit WIP migrations) ---
+backend/alembic/versions/0ea029cf1a6d_enforce_immutable_assessment_responses.py
+
+**/openapi.json
