@@ -10,13 +10,14 @@ from fastapi import (
     BackgroundTasks,
 )
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app import models, schemas
 from app.deps import get_db
 from app.auth.auth import get_current_active_user
 
 # 🧠 Scoring logic for assessments (kept)
-from app.utils.scoring import compute_skill_scores, assign_tiers, compute_cps_v1
+from app.utils.scoring import compute_skill_scores, assign_tiers, compute_cps_v1, compute_hsi_v1
 
 # 🔥 Existing
 from app.services.tier_mapping import apply_keyskill_tiers
@@ -41,7 +42,39 @@ router = APIRouter(
     tags=["Assessments"],
 )
 
+def _persist_hsi_for_assessment_skill_scores(
+    db: Session,
+    assessment_id: int,
+    scoring_config_version: str,
+    assessment_version: str,
+    cps_score_used: float,
+) -> None:
+    
 
+    """
+    Persist HSI fields into existing student_skill_scores rows for this assessment/version.
+
+    Safe + additive:
+    - Does NOT modify raw_total/question_count/avg_raw/scaled_0_100
+    - Only fills hsi_score/cps_score_used/assessment_version
+    - Idempotent: re-running overwrites with the same deterministic values
+    """
+    rows = (
+        db.query(models.StudentSkillScore)
+        .filter(
+            models.StudentSkillScore.assessment_id == assessment_id,
+            models.StudentSkillScore.scoring_config_version == scoring_config_version,
+        )
+        .all()
+    )
+    
+    for row in rows:
+        # Use the same scale as tiering currently uses in this file: avg_raw (1–5-ish)
+        row.hsi_score = compute_hsi_v1(float(row.avg_raw), float(cps_score_used))
+        row.cps_score_used = float(cps_score_used)
+        row.assessment_version = assessment_version
+
+    db.commit()
 # ----------------------------------------------------------
 # 🚀 Start a new assessment
 # ----------------------------------------------------------
@@ -67,7 +100,7 @@ def create_assessment(
 
 
 # ----------------------------------------------------------
-# 📝 Submit question responses
+# 📝 Submit question responses (append-only, immutable)
 # ----------------------------------------------------------
 @router.post(
     "/{assessment_id}/responses",
@@ -89,22 +122,30 @@ def submit_responses(
         )
 
     saved = []
-    for r in responses:
-        resp = models.AssessmentResponse(
-            assessment_id=assessment_id,
-            question_id=r.question_id,
-            answer=r.answer,
-        )
-        db.add(resp)
-        saved.append(resp)
+    try:
+        for r in responses:
+            resp = models.AssessmentResponse(
+                assessment_id=assessment_id,
+                question_id=r.question_id,
+                answer=r.answer,
+            )
+            db.add(resp)
+            saved.append(resp)
 
-    db.commit()
+        db.commit()
+
+    except IntegrityError:
+        # Uniqueness constraint hit: (assessment_id, question_id) already exists
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Immutable answers: this question_id was already submitted for this assessment.",
+        )
 
     # ✅ Step 5 fix: Do NOT pass request-scoped db into background task
     background_tasks.add_task(generate_result, assessment_id, current_user.id)
 
     return saved
-
 
 # ----------------------------------------------------------
 # 📥 Manual trigger for score computation and tier assignment
@@ -122,7 +163,7 @@ def submit_assessment(
     if not assessment or assessment.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Assessment not found")
 
-    scoring_config_version = "v1"  # ✅ must align with B7 defaults
+    scoring_config_version = assessment.scoring_config_version  # pinned, backend authoritative
 
     # ✅ B7: compute + persist student_skill_scores first
     try:
@@ -160,16 +201,43 @@ def submit_assessment(
             student_id=student_profile.id,
             scoring_config_version=scoring_config_version,
         )
-        
+
     # If no student_profile exists, we skip analytics recompute safely (no exception).
 
-    # ✅ Option A: Feed assign_tiers with avg_raw (1–5 scale) so existing thresholds work
+    # ✅ Tiering base (keep exactly as-is for response contract)
+    # avg_raw is on your existing 1–5-ish scale, so thresholds in assign_tiers still make sense.
     scores_for_tiers: Dict[int, float] = {
         int(skill_id): float(data["avg_raw"])
         for skill_id, data in skill_score_map["skills"].items()
     }
 
-    tiers = assign_tiers(scores_for_tiers)
+    # ✅ HSI v1: fetch CPS for this assessment (immutable 1:1); fallback CPS=0 if missing
+    context = (
+        db.query(models.ContextProfile)
+        .filter(models.ContextProfile.assessment_id == assessment_id)
+        .first()
+    )
+    cps_score = float(getattr(context, "cps_score", 0.0) or 0.0)
+
+    
+
+    # ✅ HSI persistence Option A (no response contract change)
+    _persist_hsi_for_assessment_skill_scores(
+        db=db,
+        assessment_id=assessment_id,
+        scoring_config_version=scoring_config_version,
+        assessment_version=assessment.assessment_version,
+        cps_score_used=cps_score,
+    )
+
+    # ✅ Apply HSI to the SAME score scale used for tiering (least-breaking approach)
+    scores_for_tiers_hsi: Dict[int, float] = {
+        skill_id: compute_hsi_v1(raw_score, cps_score)
+        for skill_id, raw_score in scores_for_tiers.items()
+    }
+
+    # ✅ Tiers now reflect HSI-adjusted values
+    tiers = assign_tiers(scores_for_tiers_hsi)
 
     # 2) Upsert into AssessmentResult (update if exists, else create)
     from datetime import datetime
@@ -200,8 +268,8 @@ def submit_assessment(
 
     return {
         "assessment_id": assessment_id,
-        "skill_scores": scores_for_tiers,  # keep same response contract shape
-        "tiers": tiers,
+        "skill_scores": scores_for_tiers,  # ✅ unchanged response contract (raw)
+        "tiers": tiers,                    # ✅ tiers now HSI-based
     }
 
 
@@ -277,7 +345,12 @@ def generate_result(assessment_id: int, student_id: int) -> None:
         if existing:
             return
 
-        scoring_config_version = "v1"  # ✅ must align with B7 defaults
+        assessment = db.query(models.Assessment).get(assessment_id)
+        if not assessment:
+            return
+
+        scoring_config_version = assessment.scoring_config_version
+        assessment_version_used = assessment.assessment_version
 
         # ✅ B7 scoring
         try:
@@ -318,7 +391,29 @@ def generate_result(assessment_id: int, student_id: int) -> None:
             for skill_id, data in skill_score_map["skills"].items()
         }
 
-        tiers = assign_tiers(scores_for_tiers)
+        # ✅ HSI v1: fetch CPS for this assessment; fallback CPS=0 if missing
+        context = (
+            db.query(models.ContextProfile)
+            .filter(models.ContextProfile.assessment_id == assessment_id)
+            .first()
+        )
+        cps_score = float(getattr(context, "cps_score", 0.0) or 0.0)
+
+        # ✅ Persist HSI into student_skill_scores (Option A) - background safe
+        _persist_hsi_for_assessment_skill_scores(
+            db=db,
+            assessment_id=assessment_id,
+            scoring_config_version=scoring_config_version,
+            assessment_version=assessment_version_used,
+            cps_score_used=cps_score,
+        )
+
+        # ✅ Tiers reflect HSI-adjusted values (consistent with submit_assessment)
+        scores_for_tiers_hsi: Dict[int, float] = {
+            skill_id: compute_hsi_v1(raw_score, cps_score)
+            for skill_id, raw_score in scores_for_tiers.items()
+        }
+        tiers = assign_tiers(scores_for_tiers_hsi)
 
         # Save assessment result
         result = models.AssessmentResult(
@@ -327,6 +422,7 @@ def generate_result(assessment_id: int, student_id: int) -> None:
             recommended_careers=[],
             skill_tiers=tiers,
         )
+        
         db.add(result)
         db.commit()
 

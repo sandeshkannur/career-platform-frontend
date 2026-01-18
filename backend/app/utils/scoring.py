@@ -51,6 +51,75 @@ def assign_tiers(skill_scores: dict) -> dict:
             tiers[skill_id] = "Low"
     return tiers
     
+def compute_hsi_v1(raw_skill_score: float, cps_score: float) -> float:
+    """
+    Hybrid Suitability Index (HSI) v1
+
+    Rule (locked):
+        FinalScore = RawSkillScore * (1 + (CPS * 0.15 / 100))
+
+    Pure + deterministic:
+      - No DB access
+      - No side effects
+      - Defensive on bad inputs
+    """
+    try:
+        raw = float(raw_skill_score)
+    except (TypeError, ValueError):
+        raw = 0.0
+
+    try:
+        cps = float(cps_score)
+    except (TypeError, ValueError):
+        cps = 0.0
+
+    # Defensive clamping (keeps replayability stable)
+    if raw < 0.0:
+        raw = 0.0
+    if cps < 0.0:
+        cps = 0.0
+    if cps > 100.0:
+        cps = 100.0
+
+    multiplier = 1.0 + (cps * 0.15 / 100.0)
+    return raw * multiplier
+
+def compute_skill_scores_hsi_v1(
+    assessment_id: int,
+    db: Session,
+    dataset_version: str = "v1",
+) -> dict:
+    """
+    HSI-upgraded scoring (v1):
+      1) Compute raw skill scores using existing deterministic method
+      2) Fetch CPS from context_profile (assessment_id 1:1)
+      3) Apply compute_hsi_v1 per skill score
+
+    Additive: does not change existing compute_skill_scores callers until wired.
+    """
+    # 1) Raw skill scores (existing logic)
+    raw_scores = compute_skill_scores(
+        assessment_id=assessment_id,
+        db=db,
+        dataset_version=dataset_version,
+    )
+
+    # 2) Fetch CPS (must exist for HSI path)
+    context = (
+        db.query(models.ContextProfile)
+        .filter_by(assessment_id=assessment_id)
+        .first()
+    )
+
+    # If CPS is missing, keep behavior safe and deterministic: treat CPS as 0
+    cps_score = float(getattr(context, "cps_score", 0.0) or 0.0)
+
+    # 3) Apply HSI per skill
+    hsi_scores = {}
+    for skill_id, raw in raw_scores.items():
+        hsi_scores[skill_id] = compute_hsi_v1(raw, cps_score)
+
+    return hsi_scores    
 # =========================================================
 # Context Profile Score (CPS) — Hybrid Model v1
 # =========================================================
