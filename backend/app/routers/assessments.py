@@ -15,6 +15,8 @@ from sqlalchemy.exc import IntegrityError
 from app import models, schemas
 from app.deps import get_db
 from app.auth.auth import get_current_active_user
+from sqlalchemy import func
+from app.schemas_resume import ActiveAssessmentResponse
 
 # 🧠 Scoring logic for assessments (kept)
 from app.utils.scoring import compute_skill_scores, assign_tiers, compute_cps_v1, compute_hsi_v1
@@ -272,6 +274,71 @@ def submit_assessment(
         "tiers": tiers,                    # ✅ tiers now HSI-based
     }
 
+# ----------------------------------------------------------
+# ▶️ Fetch active assessment resume state (Milestone 3)
+# ----------------------------------------------------------
+@router.get(
+    "/active",
+    response_model=ActiveAssessmentResponse,
+    summary="Fetch the latest active (not completed) assessment resume state",
+)
+def get_active_assessment(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    """
+    Deterministic rule (A1):
+    - Latest assessment for this user where no assessment_result exists yet
+    - Must have at least 1 response (otherwise active=false for now)
+    """
+
+    # 1) Latest assessment without a result yet (treat as not completed)
+    assessment = (
+        db.query(models.Assessment)
+        .outerjoin(
+            models.AssessmentResult,
+            models.AssessmentResult.assessment_id == models.Assessment.id,
+        )
+        .filter(models.Assessment.user_id == current_user.id)
+        .filter(models.AssessmentResult.id.is_(None))
+        .order_by(models.Assessment.id.desc())
+        .first()
+    )
+
+    if not assessment:
+        return ActiveAssessmentResponse(active=False)
+
+    # 2) Count answered
+    answered_count = (
+        db.query(func.count(models.AssessmentResponse.id))
+        .filter(models.AssessmentResponse.assessment_id == assessment.id)
+        .scalar()
+    ) or 0
+
+    if answered_count == 0:
+        return ActiveAssessmentResponse(active=False)
+
+    # 3) Last answered question_id
+    last_qid = (
+        db.query(models.AssessmentResponse.question_id)
+        .filter(models.AssessmentResponse.assessment_id == assessment.id)
+        .order_by(models.AssessmentResponse.id.desc())
+        .limit(1)
+        .scalar()
+    )
+
+    # 4) Total questions
+    total_questions = db.query(func.count(models.Question.id)).scalar() or 0
+
+    return ActiveAssessmentResponse(
+        active=True,
+        assessment_id=assessment.id,
+        assessment_version=getattr(assessment, "assessment_version", None),
+        scoring_config_version=getattr(assessment, "scoring_config_version", None),
+        answered_count=int(answered_count),
+        last_answered_question_id=str(last_qid) if last_qid is not None else None,
+        total_questions=int(total_questions),
+    )
 
 # ----------------------------------------------------------
 # 📤 Fetch assessment info
