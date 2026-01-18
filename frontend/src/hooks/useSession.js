@@ -8,7 +8,7 @@ import { toastSuccess } from "../toast";
 
 export function useSession() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const _location = useLocation();
 
   const [sessionUser, setSessionUser] = useState(null);
   const [bootstrapping, setBootstrapping] = useState(true);
@@ -45,7 +45,7 @@ export function useSession() {
           navigate(target, { replace: true });
         }
       }
-    } catch (err) {
+    } catch {
       clearToken();
       setSessionUser(null);
       navigate("/login", { replace: true });

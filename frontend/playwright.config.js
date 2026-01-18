@@ -1,4 +1,5 @@
 // playwright.config.js
+/* eslint-disable no-undef */
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({

@@ -73,7 +73,7 @@ function hardLogoutToLogin() {
   }
 }
 
-export async function apiRequest(url, options = {}, _retried = false) {
+export async function apiRequest(url, options = {}) {
   const finalUrl = buildUrl(url);
   const token = getToken();
 
