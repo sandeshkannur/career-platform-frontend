@@ -321,6 +321,14 @@ class AssessmentResponse(Base):
     """
     __tablename__ = "assessment_responses"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "assessment_id",
+            "question_id",
+            name="uq_assessment_responses_assessment_question",
+        ),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False)
     question_id = Column(String, nullable=False)
@@ -362,6 +370,7 @@ class StudentSkillScore(Base):
     Locked B7 behavior notes:
     - Unique (assessment_id, scoring_config_version, skill_id) ensures idempotency.
     - Stores raw_total, question_count, avg_raw, scaled_0_100.
+    - Additive HSI persistence fields (nullable) for replay-safe analytics (Option A).
     """
     __tablename__ = "student_skill_scores"
 
@@ -383,13 +392,18 @@ class StudentSkillScore(Base):
     avg_raw = Column(Float, nullable=False)  # raw_total / question_count
     scaled_0_100 = Column(Float, nullable=False)  # avg_raw converted to 0..100 (temporary)
 
+    # =========================================================
+    # HSI persistence (Option A) - ADDITIVE, nullable, version-safe
+    # =========================================================
+    hsi_score = Column(Float, nullable=True)
+    cps_score_used = Column(Float, nullable=True)
+    assessment_version = Column(String(20), nullable=True)
+
     computed_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     __table_args__ = (
         UniqueConstraint("assessment_id", "scoring_config_version", "skill_id", name="uq_assess_skill_ver"),
     )
-
-
 # =========================================================
 # B9: Analytics snapshots (NEW - additive)
 # =========================================================
