@@ -1,11 +1,11 @@
 // src/pages/student/StudentAssessmentIntroPage.jsx
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 
-import { startAssessment } from "../../api/assessments";
+import { getActiveAssessment, startAssessment } from "../../api/assessments";
 
 /**
  * Assessment UX — Step 2 (wired)
@@ -45,6 +45,32 @@ export default function StudentAssessmentIntroPage() {
 
   const lastRun = useMemo(() => readLastRunSnapshot(), []);
 
+  // Step 1: backend-authoritative state sync (no scoring/order logic on client)
+  const [activeLoading, setActiveLoading] = useState(true);
+  const [activeError, setActiveError] = useState(null);
+  const [activeState, setActiveState] = useState(null);
+
+  const loadActive = useCallback(async () => {
+    setActiveLoading(true);
+    setActiveError(null);
+    try {
+      const json = await getActiveAssessment();
+      setActiveState(json);
+
+      // Proof log required by our onboarding step
+      console.log("[StudentAssessmentIntroPage] /v1/assessments/active =>", json);
+    } catch (e) {
+      setActiveError(e?.message || "Could not load your progress right now.");
+      console.error("[StudentAssessmentIntroPage] loadActive error:", e);
+    } finally {
+      setActiveLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadActive();
+  }, [loadActive]);
+
   const goToRun = useCallback(
     (assessmentId) => {
       navigate(`/student/assessment/run/${assessmentId}`);
@@ -73,13 +99,23 @@ export default function StudentAssessmentIntroPage() {
   }, [goToRun]);
 
   const handleResume = useCallback(() => {
+    // 1) Backend-authoritative resume first
+    const backendAssessmentId = activeState?.assessment_id;
+
+    if (backendAssessmentId && activeState?.active && !activeState?.is_complete) {
+      goToRun(backendAssessmentId);
+      return;
+    }
+
+    // 2) Fallback: local snapshot
     if (lastRun?.assessment_id) {
       goToRun(lastRun.assessment_id);
       return;
     }
-    // If nothing to resume, behave like Start (no extra UX yet).
+
+    // 3) Else start new
     handleStart();
-  }, [goToRun, handleStart, lastRun]);
+  }, [activeState, goToRun, handleStart, lastRun]);
 
   return (
     <SkeletonPage
@@ -87,10 +123,10 @@ export default function StudentAssessmentIntroPage() {
       subtitle="Understand your strengths, preferences, and aptitude."
       actions={
         <>
-          <Button variant="secondary" disabled={busy} onClick={handleResume}>
+          <Button variant="secondary" disabled={busy || activeLoading} onClick={handleResume}>
             Resume
           </Button>
-          <Button disabled={busy} onClick={handleStart}>
+          <Button disabled={busy || activeLoading} onClick={handleStart}>
             {busy ? "Starting..." : "Start Assessment"}
           </Button>
         </>
@@ -101,6 +137,18 @@ export default function StudentAssessmentIntroPage() {
           This assessment helps generate <b>deterministic</b> and <b>explainable</b>{" "}
           career recommendations based on your responses.
         </p>
+        {activeError ? (
+          <div style={{ fontSize: 12, opacity: 0.7 }}>
+            Couldn’t check saved progress right now. You can still start or resume if available.
+          </div>
+        ) : null}
+
+        {activeState?.active && activeState?.assessment_id && !activeState?.is_complete ? (
+          <div style={{ fontSize: 12, opacity: 0.75 }}>
+            Saved progress found: answered <b>{activeState.answered_count}</b> of{" "}
+            <b>{activeState.total_questions}</b>.
+          </div>
+        ) : null}
 
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>What to expect</div>

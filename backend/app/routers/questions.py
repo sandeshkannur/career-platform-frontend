@@ -85,6 +85,58 @@ def get_localized_questions(
         count_returned=len(questions_out),
         questions=questions_out,
     )
+
+# ----------------------------------------------------------
+# 🧩 Fetch question pool (runner support)
+# IMPORTANT: must be defined BEFORE "/{question_id}" to avoid route collision
+# ----------------------------------------------------------
+@router.get(
+    "/pool",
+    summary="Fetch question pool for the runner",
+)
+def get_question_pool(
+    lang: str | None = Query(
+        None,
+        description="Optional language code: en, hi, ta (unsupported values fall back to en)",
+    ),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    requested_lang = (lang or "en").strip().lower()
+    if requested_lang not in LANG_FIELD_MAP:
+        lang_used = "en"
+        lang_field = LANG_FIELD_MAP["en"]
+    else:
+        lang_used = requested_lang
+        lang_field = LANG_FIELD_MAP[requested_lang]
+
+    questions = db.query(Question).order_by(Question.id.asc()).all()
+
+    items = []
+    for q in questions:
+        text_in_lang = getattr(q, lang_field, None)
+        if text_in_lang is None or (isinstance(text_in_lang, str) and text_in_lang.strip() == ""):
+            text_in_lang = q.question_text_en
+
+        items.append(
+            {
+                "question_id": str(q.id),
+                "assessment_version": q.assessment_version,
+                "lang": lang,
+                "lang_used": lang_used,
+                "skill_id": q.skill_id,
+                "question_text": text_in_lang,
+            }
+        )
+
+    return {
+        "assessment_version": "v1",
+        "lang": lang,
+        "lang_used": lang_used,
+        "count_returned": len(items),
+        "questions": items,
+    }
+
 # ----------------------------------------------------------
 # 📌 Fetch a single question by ID (resume-safe, deterministic)
 # ----------------------------------------------------------
