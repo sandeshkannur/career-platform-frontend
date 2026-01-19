@@ -50,3 +50,17 @@ export async function submitAssessment(assessmentId, payload = {}) {
   if (!assessmentId) throw new Error("assessmentId is required");
   return apiPost(`/v1/assessments/${assessmentId}/submit-assessment`, payload);
 }
+/**
+ * POST /v1/assessments/{assessment_id}/responses
+ * Submits one or more immutable responses (backend authoritative + idempotent).
+ *
+ * Payload shape (array):
+ * [
+ *   { question_id: "12", answer: "5", idempotency_key: "..." },
+ *   ...
+ * ]
+ */
+export async function postAssessmentResponses(assessmentId, responses = []) {
+  if (!assessmentId) throw new Error("assessmentId is required");
+  return apiPost(`/v1/assessments/${assessmentId}/responses`, responses);
+}
