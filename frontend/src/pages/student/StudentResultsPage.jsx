@@ -4,6 +4,7 @@ import { apiGet } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
+import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
 
 function PencilIcon({ size = 14 }) {
   return (
@@ -232,6 +233,45 @@ export default function StudentResultsPage() {
                 </div>
                 <div style={{ fontWeight: 600 }}>{labelOrNotShared(ctx?.ses_band)}</div>
               </div>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <details>
+                <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+                  {getContextImpactCopyV1({ ctx }).title}
+                </summary>
+
+                <div className="text-muted" style={{ fontSize: 13, marginTop: 8 }}>
+                  <div style={{ marginBottom: 8 }}>
+                    {getContextImpactCopyV1({ ctx }).intro}
+                  </div>
+
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {getContextImpactCopyV1({ ctx }).bullets.map((line, idx) => (
+                      <li key={idx} style={{ marginBottom: 6 }}>
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div style={{ marginTop: 8 }}>
+                    {getContextImpactCopyV1({ ctx }).footer}{" "}
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate("/student/context")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          navigate("/student/context");
+                        }
+                      }}
+                      style={{ textDecoration: "underline", cursor: "pointer" }}
+                    >
+                      Context
+                    </span>
+                    .
+                  </div>
+                </div>
+              </details>
             </div>
 
             {/* Simple responsive override without new CSS files */}
