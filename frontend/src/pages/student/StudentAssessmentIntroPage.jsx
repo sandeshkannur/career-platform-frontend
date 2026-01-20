@@ -30,6 +30,15 @@ function readLastRunSnapshot() {
     return null;
   }
 }
+function isLikelyCompletedFlow() {
+  // If user navigated here after submission/results,
+  // do not aggressively re-check /active.
+  try {
+    return window.location.pathname.includes("/results");
+  } catch {
+    return false;
+  }
+}
 
 function writeLastRunSnapshot(snapshot) {
   try {
@@ -60,8 +69,12 @@ export default function StudentAssessmentIntroPage() {
       // Proof log required by our onboarding step
       console.log("[StudentAssessmentIntroPage] /v1/assessments/active =>", json);
     } catch (e) {
-      setActiveError(e?.message || "Could not load your progress right now.");
-      console.error("[StudentAssessmentIntroPage] loadActive error:", e);
+    // World-class behaviour:
+    // /active is best-effort only. Do NOT block Start/Resume.
+    if (!isLikelyCompletedFlow()) {
+      setActiveError("Couldn’t check saved progress right now.");
+    }
+    console.warn("[StudentAssessmentIntroPage] /active check skipped:", e);
     } finally {
       setActiveLoading(false);
     }
@@ -137,6 +150,25 @@ export default function StudentAssessmentIntroPage() {
           This assessment helps generate <b>deterministic</b> and <b>explainable</b>{" "}
           career recommendations based on your responses.
         </p>
+                <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+          <div style={{ fontWeight: 800, marginBottom: 6 }}>
+            Help us tailor guidance (optional, ~30 seconds)
+          </div>
+
+          <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4, marginBottom: 10 }}>
+            Adding a few details helps keep recommendations practical for you.
+            You can skip this and update later anytime.
+          </div>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Button type="button" onClick={() => navigate("/student/context")}>
+              Add details
+            </Button>
+            <Button type="button" onClick={() => {}} style={{ opacity: 0.8 }}>
+              Skip for now
+            </Button>
+          </div>
+        </div>
         {activeError ? (
           <div style={{ fontSize: 12, opacity: 0.7 }}>
             Couldn’t check saved progress right now. You can still start or resume if available.
