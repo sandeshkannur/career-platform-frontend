@@ -1,143 +1,281 @@
-// src/pages/student/StudentResultsPage.jsx
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { apiGet } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
-import { getStudentResults } from "../../api/students";
+
+function PencilIcon({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      style={{ display: "inline-block" }}
+    >
+      <path
+        fill="currentColor"
+        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l8.06-8.06.92.92L5.92 19.58zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+      />
+    </svg>
+  );
+}
 
 export default function StudentResultsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { sessionUser } = useSession();
 
-  // Match StudentDashboardPage: stable studentId source of truth.
   const studentId = useMemo(() => {
-    return sessionUser?.student_profile?.student_id ?? null;
+    return sessionUser?.student_profile?.student_id ?? sessionUser?.id ?? null;
   }, [sessionUser]);
 
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const selectedAssessmentId = useMemo(() => {
+    const qs = new URLSearchParams(location.search);
+    const raw = qs.get("assessmentId");
+    const parsed = raw ? Number(raw) : null;
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [location.search]);
 
-  // Special states
-  const [notReady, setNotReady] = useState(false); // 404
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
 
-  const [error, setError] = useState(null);
+  // Context Profile (CPS inputs) for the selected assessment
+  const [ctx, setCtx] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
-
     async function load() {
-      if (!studentId) return;
-
-      setLoading(true);
-      setResults(null);
-      setNotReady(false);
-      setError(null);
+      if (!studentId) {
+        setError("Student not ready");
+        setLoading(false);
+        return;
+      }
 
       try {
-        const data = await getStudentResults(studentId);
-        if (cancelled) return;
-        setResults(data);
+        setLoading(true);
+        setError("");
+        const res = await apiGet(`/v1/students/${studentId}/results`);
+        setData(res);
       } catch (e) {
-        if (cancelled) return;
-
-        const status = e?.status || e?.response?.status;
-
-        if (status === 404) {
-          setNotReady(true);
-          return;
-        }
-
-        const message =
+        setError(
           e?.message ||
-          e?.detail ||
-          e?.response?.data?.detail ||
-          "Failed to load results.";
-
-        setError({ status, message, raw: e });
+            "Results not ready. Please try again after submitting assessment."
+        );
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
   }, [studentId]);
 
-  const showEmpty = !studentId || notReady;
+  const selectedResult = useMemo(() => {
+    if (!Array.isArray(data?.results) || data.results.length === 0) {
+      return null;
+    }
+
+    if (selectedAssessmentId != null) {
+      const match = data.results.find(
+        (r) => r.assessment_id === selectedAssessmentId
+      );
+      return match ?? data.results[0];
+    }
+
+    return data.results[0];
+  }, [data, selectedAssessmentId]);
+
+  useEffect(() => {
+    async function loadCtx() {
+      if (!selectedResult?.assessment_id) {
+        setCtx(null);
+        return;
+      }
+
+      try {
+        const res = await apiGet(
+          `/v1/assessments/${selectedResult.assessment_id}/context-profile`
+        );
+        setCtx(res);
+      } catch {
+        // Context is optional; keep the page usable if it fails
+        setCtx(null);
+      }
+    }
+
+    loadCtx();
+  }, [selectedResult?.assessment_id]);
+
+  function labelOrNotShared(v) {
+    const val = (v ?? "unknown").toString().trim();
+    return !val || val.toLowerCase() === "unknown" ? "Not shared yet" : val;
+  }
+
+  const isContextUnknown = useMemo(() => {
+    if (!ctx) return true;
+    const fields = [
+      ctx.ses_band,
+      ctx.education_board,
+      ctx.support_level,
+      ctx.resource_access,
+    ];
+    return fields.every((v) => (v || "unknown") === "unknown");
+  }, [ctx]);
 
   return (
     <SkeletonPage
       title="Your Career Results"
       subtitle="Top recommendations based on your assessment."
-      actions={
-        <>
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/student/results/history")}
-          >
-            View History
-          </Button>
-
-          <Button
-            disabled={!studentId}
-            title={!studentId ? "Student id not available in session yet" : ""}
-            onClick={() => {
-              if (!studentId) return;
-              navigate(`/student/reports/${studentId}`);
-            }}
-          >
-            Download Report
-          </Button>
-        </>
-      }
-      empty={showEmpty}
-      emptyTitle="Results not ready"
-      emptyDescription={
-        !studentId
-          ? "Could not determine student id from session. Please re-login."
-          : "Complete the assessment (or refresh after scoring completes) to view results."
-      }
     >
-      {studentId && loading && (
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          Loading results…
-        </div>
-      )}
-
-      {studentId && error && !loading && (
-        <div
-          style={{
-            padding: 12,
-            border: "1px solid #f3b4b4",
-            background: "#fff6f6",
-            borderRadius: 8,
-          }}
+      <div className="flex gap-2 justify-end">
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/student/dashboard")}
         >
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Failed to load results{error.status ? ` (HTTP ${error.status})` : ""}
-          </div>
-          <div style={{ fontSize: 14 }}>{error.message}</div>
-          <div style={{ marginTop: 10 }}>
-            <Button variant="secondary" onClick={() => window.location.reload()}>
-              Retry
-            </Button>
-          </div>
+          Back to Dashboard
+        </Button>
+
+        <Button onClick={() => navigate("/student/results/history")}>
+          View History
+        </Button>
+
+        <Button variant="secondary" disabled>
+          Download Report
+        </Button>
+      </div>
+
+      {loading && <p>Loading results…</p>}
+
+      {!loading && error && (
+        <div className="card" style={{ marginTop: 12 }}>
+          <h3>Results not ready</h3>
+          <p>{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       )}
 
-      {studentId && results && !loading && (
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>
-            Results JSON (temporary preview)
+      {!loading && !error && (
+        <>
+          {/* Context wrapper (clean, scalable, labels only) */}
+          <div className="card" style={{ marginTop: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "flex-start",
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  Your context (optional)
+                </div>
+
+                {isContextUnknown ? (
+                  <div className="text-muted" style={{ fontSize: 13 }}>
+                    Optional details that help us interpret results more fairly. You can change this anytime.
+                  </div>
+                ) : (
+                  <div className="text-muted" style={{ fontSize: 13 }}>
+                    We use this only to adjust assumptions, not to judge you.
+                  </div>
+                )}
+              </div>
+
+              <Button
+                variant="secondary"
+                onClick={() => navigate("/student/context")}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <PencilIcon />
+                  {isContextUnknown ? "Add" : "Edit"}
+                </span>
+              </Button>
+            </div>
+
+            {/* Responsive grid: 4 on desktop, 2 on tablet, 1 on mobile */}
+            <div
+              style={{
+                marginTop: 12,
+                display: "grid",
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                gap: 10,
+              }}
+            >
+              <div className="card" style={{ padding: 12 }}>
+                <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
+                  Education board
+                </div>
+                <div style={{ fontWeight: 600 }}>{labelOrNotShared(ctx?.education_board)}</div>
+              </div>
+
+              <div className="card" style={{ padding: 12 }}>
+                <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
+                  Support level
+                </div>
+                <div style={{ fontWeight: 600 }}>{labelOrNotShared(ctx?.support_level)}</div>
+              </div>
+
+              <div className="card" style={{ padding: 12 }}>
+                <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
+                  Resource access
+                </div>
+                <div style={{ fontWeight: 600 }}>{labelOrNotShared(ctx?.resource_access)}</div>
+              </div>
+
+              <div className="card" style={{ padding: 12 }}>
+                <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
+                  SES band
+                </div>
+                <div style={{ fontWeight: 600 }}>{labelOrNotShared(ctx?.ses_band)}</div>
+              </div>
+            </div>
+
+            {/* Simple responsive override without new CSS files */}
+            <style>{`
+              @media (max-width: 980px) {
+                .card > div[style*="grid-template-columns: repeat(4"] {
+                  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                }
+              }
+              @media (max-width: 560px) {
+                .card > div[style*="grid-template-columns: repeat(4"] {
+                  grid-template-columns: 1fr !important;
+                }
+              }
+            `}</style>
           </div>
-          <pre style={{ margin: 0, padding: 10, overflowX: "auto" }}>
-            {JSON.stringify(results, null, 2)}
-          </pre>
-        </div>
+
+          {/* Existing results card */}
+          <div className="card" style={{ marginTop: 12 }}>
+            <h3>Latest Assessment</h3>
+
+            <p>
+              You have completed <strong>{data?.total_results ?? 0}</strong> assessment(s).
+            </p>
+
+            {selectedResult ? (
+              <>
+                <p>
+                  Showing result for <strong>Assessment #{selectedResult.assessment_id}</strong>
+                </p>
+                <p>
+                  Generated on{" "}
+                  <strong>{new Date(selectedResult.generated_at).toLocaleString()}</strong>
+                </p>
+              </>
+            ) : (
+              <p>No results available yet.</p>
+            )}
+
+            <p className="text-muted">
+              Detailed career recommendations will appear here once scoring is finalized.
+            </p>
+          </div>
+        </>
       )}
     </SkeletonPage>
   );
