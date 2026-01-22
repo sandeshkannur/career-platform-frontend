@@ -878,3 +878,160 @@ async def upload_questions(
     db.commit()
     logger.info(f"upload-questions: uploaded={uploaded}, skipped={skipped}, errors={len(errors)}")
     return {"uploaded": uploaded, "skipped": skipped, "errors": errors}
+
+# ============================================================
+# PR1. UPLOAD ASSOCIATED QUALITIES (AQ_MASTER)
+# ============================================================
+
+@router.post(
+    "/upload-aqs",
+    response_model=UploadResponse,
+    summary="Bulk upload Associated Qualities (AQ) via CSV",
+)
+async def upload_aqs(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    """
+    Expected CSV headers (exact):
+      aq_id,aq_name
+
+    Idempotent behavior:
+    - If aq_id exists, update aq_name (safe additive update)
+    - Else insert
+    """
+    if file.content_type != "text/csv":
+        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+
+    text = (await file.read()).decode("utf-8-sig")
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"aq_id", "aq_name"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+
+    for row_num, row in enumerate(reader, start=2):
+        aq_id = (row.get("aq_id") or "").strip()
+        aq_name = (row.get("aq_name") or "").strip()
+
+        if not aq_id or not aq_name:
+            skipped += 1
+            continue
+
+        existing = db.query(models.AssociatedQuality).filter_by(aq_id=aq_id).first()
+        if existing:
+            # update only if changed
+            if (existing.aq_name or "").strip() != aq_name:
+                existing.aq_name = aq_name
+                updated += 1
+            else:
+                skipped += 1
+            continue
+
+        db.add(models.AssociatedQuality(aq_id=aq_id, aq_name=aq_name))
+        inserted += 1
+
+    db.commit()
+    logger.info(f"upload-aqs: inserted={inserted}, updated={updated}, skipped={skipped}")
+    return {"status": "success", "inserted": inserted}
+
+
+# ============================================================
+# PR1. UPLOAD AQ FACETS (AQ_FACET_TAXONOMY)
+# ============================================================
+
+@router.post(
+    "/upload-aq-facets",
+    response_model=UploadResponse,
+    summary="Bulk upload AQ Facets via CSV",
+)
+async def upload_aq_facets(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    """
+    Expected CSV headers (exact):
+      aq_id,aq_name,facet_id,facet_name
+
+    Idempotent behavior:
+    - If facet_id exists, update facet_name + aq_id if needed
+    - Else insert
+
+    FK behavior:
+    - aq_id must exist in associated_qualities (otherwise skip row)
+    """
+    if file.content_type != "text/csv":
+        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+
+    text = (await file.read()).decode("utf-8-sig")
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"aq_id", "aq_name", "facet_id", "facet_name"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+
+    for row_num, row in enumerate(reader, start=2):
+        aq_id = (row.get("aq_id") or "").strip()
+        facet_id = (row.get("facet_id") or "").strip()
+        facet_name = (row.get("facet_name") or "").strip()
+
+        if not aq_id or not facet_id or not facet_name:
+            skipped += 1
+            continue
+
+        # FK guard: AQ must exist
+        aq = db.query(models.AssociatedQuality).filter_by(aq_id=aq_id).first()
+        if not aq:
+            skipped += 1
+            continue
+
+        existing = db.query(models.AQFacet).filter_by(facet_id=facet_id).first()
+        if existing:
+            changed = False
+            if (existing.facet_name or "").strip() != facet_name:
+                existing.facet_name = facet_name
+                changed = True
+            if (existing.aq_id or "").strip() != aq_id:
+                existing.aq_id = aq_id
+                changed = True
+
+            if changed:
+                updated += 1
+            else:
+                skipped += 1
+            continue
+
+        db.add(models.AQFacet(facet_id=facet_id, aq_id=aq_id, facet_name=facet_name))
+        inserted += 1
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="FK or unique constraint error while inserting facets")
+
+    logger.info(f"upload-aq-facets: inserted={inserted}, updated={updated}, skipped={skipped}")
+    return {"status": "success", "inserted": inserted}
+

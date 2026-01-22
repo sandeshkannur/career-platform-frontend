@@ -736,3 +736,23 @@ class ContextProfileOut(BaseModel):
     cps_score: float
 
     model_config = ConfigDict(from_attributes=True)
+class ContextProfileUpdate(BaseModel):
+    """
+    Update payload for Context Profile.
+    Additive-only schema to match router usage (assessments.py).
+    All fields optional to support partial updates.
+    """
+
+    # ids may or may not be required by your endpoint, but keeping them optional avoids breaking existing calls
+    assessment_id: Optional[int] = Field(None, ge=1)
+    student_id: Optional[int] = Field(None, ge=1)
+
+    # Version pins (optional in update)
+    assessment_version: Optional[str] = Field(None, min_length=1, max_length=32)
+    scoring_config_version: Optional[str] = Field(None, min_length=1, max_length=32)
+
+    # Context inputs (optional in update)
+    ses_band: Optional[str] = Field(None, min_length=1, max_length=32)
+    education_board: Optional[str] = Field(None, min_length=1, max_length=32)
+    support_level: Optional[str] = Field(None, min_length=1, max_length=32)
+    resource_access: Optional[str] = Field(None, max_length=32)

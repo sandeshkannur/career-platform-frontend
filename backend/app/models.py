@@ -497,3 +497,29 @@ class ConsentLog(Base):
     user_agent = Column(Text, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+# =========================================================
+# Associated Quality (AQ) and AQFacet
+# =========================================================
+
+class AssociatedQuality(Base):
+    __tablename__ = "associated_qualities"
+
+    aq_id = Column(String, primary_key=True, index=True)   # e.g., "AQ_01"
+    aq_name = Column(String, nullable=False)               # e.g., "Curiosity Drive"
+
+    facets = relationship("AQFacet", back_populates="aq", cascade="all, delete-orphan")
+
+
+class AQFacet(Base):
+    __tablename__ = "aq_facets"
+
+    facet_id = Column(String, primary_key=True, index=True)  # e.g., "AQ01_F1"
+    aq_id = Column(String, ForeignKey("associated_qualities.aq_id", ondelete="RESTRICT"), nullable=False, index=True)
+    facet_name = Column(String, nullable=False)
+
+    aq = relationship("AssociatedQuality", back_populates="facets")
+
+
+# Helpful explicit index (some DBs already index FK col; we make it explicit)
+Index("idx_aq_facets_aq_id", AQFacet.aq_id)
