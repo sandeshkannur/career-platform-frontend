@@ -7,7 +7,7 @@ from fastapi import (
     Form,
 )
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError  # ✅ NEW
+from sqlalchemy.exc import IntegrityError
 import csv
 import io
 import logging
@@ -25,6 +25,9 @@ from app.models import (
     StudentKeySkillMap,
     User as UserModel,
     career_keyskill_association,
+    Question,
+    AQFacet,
+    QuestionFacetTag,
 )
 from app.schemas import (
     UploadResponse,
@@ -32,11 +35,9 @@ from app.schemas import (
     RoleChange,
     GuardianAssign,
     User as UserSchema,
-
-    # ✅ B3 NEW schemas (you will add these in app/schemas.py)
+    QuestionFacetTagUploadRow,
     AdminQuestionCreateRequest,
     AdminQuestionCreateResponse,
-    # ✅ B4 NEW schemas
     AdminQuestionBulkItem,
     AdminQuestionBulkResponse,
     AdminQuestionBulkErrorEntry,
@@ -57,6 +58,31 @@ router = APIRouter(
     dependencies=[Depends(require_role("admin"))],
 )
 
+
+def _parse_optional_int(value):
+    """
+    Convert optional values to int for DB integer columns.
+
+    Accepts:
+      - None, "", "null" -> None
+      - "12" -> 12
+      - 12 -> 12
+
+    Raises:
+      - ValueError for non-numeric strings.
+    """
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+
+    s = str(value).strip()
+    if s == "" or s.lower() == "null":
+        return None
+
+    return int(s)
+
+
 # ============================================================
 # 1. UPLOAD CAREER CLUSTERS
 # ============================================================
@@ -71,42 +97,61 @@ async def upload_career_clusters(
     db: Session = Depends(get_db),
     current_user: UserSchema = Depends(get_current_active_user),
 ):
+    """
+    Expected CSV headers (exact):
+      cluster_id,cluster_name
+
+    Behavior:
+    - If cluster exists, update name.
+    - Else insert.
+    """
     if file.content_type != "text/csv":
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
 
     text = (await file.read()).decode("utf-8-sig")
-
     if not text.strip():
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
     reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"cluster_id", "cluster_name"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
     inserted = 0
+    updated = 0
     skipped = 0
 
     for row in reader:
-        name = (row.get("name") or "").strip()
-        if not name:
+        cid = (row.get("cluster_id") or "").strip()
+        cname = (row.get("cluster_name") or "").strip()
+
+        if not cid or not cname:
             skipped += 1
             continue
 
-        if db.query(CareerCluster).filter_by(name=name).first():
-            skipped += 1
+        existing = db.query(CareerCluster).filter_by(cluster_id=cid).first()
+        if existing:
+            if (existing.cluster_name or "").strip() != cname:
+                existing.cluster_name = cname
+                updated += 1
+            else:
+                skipped += 1
             continue
 
-        cluster = CareerCluster(
-            name=name,
-            description=(row.get("description") or "").strip() or None,
-        )
-        db.add(cluster)
+        db.add(CareerCluster(cluster_id=cid, cluster_name=cname))
         inserted += 1
 
     db.commit()
-    logger.info(f"upload-career-clusters: inserted={inserted}, skipped={skipped}")
+    logger.info(f"upload-career-clusters: inserted={inserted}, updated={updated}, skipped={skipped}")
     return {"status": "success", "inserted": inserted}
 
 
 # ============================================================
-# 2. UPLOAD CAREERS (supports cluster_id OR cluster_name)
+# 2. UPLOAD CAREERS
 # ============================================================
 
 @router.post(
@@ -120,10 +165,13 @@ async def upload_careers(
     current_user: UserSchema = Depends(get_current_active_user),
 ):
     """
-    CSV headers supported:
-    - title (required)
-    - description (optional)
-    - cluster_id (int) OR cluster_name (string)
+    Expected CSV headers (exact):
+      career_id,career_name,cluster_id
+
+    Behavior:
+    - If career exists, update fields.
+    - Else insert.
+    - cluster_id must exist.
     """
     if file.content_type != "text/csv":
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
@@ -133,54 +181,58 @@ async def upload_careers(
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
     reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"career_id", "career_name", "cluster_id"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
     inserted = 0
+    updated = 0
     skipped = 0
 
     for row in reader:
-        title = (row.get("title") or "").strip()
-        if not title:
+        career_id = (row.get("career_id") or "").strip()
+        career_name = (row.get("career_name") or "").strip()
+        cluster_id = (row.get("cluster_id") or "").strip()
+
+        if not career_id or not career_name or not cluster_id:
             skipped += 1
             continue
 
-        if db.query(Career).filter_by(title=title).first():
+        cluster = db.query(CareerCluster).filter_by(cluster_id=cluster_id).first()
+        if not cluster:
             skipped += 1
             continue
 
-        # Support cluster_id OR cluster_name
-        cluster = None
+        existing = db.query(Career).filter_by(career_id=career_id).first()
+        if existing:
+            changed = False
+            if (existing.career_name or "").strip() != career_name:
+                existing.career_name = career_name
+                changed = True
+            if (existing.cluster_id or "").strip() != cluster_id:
+                existing.cluster_id = cluster_id
+                changed = True
 
-        cluster_id_raw = (row.get("cluster_id") or "").strip()
-        if cluster_id_raw:
-            try:
-                cid = int(cluster_id_raw)
-                cluster = db.query(CareerCluster).get(cid)
-            except Exception:
-                cluster = None
-
-        if cluster is None:
-            cluster_name = (row.get("cluster_name") or "").strip()
-            if cluster_name:
-                cluster = db.query(CareerCluster).filter_by(name=cluster_name).first()
-
-        if cluster is None:
-            skipped += 1
+            if changed:
+                updated += 1
+            else:
+                skipped += 1
             continue
 
-        career = Career(
-            title=title,
-            description=(row.get("description") or "").strip() or None,
-            cluster_id=cluster.id,
-        )
-        db.add(career)
+        db.add(Career(career_id=career_id, career_name=career_name, cluster_id=cluster_id))
         inserted += 1
 
     db.commit()
-    logger.info(f"upload-careers: inserted={inserted}, skipped={skipped}")
+    logger.info(f"upload-careers: inserted={inserted}, updated={updated}, skipped={skipped}")
     return {"status": "success", "inserted": inserted}
 
 
 # ============================================================
-# 3. UPLOAD KEYSKILLS (supports cluster_id OR cluster_name)
+# 3. UPLOAD KEY SKILLS
 # ============================================================
 
 @router.post(
@@ -194,10 +246,12 @@ async def upload_keyskills(
     current_user: UserSchema = Depends(get_current_active_user),
 ):
     """
-    CSV headers supported:
-    - name (required)
-    - description (optional)
-    - cluster_id (int) OR cluster_name (string)
+    Expected CSV headers (exact):
+      keyskill_id,keyskill_name
+
+    Behavior:
+    - If exists, update name.
+    - Else insert.
     """
     if file.content_type != "text/csv":
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
@@ -207,206 +261,121 @@ async def upload_keyskills(
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
     reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"keyskill_id", "keyskill_name"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+
+    for row in reader:
+        kid = (row.get("keyskill_id") or "").strip()
+        kname = (row.get("keyskill_name") or "").strip()
+
+        if not kid or not kname:
+            skipped += 1
+            continue
+
+        existing = db.query(KeySkill).filter_by(keyskill_id=kid).first()
+        if existing:
+            if (existing.keyskill_name or "").strip() != kname:
+                existing.keyskill_name = kname
+                updated += 1
+            else:
+                skipped += 1
+            continue
+
+        db.add(KeySkill(keyskill_id=kid, keyskill_name=kname))
+        inserted += 1
+
+    db.commit()
+    logger.info(f"upload-keyskills: inserted={inserted}, updated={updated}, skipped={skipped}")
+    return {"status": "success", "inserted": inserted}
+
+
+# ============================================================
+# 4. CAREER ↔ KEYSKILL MAPPING
+# ============================================================
+
+@router.post(
+    "/upload-career-keyskill-map",
+    response_model=UploadResponse,
+    summary="Bulk upload Career ↔ KeySkill mapping via CSV",
+)
+async def upload_career_keyskill_map(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    """
+    Expected CSV headers (exact):
+      career_id,keyskill_id
+
+    Behavior:
+    - Inserts into association table.
+    - Skips invalid FK rows.
+    - Skips duplicates (idempotent-ish).
+    """
+    if file.content_type != "text/csv":
+        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+
+    text = (await file.read()).decode("utf-8-sig")
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"career_id", "keyskill_id"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
     inserted = 0
     skipped = 0
 
     for row in reader:
-        name = (row.get("name") or "").strip()
-        if not name:
+        career_id = (row.get("career_id") or "").strip()
+        keyskill_id = (row.get("keyskill_id") or "").strip()
+
+        if not career_id or not keyskill_id:
             skipped += 1
             continue
 
-        cluster = None
-
-        cluster_id_raw = (row.get("cluster_id") or "").strip()
-        if cluster_id_raw:
-            try:
-                cid = int(cluster_id_raw)
-                cluster = db.query(CareerCluster).get(cid)
-            except Exception:
-                cluster = None
-
-        if cluster is None:
-            cluster_name = (row.get("cluster_name") or "").strip()
-            if cluster_name:
-                cluster = db.query(CareerCluster).filter_by(name=cluster_name).first()
-
-        if cluster is None:
+        career = db.query(Career).filter_by(career_id=career_id).first()
+        keyskill = db.query(KeySkill).filter_by(keyskill_id=keyskill_id).first()
+        if not career or not keyskill:
             skipped += 1
             continue
 
-        ks = KeySkill(
-            name=name,
-            description=(row.get("description") or "").strip() or None,
-            cluster_id=cluster.id,
-        )
-        db.add(ks)
-        inserted += 1
-
-    db.commit()
-    logger.info(f"upload-keyskills: inserted={inserted}, skipped={skipped}")
-    return {"status": "success", "inserted": inserted}
-
-
-# ============================================================
-# 4. NEW ENDPOINT — UPLOAD CAREER ↔ KEYSKILL MAPPINGS
-# ============================================================
-
-@router.post(
-    "/upload-career-keyskills",
-    response_model=UploadResponse,
-    summary="Bulk upload Career ↔ KeySkill mappings via CSV",
-)
-async def upload_career_keyskills(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: UserSchema = Depends(get_current_active_user),
-):
-    """
-    CSV format:
-    career_title,skill_name
-    Data Scientist,Python
-    Mechanical Engineer,CAD
-    ...
-    """
-    if file.content_type != "text/csv":
-        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
-
-    text = (await file.read()).decode("utf-8-sig")
-    if not text.strip():
-        raise HTTPException(status_code=400, detail="CSV file is empty")
-
-    reader = csv.DictReader(io.StringIO(text))
-    inserted = 0
-    skipped = 0
-    errors = []
-
-    for i, row in enumerate(reader, start=1):
-        career_title = (row.get("career_title") or "").strip()
-        keyskill_name = (row.get("skill_name") or "").strip()
-
-        if not career_title or not keyskill_name:
-            skipped += 1
-            errors.append(f"Row {i}: missing career_title or skill_name")
-            continue
-
-        career = db.query(Career).filter_by(title=career_title).first()
-        if not career:
-            skipped += 1
-            errors.append(f"Row {i}: career '{career_title}' not found")
-            continue
-
-        keyskill = db.query(KeySkill).filter_by(name=keyskill_name).first()
-        if not keyskill:
-            skipped += 1
-            errors.append(f"Row {i}: keyskill '{keyskill_name}' not found")
-            continue
-
-        if keyskill in career.keyskills:
-            skipped += 1
-            continue
-
-        career.keyskills.append(keyskill)
-        inserted += 1
-
-    db.commit()
-
-    if errors:
-        print("Errors during upload:")
-        for e in errors:
-            print(" -", e)
-
-    logger.info(f"upload-career-keyskills: inserted={inserted}, skipped={skipped}")
-    return {"status": "success", "inserted": inserted}
-
-
-# ============================================================
-# 4b. NEW ENDPOINT — UPLOAD CAREER ↔ KEYSKILL WEIGHTS
-# ============================================================
-
-@router.post(
-    "/upload-career-keyskill-weights",
-    response_model=UploadResponse,
-    summary="Bulk update weight_percentage for Career ↔ KeySkill via CSV",
-)
-async def upload_career_keyskill_weights(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: UserSchema = Depends(get_current_active_user),
-):
-    """
-    CSV format (header required):
-        career_id,keyskill_id,weight_percentage
-
-    - Updates weight_percentage column in career_keyskill_association
-    - 'inserted' in response = number of rows successfully updated
-    """
-    if file.content_type != "text/csv":
-        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
-
-    text = (await file.read()).decode("utf-8-sig")
-    if not text.strip():
-        raise HTTPException(status_code=400, detail="CSV file is empty")
-
-    reader = csv.DictReader(io.StringIO(text))
-
-    expected_fields = {"career_id", "keyskill_id", "weight_percentage"}
-    if set(reader.fieldnames or []) != expected_fields:
-        raise HTTPException(
-            status_code=400,
-            detail=f"CSV must have columns exactly {expected_fields}, "
-                   f"but got {reader.fieldnames}",
-        )
-
-    updated = 0
-    missing = 0
-
-    try:
-        for row in reader:
-            try:
-                career_id = int(row["career_id"])
-                keyskill_id = int(row["keyskill_id"])
-                weight = int(row["weight_percentage"])
-            except (ValueError, TypeError) as e:
-                logger.warning(f"Skipping invalid row {row}: {e}")
-                continue
-
-            stmt = (
-                career_keyskill_association.update()
-                .where(
-                    career_keyskill_association.c.career_id == career_id,
-                    career_keyskill_association.c.keyskill_id == keyskill_id,
-                )
-                .values(weight_percentage=weight)
+        # Insert into association table if not exists
+        exists = db.execute(
+            career_keyskill_association.select().where(
+                (career_keyskill_association.c.career_id == career_id)
+                & (career_keyskill_association.c.keyskill_id == keyskill_id)
             )
+        ).first()
 
-            result = db.execute(stmt)
+        if exists:
+            skipped += 1
+            continue
 
-            if result.rowcount == 0:
-                logger.warning(
-                    f"No association found for (career_id={career_id}, keyskill_id={keyskill_id})"
-                )
-                missing += 1
-            else:
-                updated += result.rowcount
-
-        db.commit()
-
-    except Exception as e:
-        db.rollback()
-        logger.exception("Error while updating career-keyskill weights")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error while updating weights, rolled back. Error: {e}",
+        db.execute(
+            career_keyskill_association.insert().values(
+                career_id=career_id, keyskill_id=keyskill_id
+            )
         )
+        inserted += 1
 
-    logger.info(
-        f"upload-career-keyskill-weights: updated={updated}, missing_pairs={missing}"
-    )
-    return UploadResponse(
-        status=f"success (updated={updated}, missing_pairs={missing})",
-        inserted=updated,
-    )
+    db.commit()
+    logger.info(f"upload-career-keyskill-map: inserted={inserted}, skipped={skipped}")
+    return {"status": "success", "inserted": inserted}
 
 
 # ============================================================
@@ -431,6 +400,10 @@ def create_question_api(
     - Reuses shared validate_question_row() (B2)
     - No DB writes before validation passes
     - Duplicate question_id => 409 Conflict (explicit error)
+
+    Important:
+    - `id` is the internal DB PK (integer)
+    - `question_code` is the canonical/external identifier used by student flows
     """
 
     # Convert payload -> dict to match validator signature
@@ -438,7 +411,7 @@ def create_question_api(
 
     validated = validate_question_row(db=db, row=row_for_validation, row_index=1)
 
-    # ✅ HTTP-native validation failure (400)
+    # Validation failure (400) - do not write anything to DB
     if isinstance(validated, RowValidationError):
         raise HTTPException(
             status_code=400,
@@ -449,10 +422,36 @@ def create_question_api(
             },
         )
 
-    # ✅ DB write ONLY after validation succeeds
-    # NOTE: validator does not provide question_id; payload owns it.
+    # DB write ONLY after validation succeeds
+    try:
+        qid_int = int(str(payload.question_id).strip())
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "status": "error",
+                "error_code": "INVALID_QUESTION_ID",
+                "message": f"question_id must be an integer-like value (got '{payload.question_id}')",
+                "field": "question_id",
+            },
+        )
+
+    # prerequisite_qid is stored as INTEGER FK -> must be int/None
+    try:
+        prereq_int = _parse_optional_int(payload.prerequisite_qid)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "status": "error",
+                "error_code": "INVALID_PREREQUISITE_QID",
+                "message": "prerequisite_qid must be an integer (or empty/null)",
+                "field": "prerequisite_qid",
+            },
+        )
+
     q = models.Question(
-        id=payload.question_id,  # ✅ FIX: use payload
+        id=qid_int,
         assessment_version=validated.assessment_version,
         question_text_en=validated.question_text_en,
         question_text_hi=(validated.question_text_hi or "").strip() or None,
@@ -462,7 +461,10 @@ def create_question_api(
         # Optional fields supported by your questions table
         weight=payload.weight if payload.weight is not None else 1,
         group_id=(payload.group_id or "").strip() or None,
-        prerequisite_qid=(payload.prerequisite_qid or "").strip() or None,
+        prerequisite_qid=prereq_int,
+
+        # Canonical external identifier (must be persisted if supplied)
+        question_code=(payload.question_code or "").strip() or None,
     )
 
     db.add(q)
@@ -476,7 +478,7 @@ def create_question_api(
             detail={
                 "status": "error",
                 "error_code": "DUPLICATE_QUESTION_ID",
-                "message": f"Question with id '{payload.question_id}' already exists.",  # ✅ FIX
+                "message": f"Question with id '{qid_int}' already exists.",
                 "field": "question_id",
             },
         )
@@ -494,9 +496,8 @@ def create_question_api(
         },
         errors=[],
     )
-    
-    
-    
+
+
 # ============================================================
 # ✅ B4. API-BASED BULK QUESTION CREATION (JSON ARRAY)
 # ============================================================
@@ -515,11 +516,12 @@ def bulk_create_questions_api(
     """
     B4 spec:
     - Admin-only (router dependency)
-    - Input: JSON array
-    - Reuses shared validate_question_row() (B2) per item
-    - ❌ No DB writes before validation pass completes
-    - Validation errors do NOT stop the batch
-    - Duplicate question_id handling: skip + error entry
+    - Input: JSON ARRAY
+    - Validates first (no writes), writes later
+    - Continues on error
+    - Skips duplicates (both within request + existing DB rows)
+    - Must persist `question_code` (canonical external identifier)
+    - Must store `prerequisite_qid` as int/None (INTEGER FK column)
     """
 
     created = 0
@@ -527,28 +529,31 @@ def bulk_create_questions_api(
     errors: List[AdminQuestionBulkErrorEntry] = []
 
     # ---------------------------
-    # PASS 0: Detect duplicates inside the payload itself
+    # Pre-check payload-level duplicates for question_id (string compare after strip)
     # ---------------------------
-    seen_ids = set()
+    seen_qids = set()
     duplicate_indexes = set()
 
     for i, item in enumerate(payloads):
         qid = (item.question_id or "").strip()
-        if qid in seen_ids:
+        if not qid:
+            duplicate_indexes.add(i)
+            continue
+        if qid in seen_qids:
             duplicate_indexes.add(i)
         else:
-            seen_ids.add(qid)
+            seen_qids.add(qid)
 
     # ---------------------------
-    # PASS 1: Validate everything first (NO DB WRITES)
+    # PASS 1: Validate & normalize (NO DB WRITES)
     # ---------------------------
-    valid_items: List[Dict] = []   # store minimal validated insert data
-    valid_meta: List[Dict] = []    # store index + question_id for error reporting
+    valid_items: List[Dict] = []   # insert-ready dicts
+    valid_meta: List[Dict] = []    # index + question_id for error reporting
 
     for i, item in enumerate(payloads):
         qid = (item.question_id or "").strip()
 
-        # Skip payload-level duplicates (preferred behavior)
+        # Skip payload-level duplicates
         if i in duplicate_indexes:
             skipped += 1
             errors.append(
@@ -560,9 +565,8 @@ def bulk_create_questions_api(
             )
             continue
 
-        # Convert to dict to match B2 validator signature
+        # Convert to dict to match validator signature
         row_for_validation = item.dict()
-
         validated = validate_question_row(db=db, row=row_for_validation, row_index=i)
 
         if isinstance(validated, RowValidationError):
@@ -576,10 +580,38 @@ def bulk_create_questions_api(
             )
             continue
 
-        # Build insert-ready dict (but DO NOT write yet)
+        # id is INTEGER PK in DB
+        try:
+            qid_int = int(qid)
+        except Exception:
+            skipped += 1
+            errors.append(
+                AdminQuestionBulkErrorEntry(
+                    index=i,
+                    question_id=qid or None,
+                    errors=[{"field": "question_id", "message": f"must be an integer-like value (got '{qid}')"}],
+                )
+            )
+            continue
+
+        # prerequisite_qid is INTEGER FK -> must be int/None
+        try:
+            prereq_int = _parse_optional_int(item.prerequisite_qid)
+        except ValueError:
+            skipped += 1
+            errors.append(
+                AdminQuestionBulkErrorEntry(
+                    index=i,
+                    question_id=qid or None,
+                    errors=[{"field": "prerequisite_qid", "message": "must be an integer (or empty/null)"}],
+                )
+            )
+            continue
+
+        # Build insert-ready dict (still NO DB write)
         valid_items.append(
             {
-                "id": qid,  # DB PK
+                "id": qid_int,
                 "assessment_version": validated.assessment_version,
                 "question_text_en": validated.question_text_en,
                 "question_text_hi": (validated.question_text_hi or "").strip() or None,
@@ -587,14 +619,16 @@ def bulk_create_questions_api(
                 "skill_id": validated.skill_id,
                 "weight": item.weight if item.weight is not None else 1,
                 "group_id": (item.group_id or "").strip() or None,
-                "prerequisite_qid": (item.prerequisite_qid or "").strip() or None,
+                "prerequisite_qid": prereq_int,
+                # ✅ Persist canonical identifier (external)
+                "question_code": (getattr(item, "question_code", None) or "").strip() or None,
             }
         )
         valid_meta.append({"index": i, "question_id": qid})
 
     # ---------------------------
     # PASS 2: Write valid rows (DB writes happen ONLY here)
-    # Continue on duplicate conflicts (skip + error entry)
+    # Flush each row to catch per-row IntegrityError without killing whole batch.
     # ---------------------------
     for meta, row in zip(valid_meta, valid_items):
         qid = meta["question_id"]
@@ -603,8 +637,7 @@ def bulk_create_questions_api(
         db.add(q)
 
         try:
-            # Flush each row so we can catch duplicates without killing the batch
-            db.flush()
+            db.flush()  # detect duplicates early
             created += 1
 
         except IntegrityError:
@@ -630,7 +663,7 @@ def bulk_create_questions_api(
                 )
             )
 
-    # Commit final successful inserts
+    # Final commit for the successful inserts
     try:
         db.commit()
     except Exception as e:
@@ -638,11 +671,9 @@ def bulk_create_questions_api(
         logger.exception("bulk_create_questions_api: commit failed")
         raise HTTPException(status_code=500, detail=f"Bulk insert commit failed: {e}")
 
-    return AdminQuestionBulkResponse(
-        created=created,
-        skipped=skipped,
-        errors=errors,
-    )
+    return AdminQuestionBulkResponse(created=created, skipped=skipped, errors=errors)
+
+
 # ============================================================
 # 5. STUDENT SKILL MAPS
 # ============================================================
@@ -777,12 +808,17 @@ async def upload_questions(
     - Writes: questions
     - Output: {uploaded:int, skipped:int, errors:list}
     - Non-idempotent: duplicates are skipped
+
+    Notes:
+    - `id` is INTERNAL DB PK (integer)
+    - `question_code` is the CANONICAL / EXTERNAL identifier used by student flows
+    - `prerequisite_qid` is INTEGER FK -> must be int/None
     """
-    # Basic file checks
     if not (file.filename or "").lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
     raw = await file.read()
+    # Excel often writes UTF-8 with BOM -> utf-8-sig handles that safely.
     text = raw.decode("utf-8-sig", errors="replace")
 
     if not text.strip():
@@ -793,6 +829,7 @@ async def upload_questions(
     # Strict header validation: allow exactly one of the two supported sets (in exact order)
     expected_headers_a = [
         "id",
+        "question_code",
         "question_text_en",
         "question_text_hi",
         "question_text_ta",
@@ -803,6 +840,7 @@ async def upload_questions(
     ]
     expected_headers_b = [
         "question_id",
+        "question_code",
         "question_text_en",
         "question_text_hi",
         "question_text_ta",
@@ -821,32 +859,37 @@ async def upload_questions(
 
     uploaded = 0
     skipped = 0
-    errors: list[str] = []
+    errors: List[str] = []
 
     for row_num, row in enumerate(reader, start=2):
-        # normalize id field
+        # Normalize id field (support both id and question_id)
         qid = (row.get("id") or row.get("question_id") or "").strip()
         if not qid:
             skipped += 1
             errors.append(f"Row {row_num}: missing id/question_id")
             continue
 
-        # duplicates (non-idempotent): skip existing primary key
-        if db.query(models.Question).filter_by(id=qid).first():
+        # DB PK is integer
+        try:
+            qid_int = int(qid)
+        except ValueError:
             skipped += 1
-            errors.append(f"Row {row_num}: duplicate question id '{qid}'")
+            errors.append(f"Row {row_num}: question id must be integer (got '{qid}')")
             continue
 
-        # ✅ B2 shared validation: assessment_version presence, required fields,
-        # enum correctness (future), defaults, and skill_id existence (DB read)
+        # Non-idempotent behavior: skip if PK already exists
+        if db.query(models.Question).filter_by(id=qid_int).first():
+            skipped += 1
+            errors.append(f"Row {row_num}: duplicate question id '{qid_int}'")
+            continue
+
+        # B2 shared validation (no DB write before validation passes)
         row_for_validation = dict(row)
         row_for_validation["assessment_version"] = (assessment_version or "").strip()
 
         validated = validate_question_row(db=db, row=row_for_validation, row_index=row_num)
-
         if isinstance(validated, RowValidationError):
             skipped += 1
-            # flatten structured errors into your existing string list format
             for fe in validated.errors:
                 errors.append(f"Row {row_num}: {fe.field} - {fe.message}")
             continue
@@ -860,8 +903,16 @@ async def upload_questions(
             errors.append(f"Row {row_num}: weight must be an integer (got '{weight_raw}')")
             continue
 
+        # prerequisite_qid is INTEGER FK -> must be int/None
+        try:
+            prereq_int = _parse_optional_int(row.get("prerequisite_qid"))
+        except ValueError:
+            skipped += 1
+            errors.append(f"Row {row_num}: prerequisite_qid must be an integer (or empty/null)")
+            continue
+
         q = models.Question(
-            id=qid,
+            id=qid_int,
             assessment_version=validated.assessment_version,
             question_text_en=validated.question_text_en,
             question_text_hi=(validated.question_text_hi or "").strip() or None,
@@ -869,7 +920,8 @@ async def upload_questions(
             skill_id=validated.skill_id,
             weight=weight,
             group_id=(row.get("group_id") or "").strip() or None,
-            prerequisite_qid=(row.get("prerequisite_qid") or "").strip() or None,
+            prerequisite_qid=prereq_int,
+            question_code=(row.get("question_code") or "").strip() or None,
         )
 
         db.add(q)
@@ -878,6 +930,7 @@ async def upload_questions(
     db.commit()
     logger.info(f"upload-questions: uploaded={uploaded}, skipped={skipped}, errors={len(errors)}")
     return {"uploaded": uploaded, "skipped": skipped, "errors": errors}
+
 
 # ============================================================
 # PR1. UPLOAD ASSOCIATED QUALITIES (AQ_MASTER)
@@ -1001,13 +1054,12 @@ async def upload_aq_facets(
             skipped += 1
             continue
 
-        # FK guard: AQ must exist
-        aq = db.query(models.AssociatedQuality).filter_by(aq_id=aq_id).first()
-        if not aq:
+        # FK check
+        if not db.query(models.AssociatedQuality).filter_by(aq_id=aq_id).first():
             skipped += 1
             continue
 
-        existing = db.query(models.AQFacet).filter_by(facet_id=facet_id).first()
+        existing = db.query(AQFacet).filter_by(facet_id=facet_id).first()
         if existing:
             changed = False
             if (existing.facet_name or "").strip() != facet_name:
@@ -1023,15 +1075,111 @@ async def upload_aq_facets(
                 skipped += 1
             continue
 
-        db.add(models.AQFacet(facet_id=facet_id, aq_id=aq_id, facet_name=facet_name))
+        db.add(AQFacet(aq_id=aq_id, facet_id=facet_id, facet_name=facet_name))
         inserted += 1
 
-    try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="FK or unique constraint error while inserting facets")
-
+    db.commit()
     logger.info(f"upload-aq-facets: inserted={inserted}, updated={updated}, skipped={skipped}")
     return {"status": "success", "inserted": inserted}
 
+
+# ============================================================
+# PR1. UPLOAD QUESTION ↔ AQ_FACET TAGGING (QUESTION_AQ_FACET_TAGGING)
+# ============================================================
+
+@router.post(
+    "/upload-question-facet-tags",
+    response_model=UploadResponse,
+    summary="Bulk upload Question ↔ AQ Facet tags via CSV",
+)
+async def upload_question_facet_tags(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    """
+    Expected CSV headers (exact):
+      assessment_version,question_code,facet_id,tag_weight
+
+    Behavior:
+    - Upsert-like:
+      - If exists, update tag_weight
+      - Else insert
+    - FK checks:
+      - question_code must exist for that assessment_version
+      - facet_id must exist
+    """
+    if file.content_type != "text/csv":
+        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+
+    text = (await file.read()).decode("utf-8-sig")
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    reader = csv.DictReader(io.StringIO(text))
+
+    expected_fields = {"assessment_version", "question_code", "facet_id", "tag_weight"}
+    if set(reader.fieldnames or []) != expected_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must have columns exactly {expected_fields}, but got {reader.fieldnames}",
+        )
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+
+    for row_num, row in enumerate(reader, start=2):
+        assessment_version = (row.get("assessment_version") or "").strip()
+        question_code = (row.get("question_code") or "").strip()
+        facet_id = (row.get("facet_id") or "").strip()
+        tag_weight_raw = (row.get("tag_weight") or "").strip()
+
+        if not assessment_version or not question_code or not facet_id or not tag_weight_raw:
+            skipped += 1
+            continue
+
+        try:
+            tag_weight = int(tag_weight_raw)
+        except ValueError:
+            skipped += 1
+            continue
+
+        # FK checks
+        q = db.query(Question).filter_by(assessment_version=assessment_version, question_code=question_code).first()
+        if not q:
+            skipped += 1
+            continue
+
+        facet = db.query(AQFacet).filter_by(facet_id=facet_id).first()
+        if not facet:
+            skipped += 1
+            continue
+
+        existing = db.query(QuestionFacetTag).filter_by(
+            assessment_version=assessment_version,
+            question_code=question_code,
+            facet_id=facet_id,
+        ).first()
+
+        if existing:
+            if existing.tag_weight != tag_weight:
+                existing.tag_weight = tag_weight
+                updated += 1
+            else:
+                skipped += 1
+            continue
+
+        db.add(
+            QuestionFacetTag(
+                assessment_version=assessment_version,
+                question_code=question_code,
+                facet_id=facet_id,
+                tag_weight=tag_weight,
+            )
+        )
+        inserted += 1
+
+    db.commit()
+    logger.info(f"upload-question-facet-tags: inserted={inserted}, updated={updated}, skipped={skipped}")
+    return {"status": "success", "inserted": inserted}

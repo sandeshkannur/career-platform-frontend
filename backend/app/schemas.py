@@ -63,6 +63,14 @@ class UploadQuestionsResult(BaseModel):
     skipped: int
     errors: List[str] = Field(default_factory=list)
 
+# ===============================
+# PR2: QUESTION ↔ FACET TAG UPLOAD SCHEMAS
+# ===============================
+
+class QuestionFacetTagUploadRow(BaseModel):
+    question_id: int
+    facet_id: str
+
 
 # ===============================
 # ADMIN USER MANAGEMENT SCHEMAS
@@ -434,6 +442,7 @@ class AdminQuestionCreateRequest(BaseModel):
     question_text_en: str
     question_text_hi: Optional[str] = None
     question_text_ta: Optional[str] = None
+    question_code: Optional[str] = None
 
     # optional DB fields (route writes these directly, validator stays DB-write-free)
     weight: Optional[int] = 1
@@ -468,6 +477,7 @@ class AdminQuestionBulkItem(BaseModel):
     question_text_en: str
     question_text_hi: Optional[str] = None
     question_text_ta: Optional[str] = None
+    question_code: Optional[str] = None
 
     # optional DB fields
     weight: Optional[int] = 1

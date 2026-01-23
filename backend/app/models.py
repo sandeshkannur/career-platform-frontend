@@ -292,6 +292,7 @@ class Question(Base):
 
     skill = relationship("Skill", backref="questions")
     prerequisite = relationship("Question", remote_side=[id], backref="dependents")
+    question_code = Column(String(100), nullable=True)
 
 
 # =========================================================
@@ -523,3 +524,34 @@ class AQFacet(Base):
 
 # Helpful explicit index (some DBs already index FK col; we make it explicit)
 Index("idx_aq_facets_aq_id", AQFacet.aq_id)
+
+# =========================================================
+# PR2: Question ↔ AQFacet tagging
+# =========================================================
+
+class QuestionFacetTag(Base):
+    """
+    QuestionFacetTag — tags a question to one or more AQ facets.
+    Backend-authoritative mapping used for explainability and analytics.
+    """
+    __tablename__ = "question_facet_tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # FK -> questions.id (INTEGER)
+    question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # FK -> aq_facets.facet_id (STRING)
+    facet_id = Column(String, ForeignKey("aq_facets.facet_id", ondelete="RESTRICT"), nullable=False, index=True)
+
+    __table_args__ = (
+    UniqueConstraint(
+        "question_id",
+        "facet_id",
+        name="uq_question_facet_tags_question_facet",
+    ),
+    )   
+
+    # Optional relationships (safe/additive)
+    question = relationship("Question", backref="facet_tags")
+    facet = relationship("AQFacet", backref="question_tags")
