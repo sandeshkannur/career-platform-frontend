@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 import csv
-import io
+from io import StringIO
 import logging
 from typing import List, Dict
 
@@ -27,8 +27,7 @@ from app.models import (
     User as UserModel,
     career_keyskill_association,
     Question,
-    AQFacet,
-    QuestionFacetTag,
+    
 )
 from app.schemas import (
     UploadResponse,
@@ -36,7 +35,6 @@ from app.schemas import (
     RoleChange,
     GuardianAssign,
     User as UserSchema,
-    QuestionFacetTagUploadRow,
     AdminQuestionCreateRequest,
     AdminQuestionCreateResponse,
     AdminQuestionBulkItem,
@@ -1084,7 +1082,19 @@ async def upload_aq_facets(
     if file.content_type != "text/csv":
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
 
-    text_csv = (await file.read()).decode("utf-8-sig")
+    raw = await file.read()
+
+    # Robust decoding: prefer UTF-8 (BOM-safe), fallback to UTF-16 (Excel/Windows common)
+    try:
+        text_csv = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        try:
+            text_csv = raw.decode("utf-16")
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Unable to decode CSV. Please save as CSV UTF-8 (Comma delimited).",
+            )
     if not text_csv.strip():
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
@@ -1209,13 +1219,13 @@ async def upload_aq_facets(
 
 
 # ============================================================
-# PR1. UPLOAD QUESTION ↔ AQ_FACET TAGGING (QUESTION_AQ_FACET_TAGGING)
+# PR2. UPLOAD QUESTION ↔ AQ_FACET TAGGING (QUESTION_AQ_FACET_TAGGING)
 # ============================================================
 
 @router.post(
     "/upload-question-facet-tags",
     response_model=UploadResponse,
-    summary="Bulk upload Question ↔ AQ Facet tags via CSV",
+    summary="Bulk upload Question ↔ AQ Facet tags via CSV (versioned)",
 )
 async def upload_question_facet_tags(
     file: UploadFile = File(...),
@@ -1224,26 +1234,36 @@ async def upload_question_facet_tags(
 ):
     """
     Expected CSV headers (exact):
-      assessment_version,question_code,facet_id,tag_weight
+      assessment_version,question_code,facet_code,tag_weight
 
     Behavior:
-    - Upsert-like:
-      - If exists, update tag_weight
-      - Else insert
-    - FK checks:
-      - question_code must exist for that assessment_version
-      - facet_id must exist
+    - Upsert into question_facet_tags_v using UNIQUE(assessment_version, question_code, facet_code)
+    - Validation:
+      - question must exist in questions for that (assessment_version, question_code)
+      - facet must exist in aq_facets_v for that (assessment_version, facet_code)
     """
     if file.content_type != "text/csv":
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
 
-    text = (await file.read()).decode("utf-8-sig")
-    if not text.strip():
+    raw = await file.read()
+
+    # Robust decoding: prefer UTF-8 (BOM-safe), fallback to UTF-16 (Excel/Windows common)
+    try:
+        text_csv = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        try:
+            text_csv = raw.decode("utf-16")
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Unable to decode CSV. Please save as CSV UTF-8 (Comma delimited).",
+            )
+    if not text_csv.strip():
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
-    reader = csv.DictReader(io.StringIO(text))
+    reader = csv.DictReader(io.StringIO(text_csv))
 
-    expected_fields = {"assessment_version", "question_code", "facet_id", "tag_weight"}
+    expected_fields = {"assessment_version", "question_code", "facet_code", "tag_weight"}
     if set(reader.fieldnames or []) != expected_fields:
         raise HTTPException(
             status_code=400,
@@ -1257,10 +1277,10 @@ async def upload_question_facet_tags(
     for row_num, row in enumerate(reader, start=2):
         assessment_version = (row.get("assessment_version") or "").strip()
         question_code = (row.get("question_code") or "").strip()
-        facet_id = (row.get("facet_id") or "").strip()
+        facet_code = (row.get("facet_code") or "").strip()
         tag_weight_raw = (row.get("tag_weight") or "").strip()
 
-        if not assessment_version or not question_code or not facet_id or not tag_weight_raw:
+        if not assessment_version or not question_code or not facet_code or not tag_weight_raw:
             skipped += 1
             continue
 
@@ -1270,41 +1290,233 @@ async def upload_question_facet_tags(
             skipped += 1
             continue
 
-        # FK checks
-        q = db.query(Question).filter_by(assessment_version=assessment_version, question_code=question_code).first()
+        # Validate question exists (authoritative questions table)
+        q = (
+            db.query(Question)
+            .filter_by(assessment_version=assessment_version, question_code=question_code)
+            .first()
+        )
         if not q:
             skipped += 1
             continue
 
-        facet = db.query(AQFacet).filter_by(facet_id=facet_id).first()
-        if not facet:
+        # Validate facet exists (versioned facets table from PR1)
+        facet_exists = db.execute(
+            text(
+                """
+                SELECT 1
+                FROM aq_facets_v
+                WHERE assessment_version = :v
+                  AND facet_code = :f
+                LIMIT 1
+                """
+            ),
+            {"v": assessment_version, "f": facet_code},
+        ).fetchone()
+
+        if not facet_exists:
             skipped += 1
             continue
 
-        existing = db.query(QuestionFacetTag).filter_by(
-            assessment_version=assessment_version,
-            question_code=question_code,
-            facet_id=facet_id,
-        ).first()
+        # Upsert into versioned mapping table
+        # We count "inserted" as successful upserts to match existing UploadResponse schema.
+        result = db.execute(
+            text(
+                """
+                INSERT INTO question_facet_tags_v
+                    (assessment_version, question_code, facet_code, tag_weight)
+                VALUES
+                    (:v, :q, :f, :w)
+                ON CONFLICT (assessment_version, question_code, facet_code)
+                DO UPDATE SET
+                    tag_weight = EXCLUDED.tag_weight,
+                    updated_at = NOW()
+                """
+            ),
+            {"v": assessment_version, "q": question_code, "f": facet_code, "w": tag_weight},
+        )
 
-        if existing:
-            if existing.tag_weight != tag_weight:
-                existing.tag_weight = tag_weight
-                updated += 1
-            else:
-                skipped += 1
+        # NOTE: Postgres doesn't easily tell insert vs update here without RETURNING tricks.
+        # We keep updated/skipped counters for logs; "inserted" means "upserted".
+        inserted += 1
+
+    db.commit()
+    logger.info(
+        f"upload-question-facet-tags(v): inserted={inserted}, updated={updated}, skipped={skipped}"
+    )
+    return {"status": "success", "inserted": inserted}
+
+
+# ============================================================
+# PR3. UPLOAD AQ STUDENTSKILL WEIGHTS
+# ============================================================
+
+@router.post("/v1/admin/upload-aq-studentskill-weights")
+async def upload_aq_studentskill_weights(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    PR3: Upload AQ -> StudentSkill weights (versioned bridge).
+
+    Required CSV headers:
+      assessment_version, aq_code, skill_id, weight
+    Optional:
+      status (defaults to 'active')
+    """
+    raw = await file.read()
+    text_csv = raw.decode("utf-8-sig")
+
+    reader = csv.DictReader(StringIO(text_csv))
+    if not reader.fieldnames:
+        raise HTTPException(status_code=400, detail="CSV missing header row")
+
+    headers = {h.strip() for h in reader.fieldnames}
+    required = {"assessment_version", "aq_code", "skill_id", "weight"}
+    missing = required - headers
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required columns: {sorted(missing)}. Found: {sorted(headers)}",
+        )
+
+    rows = []
+    errors = []
+
+    # Parse + basic validation
+    for line_no, r in enumerate(reader, start=2):
+        av = (r.get("assessment_version") or "").strip()
+        aq = (r.get("aq_code") or "").strip()
+        status = (r.get("status") or "active").strip() or "active"
+
+        # skill_id
+        try:
+            skill_id = int((r.get("skill_id") or "").strip())
+        except Exception:
+            errors.append({"row": line_no, "field": "skill_id", "message": "skill_id must be an integer"})
             continue
 
-        db.add(
-            QuestionFacetTag(
-                assessment_version=assessment_version,
-                question_code=question_code,
-                facet_id=facet_id,
-                tag_weight=tag_weight,
-            )
+        # weight
+        try:
+            weight = float((r.get("weight") or "").strip())
+        except Exception:
+            errors.append({"row": line_no, "field": "weight", "message": "weight must be numeric"})
+            continue
+
+        if not av:
+            errors.append({"row": line_no, "field": "assessment_version", "message": "assessment_version is required"})
+            continue
+        if not aq:
+            errors.append({"row": line_no, "field": "aq_code", "message": "aq_code is required"})
+            continue
+        if weight < 0:
+            errors.append({"row": line_no, "field": "weight", "message": "weight must be >= 0"})
+            continue
+
+        rows.append(
+            {
+                "rownum": line_no,
+                "assessment_version": av,
+                "aq_code": aq,
+                "skill_id": skill_id,
+                "weight": weight,
+                "status": status,
+            }
+        )
+
+    if errors:
+        raise HTTPException(status_code=400, detail={"ok": False, "errors": errors})
+
+    # Duplicate detection inside file
+    seen = set()
+    for r in rows:
+        k = (r["assessment_version"], r["aq_code"], r["skill_id"])
+        if k in seen:
+            errors.append({"row": r["rownum"], "field": "duplicate", "message": "Duplicate key in file (assessment_version, aq_code, skill_id)"})
+        seen.add(k)
+
+    if errors:
+        raise HTTPException(status_code=400, detail={"ok": False, "errors": errors})
+
+    # Validate AQ exists (versioned)
+    aq_keys = sorted({(r["assessment_version"], r["aq_code"]) for r in rows})
+    # Build VALUES list safely via parameters
+    # We’ll query by version and aq_code separately to avoid tuple-IN quirks.
+    versions = sorted({v for v, _ in aq_keys})
+    aq_codes = sorted({c for _, c in aq_keys})
+
+    aq_ok_rows = db.execute(
+        text("""
+            SELECT assessment_version, aq_code
+            FROM associated_qualities_v
+            WHERE status='active'
+              AND assessment_version = ANY(:versions)
+              AND aq_code = ANY(:aq_codes)
+        """),
+        {"versions": versions, "aq_codes": aq_codes},
+    ).fetchall()
+    aq_ok = set((x[0], x[1]) for x in aq_ok_rows)
+
+    for r in rows:
+        if (r["assessment_version"], r["aq_code"]) not in aq_ok:
+            errors.append({"row": r["rownum"], "field": "aq_code", "message": "AQ not found for assessment_version in associated_qualities_v (active)"})
+
+    # Validate skill exists
+    skill_ids = sorted({r["skill_id"] for r in rows})
+    skill_ok_rows = db.execute(
+        text("SELECT id FROM skills WHERE id = ANY(:ids)"),
+        {"ids": skill_ids},
+    ).fetchall()
+    skill_ok = {x[0] for x in skill_ok_rows}
+
+    for r in rows:
+        if r["skill_id"] not in skill_ok:
+            errors.append({"row": r["rownum"], "field": "skill_id", "message": "skill_id not found in skills"})
+
+    if errors:
+        raise HTTPException(status_code=400, detail={"ok": False, "errors": errors})
+
+    # Reject if any already exist in DB (beta-safety)
+    # We’ll check by version + aq_code + skill_id using a join on a temp VALUES set
+    keys = [(r["assessment_version"], r["aq_code"], r["skill_id"]) for r in rows]
+
+    # Build a VALUES table using SQLAlchemy parameters
+    # This pattern avoids huge OR clauses and stays deterministic.
+    values_sql = ", ".join([f"(:v{i}, :a{i}, :s{i})" for i in range(len(keys))])
+    params = {}
+    for i, (v, a, s) in enumerate(keys):
+        params[f"v{i}"] = v
+        params[f"a{i}"] = a
+        params[f"s{i}"] = s
+
+    existing = db.execute(
+        text(f"""
+            SELECT w.assessment_version, w.aq_code, w.skill_id
+            FROM aq_student_skill_weights w
+            JOIN (VALUES {values_sql}) AS x(assessment_version, aq_code, skill_id)
+              ON w.assessment_version = x.assessment_version
+             AND w.aq_code = x.aq_code
+             AND w.skill_id = x.skill_id
+        """),
+        params,
+    ).fetchall()
+
+    if existing:
+        # Return deterministic list
+        already = [{"assessment_version": v, "aq_code": a, "skill_id": s} for (v, a, s) in existing]
+        raise HTTPException(status_code=400, detail={"ok": False, "errors": [{"row": None, "field": "duplicate_db", "message": "Some keys already exist in DB", "existing": already}]})
+
+    # Insert
+    inserted = 0
+    for r in rows:
+        db.execute(
+            text("""
+                INSERT INTO aq_student_skill_weights (assessment_version, aq_code, skill_id, weight, status)
+                VALUES (:assessment_version, :aq_code, :skill_id, :weight, :status)
+            """),
+            r,
         )
         inserted += 1
 
     db.commit()
-    logger.info(f"upload-question-facet-tags: inserted={inserted}, updated={updated}, skipped={skipped}")
-    return {"status": "success", "inserted": inserted}
+    return {"ok": True, "inserted": inserted, "errors": []}
