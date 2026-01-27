@@ -5,6 +5,7 @@ import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
 import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
+import { renderCareerExplainabilityV1 } from "../../content/careerExplainability.v1";
 import {
   getResultsBlocksV1,
   formatTopCareerLabel,
@@ -103,42 +104,38 @@ export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { sessionUser } = useSession();
+    const canSeeScores =
+    sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
 
-  // Backend-authoritative student identity:
-  // Resolve student_id via /v1/students/students/me (NOT via auth/me student_profile).
-  const [studentId, setStudentId] = useState(null);
-
-  const selectedAssessmentId = useMemo(() => {
-    const qs = new URLSearchParams(location.search);
-    const raw = qs.get("assessmentId");
-    const parsed = raw ? Number(raw) : null;
-    return Number.isFinite(parsed) ? parsed : null;
-  }, [location.search]);
-
+  // ✅ Page state (required by existing logic below)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
-
-  // Context Profile (CPS inputs) for the selected assessment
   const [ctx, setCtx] = useState(null);
 
-  async function resolveStudentId() {
-    if (!sessionUser) return;
+  // ✅ Which assessment result to show:
+  // Priority:
+  // 1) location.state.assessment_id (when navigating from History)
+  // 2) query param ?assessment_id=123
+  const selectedAssessmentId = useMemo(() => {
+    const fromState =
+      location?.state?.assessment_id ??
+      location?.state?.selectedAssessmentId ??
+      null;
 
-    try {
-      const meStudent = await apiGet(`/v1/students/students/me`);
-      setStudentId(meStudent?.id ?? null);
-    } catch (e) {
-      setStudentId(null);
-      setError(e?.message || "Student profile not ready.");
-      setLoading(false);
-    }
-  }
+    const params = new URLSearchParams(location?.search || "");
+    const fromQuery = params.get("assessment_id");
 
-  useEffect(() => {
-    resolveStudentId();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionUser]);
+    if (fromState != null) return Number(fromState);
+    if (fromQuery != null && fromQuery !== "") return Number(fromQuery);
+
+    return null;
+  }, [location?.state, location?.search]);
+  
+
+  // ✅ Source of truth: session (comes from /v1/auth/me)
+  // Matches what StudentDashboardPage already uses.
+  const studentId = sessionUser?.student_profile?.student_id ?? null;
 
   useEffect(() => {
     async function load() {
@@ -207,6 +204,55 @@ export default function StudentResultsPage() {
     return !val || val.toLowerCase() === "unknown" ? "Not shared yet" : val;
   }
 
+    function getMatchBandByRank(idx) {
+    if (idx === 0) return "Strong match";
+    if (idx === 1) return "Good match";
+    return "Emerging match";
+  }
+
+  function extractCareerMetaFromExplainability(lines) {
+    const meta = { cluster: null, driver: null, driverScore: null };
+
+    const text = (lines || []).join(" ");
+
+    // Extract: It sits under "Health Science"
+    const clusterMatch = text.match(/sits under\s+["“](.+?)["”]/i);
+    if (clusterMatch && clusterMatch[1]) meta.cluster = clusterMatch[1].trim();
+
+    // Extract: driven mainly by: Animal Care
+    const driverMatch = text.match(/driven mainly by:\s*(.+?)(\.|$)/i);
+    if (driverMatch && driverMatch[1]) {
+      meta.driver = driverMatch[1]
+        .trim()
+        .replace(/\s*\(\s*\d+\s*%\s*\)\s*/g, "")   // remove "(35%)"
+        .replace(/\s*\(\s*\d+\s*\/\s*\d+\s*\)\s*/g, "") // remove "(35/100)"
+        .replace(/\.$/, "");
+    }
+
+    return meta;
+  }
+    function sanitizeExplainabilityForStudent(text) {
+    if (!text || typeof text !== "string") return text;
+
+    let t = text;
+
+    // Remove bracketed scores like "(35/100)" or "(35%)"
+    t = t.replace(/\(\s*\d+\s*\/\s*\d+\s*\)/g, "");
+    t = t.replace(/\(\s*\d+\s*%\s*\)/g, "");
+
+    // Remove standalone "35/100" and "35%" if present in the sentence
+    t = t.replace(/\b\d+\s*\/\s*\d+\b/g, "");
+    t = t.replace(/\b\d+\s*%\b/g, "");
+
+    // Clean up double spaces created by removals
+    t = t.replace(/\s{2,}/g, " ").trim();
+
+    // Clean up awkward leftover punctuation like "answers ." or "by :"
+    t = t.replace(/\s+\./g, ".").replace(/\s+,/g, ",");
+
+    return t;
+  }
+
   const isContextUnknown = useMemo(() => {
     if (!ctx) return true;
     const fields = [
@@ -220,6 +266,7 @@ export default function StudentResultsPage() {
 
   function renderTopCareersBlock(block) {
     const items = Array.isArray(block.value) ? block.value : [];
+
     if (items.length === 0) {
       return (
         <div className="text-muted" style={{ fontSize: 13 }}>
@@ -232,18 +279,43 @@ export default function StudentResultsPage() {
       <ul style={{ margin: 0, paddingLeft: 18 }}>
         {items.slice(0, block.maxItems ?? 5).map((c, idx) => {
           const label = formatTopCareerLabel(c, idx);
-          const score = formatTopCareerScore(c);
+          
 
           return (
             <li key={`${label}-${idx}`} style={{ marginBottom: 6 }}>
-              <span style={{ fontWeight: 600 }}>{label}</span>
-              {score != null ? (
-                <span
-                  className="text-muted"
-                  style={{ marginLeft: 8, fontSize: 13 }}
-                >
-                  ({score})
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <span style={{ fontWeight: 700 }}>{label}</span>
+                <span className="text-muted" style={{ fontSize: 13 }}>
+                  — {getMatchBandByRank(idx)}
                 </span>
+              </div>
+
+              {Array.isArray(c?.explainability) && c.explainability.length > 0 ? (
+                (() => {
+                  const rawLines = c.explainability
+                    .map((item) => renderCareerExplainabilityV1(item))
+                    .filter(Boolean);
+
+                  const meta = extractCareerMetaFromExplainability(rawLines);
+
+                  return (
+                    <div className="text-muted" style={{ marginTop: 6, fontSize: 13, lineHeight: 1.5 }}>
+                      {meta.cluster ? (
+                        <div>
+                          <span style={{ fontWeight: 600 }}>Cluster:</span>{" "}
+                          {meta.cluster}
+                        </div>
+                      ) : null}
+
+                      {meta.driver ? (
+                        <div>
+                          <span style={{ fontWeight: 600 }}>Driven by:</span>{" "}
+                          {meta.driver}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })()
               ) : null}
             </li>
           );
@@ -251,6 +323,7 @@ export default function StudentResultsPage() {
       </ul>
     );
   }
+
 
   return (
     <SkeletonPage
@@ -454,7 +527,9 @@ export default function StudentResultsPage() {
                 <p>
                   Generated on{" "}
                   <strong>
-                    {new Date(selectedResult.generated_at).toLocaleString()}
+                    {selectedResult.generated_at
+                      ? new Date(selectedResult.generated_at).toLocaleString()
+                      : "Just now"}
                   </strong>
                 </p>
 
