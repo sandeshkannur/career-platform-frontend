@@ -72,3 +72,17 @@ backend/app/scripts/
 backend/alembic/versions/0ea029cf1a6d_enforce_immutable_assessment_responses.py
 
 **/openapi.json
+
+# Local snapshots (never commit)
+Snapshot/
+
+# Local scratch working area (never commit)
+backend/data/working/
+
+# Local one-off fix scripts (keep as local runbooks; do not commit)
+backend/scripts/fix_career_keyskill_weights.sql
+backend/scripts/fix_career_keyskill_weights_v2.sql
+backend/scripts/upgrade_career_clusters.sql
+
+# Local helper
+make_alias_map.ps1
