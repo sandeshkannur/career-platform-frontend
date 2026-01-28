@@ -39,6 +39,65 @@ def reverse_tier(score: float) -> str:
         return "Low"
     return "Very Low"
 
+def build_pr6_explainability_blocks(evidence: dict | None) -> dict:
+    """
+    PR6: Build student-safe explainability blocks (no numeric fields)
+    from PR5 evidence (which includes counts). We treat evidence as dict
+    because compute_assessment_evidence returns a dict.
+    """
+    if not evidence:
+        return {
+            "top_facets": [],
+            "top_aqs": [],
+            "facet_evidence_blocks": [],
+        }
+
+    facet_evidence = evidence.get("facet_evidence") or []
+    aq_evidence_summary = evidence.get("aq_evidence_summary") or []
+
+    # 1) Top facets: reuse PR5 facet_evidence ordering (already meaningful)
+    top_facets = []
+    for item in facet_evidence[:3]:
+        top_facets.append(
+            schemas.ScorecardFacetExplainBlock(
+                facet_code=item.get("facet_code"),
+                facet_name_en=item.get("facet_name_en"),
+                aq_code=item.get("aq_code"),
+                aq_name_en=item.get("aq_name_en"),
+                question_codes=item.get("question_codes") or [],
+                explanation_key=f"facet.{item.get('facet_code')}.summary",
+            )
+        )
+
+    # 2) Top AQs: reuse PR5 aq_evidence_summary ordering
+    top_aqs = []
+    for aq_item in aq_evidence_summary[:3]:
+        top_aqs.append(
+            schemas.ScorecardAQExplainBlock(
+                aq_code=aq_item.get("aq_code"),
+                aq_name_en=aq_item.get("aq_name_en"),
+                facet_codes=aq_item.get("facet_codes") or [],
+                question_codes=aq_item.get("question_codes") or [],
+                explanation_key=f"aq.{aq_item.get('aq_code')}.summary",
+            )
+        )
+
+    # 3) Facet evidence blocks (traceability only)
+    facet_evidence_blocks = []
+    for item in facet_evidence[:3]:
+        facet_evidence_blocks.append(
+            schemas.ScorecardFacetEvidenceBlock(
+                facet_code=item.get("facet_code"),
+                evidence_question_codes=item.get("question_codes") or [],
+            )
+        )
+
+    return {
+        "top_facets": top_facets,
+        "top_aqs": top_aqs,
+        "facet_evidence_blocks": facet_evidence_blocks,
+    }
+
 
 @router.get("/{student_id}", response_model=schemas.ScorecardResponse)
 def get_scorecard(student_id: int, db: Session = Depends(deps.get_db)):
@@ -64,6 +123,7 @@ def get_scorecard(student_id: int, db: Session = Depends(deps.get_db)):
     evidence = None
     if latest_assessment_id is not None:
         evidence = compute_assessment_evidence(db, int(latest_assessment_id))
+    blocks = build_pr6_explainability_blocks(evidence)
 
     # keyskill numeric scores (0–1.0), normalized
     sk_normalized = get_student_keyskill_scores(db, student_id)
@@ -77,6 +137,9 @@ def get_scorecard(student_id: int, db: Session = Depends(deps.get_db)):
             cluster_scores={},
             career_scores={},
             evidence=evidence,
+            top_facets=blocks["top_facets"],
+            top_aqs=blocks["top_aqs"],
+            facet_evidence_blocks=blocks["facet_evidence_blocks"],
             message="No key skills mapped for this student."
         )
 
@@ -121,5 +184,8 @@ def get_scorecard(student_id: int, db: Session = Depends(deps.get_db)):
         cluster_scores=cluster_scores,
         career_scores=career_scores,
         evidence=evidence,
+        top_facets=blocks["top_facets"],
+        top_aqs=blocks["top_aqs"],
+        facet_evidence_blocks=blocks["facet_evidence_blocks"],
         message=None,
     )

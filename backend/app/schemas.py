@@ -376,6 +376,58 @@ class AssessmentResultOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+# ===============================
+# PR5: Evidence Schemas (computed-on-read)
+# ===============================
+
+class FacetEvidenceItem(BaseModel):
+    facet_code: str
+    facet_name_en: str
+    aq_code: str
+    aq_name_en: str
+    evidence_count: int
+    question_codes: List[str] = Field(default_factory=list)
+
+
+class AQEvidenceSummaryItem(BaseModel):
+    aq_code: str
+    aq_name_en: str
+    evidence_count: int
+    facet_codes: List[str] = Field(default_factory=list)
+    question_codes: List[str] = Field(default_factory=list)
+
+
+class AssessmentEvidenceBlock(BaseModel):
+    facet_evidence: List[FacetEvidenceItem] = Field(default_factory=list)
+    aq_evidence_summary: List[AQEvidenceSummaryItem] = Field(default_factory=list)
+
+
+# ===============================
+# PR6: Student-safe AQ/Facet blocks (computed-on-read from PR5 evidence)
+# ===============================
+
+class ScorecardFacetExplainBlock(BaseModel):
+    facet_code: str
+    facet_name_en: str
+    aq_code: str
+    aq_name_en: str
+    # Traceability without pressure (no counts/scores)
+    question_codes: List[str] = Field(default_factory=list)
+    # Optional CMS key (versioned content) — additive, safe
+    explanation_key: Optional[str] = None
+
+
+class ScorecardAQExplainBlock(BaseModel):
+    aq_code: str
+    aq_name_en: str
+    facet_codes: List[str] = Field(default_factory=list)
+    question_codes: List[str] = Field(default_factory=list)
+    explanation_key: Optional[str] = None
+
+
+class ScorecardFacetEvidenceBlock(BaseModel):
+    facet_code: str
+    evidence_question_codes: List[str] = Field(default_factory=list)
 
 # ===============================
 # SCORECARD RESPONSE (FULL REPORT)
@@ -422,33 +474,15 @@ class ScorecardResponse(BaseModel):
     # PR5: additive explainability evidence (computed-on-read)
     evidence: Optional["AssessmentEvidenceBlock"] = None
 
+    # PR6: student-safe explainability blocks (no numeric fields)
+    top_facets: List["ScorecardFacetExplainBlock"] = Field(default_factory=list)
+    top_aqs: List["ScorecardAQExplainBlock"] = Field(default_factory=list)
+    facet_evidence_blocks: List["ScorecardFacetEvidenceBlock"] = Field(default_factory=list)
+
     message: Optional[str] = None
 
 
-# ===============================
-# PR5: Evidence Schemas (computed-on-read)
-# ===============================
 
-class FacetEvidenceItem(BaseModel):
-    facet_code: str
-    facet_name_en: str
-    aq_code: str
-    aq_name_en: str
-    evidence_count: int
-    question_codes: List[str] = Field(default_factory=list)
-
-
-class AQEvidenceSummaryItem(BaseModel):
-    aq_code: str
-    aq_name_en: str
-    evidence_count: int
-    facet_codes: List[str] = Field(default_factory=list)
-    question_codes: List[str] = Field(default_factory=list)
-
-
-class AssessmentEvidenceBlock(BaseModel):
-    facet_evidence: List[FacetEvidenceItem] = Field(default_factory=list)
-    aq_evidence_summary: List[AQEvidenceSummaryItem] = Field(default_factory=list)
 
 
 # ===============================
@@ -808,3 +842,5 @@ class ContextProfileUpdate(BaseModel):
     education_board: Optional[str] = Field(None, min_length=1, max_length=32)
     support_level: Optional[str] = Field(None, min_length=1, max_length=32)
     resource_access: Optional[str] = Field(None, max_length=32)
+
+ScorecardResponse.model_rebuild()
