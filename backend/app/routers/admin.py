@@ -48,6 +48,8 @@ from app.validators.question_ingestion import (
     validate_question_row,
     RowValidationError,
 )
+from app.services.knowledge_pack_validation import run_validate_knowledge_pack
+
 
 logger = logging.getLogger(__name__)
 
@@ -782,6 +784,16 @@ def assign_guardian(
 
     return user
 
+@router.get(
+    "/validate-knowledge-pack",
+    response_model=ValidateKnowledgePackResponse,
+    tags=["Admin Panel", "admin"],
+)
+def validate_knowledge_pack(
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    return run_validate_knowledge_pack(db)
 
 # ============================================================
 # 7. UPLOAD QUESTIONS (B1)
