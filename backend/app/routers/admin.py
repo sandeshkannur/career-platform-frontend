@@ -6,6 +6,7 @@ from fastapi import (
     HTTPException,
     Form,
 )
+import io
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -1404,7 +1405,7 @@ async def upload_question_facet_tags(
 # PR3. UPLOAD AQ STUDENTSKILL WEIGHTS
 # ============================================================
 
-@router.post("/v1/admin/upload-aq-studentskill-weights")
+@router.post("/upload-aq-studentskill-weights")
 async def upload_aq_studentskill_weights(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),

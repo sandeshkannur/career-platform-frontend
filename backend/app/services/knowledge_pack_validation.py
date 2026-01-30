@@ -71,12 +71,12 @@ def run_validate_knowledge_pack(db: Session):
     aqs_count = db.query(AssociatedQuality).count()
     aq_facets_count = db.query(AQFacet).count()
     questions_count = db.query(Question).count()
-    qft_count = db.query(QuestionFacetTag).count()
+    qft_count = db.execute(text("SELECT COUNT(*) FROM question_facet_tags_v")).scalar() or 0
 
     add_count("associated_qualities", aqs_count)
     add_count("aq_facets", aq_facets_count)
     add_count("questions", questions_count)
-    add_count("question_facet_tags", qft_count)
+    add_count("question_facet_tags", qft_count)  # keep label stable for clients
 
     try:
         aq_ss_weights_count = db.execute(text("SELECT COUNT(*) FROM aq_student_skill_weights")).scalar() or 0
@@ -206,7 +206,7 @@ def run_validate_knowledge_pack(db: Session):
                         SELECT COUNT(*) AS cnt
                         FROM associated_qualities aq
                         JOIN aq_facets f ON f.aq_id = aq.aq_id
-                        LEFT JOIN question_facet_tags qft ON qft.facet_id = f.facet_id
+                        LEFT JOIN question_facet_tags_v qft ON qft.facet_code = f.facet_id
                         WHERE qft.facet_id IS NULL
                         """
                     )
@@ -222,7 +222,7 @@ def run_validate_knowledge_pack(db: Session):
                             SELECT aq.aq_id, aq.aq_name, f.facet_id, f.facet_name
                             FROM associated_qualities aq
                             JOIN aq_facets f ON f.aq_id = aq.aq_id
-                            LEFT JOIN question_facet_tags qft ON qft.facet_id = f.facet_id
+                            LEFT JOIN question_facet_tags_v qft ON qft.facet_id = f.facet_id
                             WHERE qft.facet_id IS NULL
                             ORDER BY aq.aq_id, f.facet_id
                             LIMIT 2
