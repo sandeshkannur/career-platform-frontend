@@ -13,6 +13,8 @@ import csv
 from io import StringIO
 import logging
 from typing import List, Dict
+from fastapi.responses import StreamingResponse
+import json
 
 from app.deps import get_db
 from app import models
@@ -40,8 +42,10 @@ from app.schemas import (
     AdminQuestionBulkItem,
     AdminQuestionBulkResponse,
     AdminQuestionBulkErrorEntry,
+    ValidateKnowledgePackResponse,
 )
 from app.auth.auth import require_role, get_current_active_user
+from app.services.knowledge_pack_validation import run_validate_knowledge_pack
 
 # ✅ B2 shared validation import
 from app.validators.question_ingestion import (
@@ -782,6 +786,55 @@ def assign_guardian(
 
     return user
 
+@router.get(
+    "/validate-knowledge-pack",
+    tags=["Admin Panel", "admin"],
+)
+def validate_knowledge_pack(
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    # Import-safe: keep schemas inside the service to avoid startup failures
+    return run_validate_knowledge_pack(db)
+
+@router.get(
+    "/validate-knowledge-pack.csv",
+    tags=["Admin Panel", "admin"],
+)
+def validate_knowledge_pack_csv(
+    db: Session = Depends(get_db),
+    current_user: UserSchema = Depends(get_current_active_user),
+):
+    """
+    PR12: Admin productivity
+    - Export the validation issues as CSV for remediation workflows.
+    - Read-only; does not modify ingestion/scoring.
+    """
+    report = run_validate_knowledge_pack(db)
+
+    # CSV headers (stable + remediation-friendly)
+    headers = ["severity", "code", "message", "sample_json"]
+
+    def _iter_rows():
+        # header row
+        yield ",".join(headers) + "\n"
+        for issue in report.issues:
+            sev = (issue.severity or "").replace('"', '""')
+            code = (issue.code or "").replace('"', '""')
+            msg = (issue.message or "").replace('"', '""')
+
+            # sample can be dict/None; store as compact JSON string
+            sample_obj = issue.sample if issue.sample is not None else None
+            sample_json = json.dumps(sample_obj, ensure_ascii=False, separators=(",", ":"))
+            sample_json = sample_json.replace('"', '""')  # CSV escape
+
+            yield f'"{sev}","{code}","{msg}","{sample_json}"\n'
+
+    return StreamingResponse(
+        _iter_rows(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=knowledge_pack_validation_issues.csv"},
+    )
 
 # ============================================================
 # 7. UPLOAD QUESTIONS (B1)
