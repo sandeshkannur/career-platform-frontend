@@ -833,7 +833,58 @@ class ConsentRequestResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
     
+# =========================================================
+# PR18: Canonical Report Contract (sections-based)
+# - Single deterministic "report document"
+# - Multiple projections: student / counsellor / admin
+# - Format is a projection (json/html now, pdf later)
+# =========================================================
 
+class ReportMeta(BaseModel):
+    student_id: int
+    assessment_id: int
+    assessment_version: str
+    scoring_config_version: str
+    generated_at: datetime
+    locale: str
+    view: Literal["student", "counsellor", "admin"]
+
+
+class ReportBlock(BaseModel):
+    """
+    Renderable block used by both mobile + desktop UIs.
+    Keep it minimal + future-proof (no internal IDs, no raw scores).
+    """
+    kind: Literal[
+        "paragraph",
+        "bullets",
+        "callout",
+        "career_list",
+        "cluster_list",
+    ]
+    text: Optional[str] = None
+    items: Optional[List[str]] = None
+
+    # CMS-backed explainability (PR16)
+    explanation_key: Optional[str] = None
+    explanation_text: Optional[str] = None
+
+
+class ReportSection(BaseModel):
+    """
+    A section is a logical page/card area.
+    UI can render sections as:
+      - Mobile: accordion/cards
+      - Desktop: same, with side nav if desired
+    """
+    type: str  # e.g., "summary", "clusters", "careers", "explainability", "coming_soon"
+    title: str
+    blocks: List[ReportBlock] = Field(default_factory=list)
+
+
+class ReportDocument(BaseModel):
+    report_meta: ReportMeta
+    sections: List[ReportSection] = Field(default_factory=list)
 # ----------------------------
 # B14: Student Report Response
 # ----------------------------
@@ -842,10 +893,11 @@ class ReportResponse(BaseModel):
     student_id: int
     scoring_config_version: str
     report_ready: bool
-    report_format: str  # "json" or "pdf_placeholder"
+    report_format: str  # "json" | "html" | "pdf" (pdf deferred in beta)
     generated_at: datetime
     pdf_download_url: Optional[str] = None
     message: Optional[str] = None
+    # report_payload will carry PR18 canonical ReportDocument shape as a dict
     report_payload: Optional[Dict[str, Any]] = None
 
 
