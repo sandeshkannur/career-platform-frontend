@@ -133,31 +133,64 @@ def _compute_recommendations_payload(student_id: int, db: Session) -> dict:
 
 def _sanitize_recommendations_payload(payload: dict) -> dict:
     """
-    Remove all numeric score-related fields from /recommendations payload.
-    Students/parents should never receive numbers in network response.
+    Student-safe sanitization:
+    - Remove numeric exposure (scores, weights) from any depth.
+    - Keep only student-safe semantic fields + explainability keys/vars (non-numeric).
     """
-    out = dict(payload)
-    recs = out.get("recommended_careers") or []
 
-    for r in recs:
-        # remove numeric fields
-        for k in ["score"]:
-            r.pop(k, None)
+    def strip_numeric(obj):
+        # Recursively remove numeric values and known numeric keys
+        if isinstance(obj, dict):
+            cleaned = {}
+            for k, v in obj.items():
+                key = str(k)
 
-        # remove weights (numeric) from matched_keyskills
-        mks = r.get("matched_keyskills") or []
-        for ks in mks:
-            ks.pop("weight", None)
+                # Hard block known numeric fields (even if stringified)
+                if key in {
+                    "score",
+                    "weight",
+                    "points",
+                    "raw_score",
+                    "scaled_score",
+                    "top_keyskill_weights",
+                }:
+                    continue
 
-        # remove score from explainability vars if present
-        exp = r.get("explainability") or []
-        for e in exp:
-            if isinstance(e, dict) and isinstance(e.get("vars"), dict):
-                e["vars"].pop("score", None)
-                e["vars"].pop("top_keyskill_weights", None)
+                # Recurse
+                vv = strip_numeric(v)
 
-    out["recommended_careers"] = recs
-    return out
+                # If the value is numeric (int/float) or a list of numerics, drop it
+                if isinstance(vv, (int, float)):
+                    continue
+                if isinstance(vv, list) and vv and all(isinstance(x, (int, float)) for x in vv):
+                    continue
+
+                cleaned[key] = vv
+            return cleaned
+
+        if isinstance(obj, list):
+            return [strip_numeric(x) for x in obj]
+
+        return obj
+
+    # 1) Strip numeric fields everywhere
+    sanitized = strip_numeric(payload)
+
+    # 2) Defense-in-depth: ensure matched_keyskills entries never include weight
+    for career in sanitized.get("recommended_careers", []) or []:
+        if "matched_keyskills" in career and isinstance(career["matched_keyskills"], list):
+            for ks in career["matched_keyskills"]:
+                if isinstance(ks, dict) and "weight" in ks:
+                    ks.pop("weight", None)
+
+        # Also protect explainability vars from known numeric keys
+        if "explainability" in career and isinstance(career["explainability"], list):
+            for ex in career["explainability"]:
+                if isinstance(ex, dict) and isinstance(ex.get("vars"), dict):
+                    ex["vars"].pop("score", None)
+                    ex["vars"].pop("top_keyskill_weights", None)
+
+    return sanitized
 
 
 @router.get("/{student_id}")
@@ -186,7 +219,6 @@ def get_recommendations(
             )
     
     payload = _compute_recommendations_payload(student_id=student_id, db=db)
-    return _sanitize_recommendations_payload(payload)
 
     # ✅ IMPORTANT: Student endpoint returns sanitized payload only
     return _sanitize_recommendations_payload(payload)
@@ -197,7 +229,7 @@ def get_recommendations(
 def get_recommendations_admin(
     student_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_roles(["admin", "counsellor"])),
+    current_user: models.User = Depends(require_roles("admin", "counsellor")),
 ):
     # Reuse the same logic by calling the student route function body pattern
     # (We keep it simple: duplicate the call path by invoking the same compute pipeline)
