@@ -47,6 +47,136 @@ router = APIRouter(
     tags=["Assessments"],
 )
 
+def _get_answer_scale_for_assessment(db: Session, assessment_id: int) -> tuple[int, int, str]:
+    """
+    PR32: Get canonical answer scale (min,max) for the assessment's assessment_version.
+    Deterministic + auditable: if scale config missing, fail fast.
+    Returns: (min_value, max_value, assessment_version)
+    """
+    # 1) fetch assessment_version
+    row = db.execute(
+        text("SELECT assessment_version FROM assessments WHERE id = :aid"),
+        {"aid": assessment_id},
+    ).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+
+    assessment_version = row[0]
+
+    # 2) fetch scale config
+    scale = db.execute(
+        text("""
+            SELECT min_value, max_value
+            FROM assessment_answer_scale
+            WHERE assessment_version = :v AND is_active = TRUE
+        """),
+        {"v": assessment_version},
+    ).fetchone()
+
+    if not scale:
+        # misconfiguration: deterministic hard fail (do not guess)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Answer scale config missing for assessment_version={assessment_version}",
+        )
+
+    return int(scale[0]), int(scale[1]), str(assessment_version)
+
+
+def _parse_and_validate_answer_value(
+    answer_raw: str,
+    min_value: int,
+    max_value: int,
+    question_id: str,
+) -> int:
+    """
+    PR32: Convert answer to int and enforce range.
+    Student-safe: no weights/scores exposed, only min/max.
+    """
+    try:
+        answer_int = int(str(answer_raw).strip())
+    except Exception:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid answer for question_id={question_id}. Must be an integer in range {min_value}..{max_value}.",
+        )
+
+    if answer_int < min_value or answer_int > max_value:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Answer out of range for question_id={question_id}. Allowed range is {min_value}..{max_value}.",
+        )
+
+    return answer_int
+
+def _parse_and_validate_answer_value(
+    answer_raw: str,
+    min_value: int,
+    max_value: int,
+    question_id: str,
+) -> int:
+    """
+    PR32: Convert answer to int and enforce range.
+    Student-safe: no weights/scores exposed, only min/max.
+    """
+    try:
+        answer_int = int(str(answer_raw).strip())
+    except Exception:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid answer for question_id={question_id}. Must be an integer in range {min_value}..{max_value}.",
+        )
+
+    if answer_int < min_value or answer_int > max_value:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Answer out of range for question_id={question_id}. Allowed range is {min_value}..{max_value}.",
+        )
+
+    return answer_int
+
+
+def _enforce_scale_on_persisted_responses(db: Session, assessment_id: int) -> None:
+    """
+    PR32: Re-validate all persisted responses for an assessment against the canonical
+    scale for its assessment_version. Also backfills answer_value if missing.
+
+    Deterministic behavior:
+    - If any answer is non-integer or out of range -> 422 (do not compute).
+    - If scale config is missing -> 500 (misconfigured server; do not guess).
+    """
+    min_value, max_value, _assessment_version = _get_answer_scale_for_assessment(
+        db=db,
+        assessment_id=assessment_id,
+    )
+
+    rows = (
+        db.query(models.AssessmentResponse)
+        .filter(models.AssessmentResponse.assessment_id == assessment_id)
+        .all()
+    )
+
+    for row in rows:
+        # Prefer answer_value when available; fallback to parsing answer
+        if row.answer_value is None:
+            row.answer_value = _parse_and_validate_answer_value(
+                answer_raw=row.answer,
+                min_value=min_value,
+                max_value=max_value,
+                question_id=str(row.question_id),
+            )
+        else:
+            # Ensure already-stored answer_value remains in canonical range
+            if int(row.answer_value) < min_value or int(row.answer_value) > max_value:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Answer out of range for question_id={row.question_id}. Allowed range is {min_value}..{max_value}.",
+                )
+
+    # If we backfilled any rows, persist it (idempotent)
+    db.commit()
+
 def _sample_75_questions_v1(db: Session) -> List[Dict]:
     """
     Returns 75 questions (3 per AQ) for assessment_version='v1'.
@@ -384,6 +514,14 @@ def submit_responses(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No responses provided"
         )
+    
+    # ------------------------------------------------------
+    # PR32: Fetch canonical answer scale for this assessment_version (e.g., 1..5 for v1)
+    # ------------------------------------------------------
+    min_value, max_value, _assessment_version = _get_answer_scale_for_assessment(
+        db=db,
+        assessment_id=assessment_id,
+    )
     # ------------------------------------------------------
     # M4-A2: Pre-fetch existing question_ids for this assessment
     # Allows partial offline replay batches to succeed safely
@@ -441,10 +579,21 @@ def submit_responses(
             if r.question_id in existing_qids:
                 continue
 
+            # ------------------------------------------------------
+            # PR32: enforce canonical answer scale and persist numeric answer_value
+            # ------------------------------------------------------
+            answer_value = _parse_and_validate_answer_value(
+                answer_raw=r.answer,
+                min_value=min_value,
+                max_value=max_value,
+                question_id=str(r.question_id),
+            )
+
             resp = models.AssessmentResponse(
                 assessment_id=assessment_id,
                 question_id=r.question_id,
-                answer=r.answer,
+                answer=r.answer,                 # keep existing raw string for backward compatibility
+                answer_value=answer_value,       # NEW: canonical int
                 idempotency_key=r.idempotency_key,
             )
             db.add(resp)
@@ -589,6 +738,14 @@ def submit_assessment(
     db=db,
     assessment=assessment,
     current_user_id=current_user.id,
+    )
+
+    # ------------------------------------------------------
+    # PR32: Re-validate persisted answers before scoring (hard gate)
+    # ------------------------------------------------------
+    _enforce_scale_on_persisted_responses(
+        db=db,
+        assessment_id=assessment_id,
     )
 
     scoring_config_version = assessment.scoring_config_version  # pinned, backend authoritative
@@ -893,6 +1050,17 @@ def generate_result(assessment_id: int, student_id: int) -> None:
 
         assessment = db.query(models.Assessment).get(assessment_id)
         if not assessment:
+            return
+        
+        # ------------------------------------------------------
+        # PR32: Background hard gate — do not generate results if answers violate canonical scale
+        # ------------------------------------------------------
+        try:
+            _enforce_scale_on_persisted_responses(
+                db=db,
+                assessment_id=assessment_id,
+            )
+        except HTTPException:
             return
 
         scoring_config_version = assessment.scoring_config_version

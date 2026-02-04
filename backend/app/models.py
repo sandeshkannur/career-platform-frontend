@@ -354,6 +354,8 @@ class AssessmentResponse(Base):
     question_id = Column(String, nullable=False)
     answer = Column(String, nullable=False)
 
+    answer_value = Column(Integer, nullable=True)
+
     # NEW: idempotency key for offline replay safety (nullable for backward compatibility)
     idempotency_key = Column(String(80), nullable=True, index=True)
 

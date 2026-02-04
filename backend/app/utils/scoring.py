@@ -14,9 +14,10 @@ def compute_skill_scores(assessment_id: int, db: Session, dataset_version: str =
     skill_scores = defaultdict(float)
 
     for response in responses:
-        # Answer is expected to be numeric (e.g. 0/1/2/3). Default to 1 if empty.
+        # PR32: Prefer canonical integer answer_value; fallback to parsing answer (legacy rows)
         try:
-            score = float(response.answer) if response.answer is not None else 1.0
+            raw = response.answer_value if response.answer_value is not None else response.answer
+            score = float(raw) if raw is not None else 1.0
         except Exception:
             score = 1.0
 
