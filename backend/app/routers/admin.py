@@ -19,6 +19,7 @@ import json
 
 from app.deps import get_db
 from app import models
+from app import schemas
 from app.models import (
     CareerCluster,
     Career,
@@ -839,7 +840,205 @@ def validate_knowledge_pack_csv(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=knowledge_pack_validation_issues.csv"},
     )
+# ============================================================
+# PR45. QSSW UPLOAD
+# ============================================================
+@router.post(
+    "/upload-question-student-skill-weights",
+    response_model=schemas.QSSWUploadResult,
+    summary="Upload Question → StudentSkill weights (QSSW) (idempotent upsert, supports dry_run)",
+)
+async def upload_question_student_skill_weights(
+    file: UploadFile = File(...),
+    dry_run: bool = False,
+    default_assessment_version: str = "v1",
+    db: Session = Depends(get_db),
+):
+    """
+    CSV headers (minimum):
+      canonical_student_skill, weight
 
+    Plus ONE of:
+      question_id   (numeric questions.id)
+      question_code (stable external identifier)
+
+    Optional:
+      assessment_version (defaults to default_assessment_version)
+      source, facet_id, aq_id
+
+    Behavior:
+    - Resolve question_id:
+        if question_id provided: validate exists in questions.id
+        else: resolve by (assessment_version, question_code)
+    - Resolve student_skill via skills.name exact match (trimmed)
+    - Upsert into question_student_skill_weights on (question_id, skill_id)
+    - dry_run=true: validate + count what would happen, but DO NOT write
+    - Returns inserted/updated/skipped + per-row error list
+    """
+
+    # --- read + decode (Excel safe) ---
+    raw = await file.read()
+    try:
+        text_csv = raw.decode("utf-8-sig")   # handles UTF-8 BOM from Excel
+    except UnicodeDecodeError:
+        text_csv = raw.decode("utf-16")      # common Excel fallback
+
+    reader = csv.DictReader(StringIO(text_csv))
+    if not reader.fieldnames:
+        return schemas.QSSWUploadResult(ok=False, dry_run=dry_run, errors=[
+            schemas.QSSWUploadRowError(row=1, error="CSV missing header row", raw={})
+        ])
+
+    headers = {h.strip() for h in reader.fieldnames if h}
+
+    required = {"canonical_student_skill", "weight"}
+    missing = required - headers
+    if missing:
+        return schemas.QSSWUploadResult(ok=False, dry_run=dry_run, errors=[
+            schemas.QSSWUploadRowError(row=1, error=f"Missing required columns: {sorted(missing)}", raw={})
+        ])
+
+    if "question_id" not in headers and "question_code" not in headers:
+        return schemas.QSSWUploadResult(ok=False, dry_run=dry_run, errors=[
+            schemas.QSSWUploadRowError(row=1, error="CSV must include either question_id or question_code", raw={})
+        ])
+
+    # --- pre-load skill name -> id map (fast + deterministic) ---
+    skill_rows = db.query(models.Skill.id, models.Skill.name).all()
+    skill_by_name = {(name or "").strip(): sid for sid, name in skill_rows}
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+    errors = []
+
+    # cache question lookups by (assessment_version, question_code)
+    q_cache = {}
+
+    # NOTE: csv line numbers start at 2 because header is row 1
+    for line_no, r in enumerate(reader, start=2):
+        try:
+            av = (r.get("assessment_version") or "").strip() or default_assessment_version
+
+            qid_raw = (r.get("question_id") or "").strip()
+            qcode = (r.get("question_code") or "").strip()
+
+            # --- resolve question_id ---
+            question_id = None
+
+            if qid_raw:
+                if not qid_raw.isdigit():
+                    raise ValueError("question_id must be numeric when provided")
+                question_id = int(qid_raw)
+
+                # validate question exists
+                q_exists = db.query(models.Question.id).filter(models.Question.id == question_id).first()
+                if not q_exists:
+                    raise ValueError(f"question_id not found: {question_id}")
+
+            else:
+                if not qcode:
+                    raise ValueError("Either question_id or question_code must be provided")
+
+                key = (av, qcode)
+                if key in q_cache:
+                    question_id = q_cache[key]
+                else:
+                    q = (
+                        db.query(models.Question.id)
+                        .filter(models.Question.assessment_version == av, models.Question.question_code == qcode)
+                        .first()
+                    )
+                    if not q:
+                        raise ValueError(f"question_code not found for assessment_version={av}: {qcode}")
+                    question_id = q[0]
+                    q_cache[key] = question_id
+
+            # --- resolve skill_id ---
+            skill_name = (r.get("canonical_student_skill") or "").strip()
+            if not skill_name:
+                raise ValueError("canonical_student_skill is blank")
+
+            skill_id = skill_by_name.get(skill_name)
+            if not skill_id:
+                raise ValueError(f"skill not found (skills.name): {skill_name}")
+
+            # --- weight ---
+            w_raw = (r.get("weight") or "").strip()
+            if w_raw == "":
+                raise ValueError("weight is blank")
+            try:
+                weight = float(w_raw)
+            except Exception:
+                raise ValueError(f"weight not numeric: {w_raw}")
+
+            # optional metadata
+            source = (r.get("source") or "").strip() or None
+            facet_id = (r.get("facet_id") or "").strip() or None
+            aq_id = (r.get("aq_id") or "").strip() or None
+
+            # --- determine insert vs update (for counts) ---
+            exists_row = db.query(models.QuestionStudentSkillWeight.id).filter(
+                models.QuestionStudentSkillWeight.question_id == question_id,
+                models.QuestionStudentSkillWeight.skill_id == skill_id,
+            ).first()
+
+            if dry_run:
+                if exists_row:
+                    updated += 1
+                else:
+                    inserted += 1
+                continue
+
+            # --- write: use ON CONFLICT for true idempotent upsert ---
+            stmt = text("""
+                INSERT INTO question_student_skill_weights
+                    (question_id, skill_id, weight, source, facet_id, aq_id)
+                VALUES
+                    (:question_id, :skill_id, :weight, :source, :facet_id, :aq_id)
+                ON CONFLICT (question_id, skill_id)
+                DO UPDATE SET
+                    weight = EXCLUDED.weight,
+                    source = EXCLUDED.source,
+                    facet_id = EXCLUDED.facet_id,
+                    aq_id = EXCLUDED.aq_id
+            """)
+
+            db.execute(stmt, {
+                "question_id": question_id,
+                "skill_id": skill_id,
+                "weight": weight,
+                "source": source,
+                "facet_id": facet_id,
+                "aq_id": aq_id,
+            })
+
+            if exists_row:
+                updated += 1
+            else:
+                inserted += 1
+
+        except Exception as e:
+            skipped += 1
+            errors.append(
+                schemas.QSSWUploadRowError(
+                    row=line_no,
+                    error=str(e),
+                    raw={k: (r.get(k) or "") for k in reader.fieldnames},
+                )
+            )
+
+    if not dry_run:
+        db.commit()
+
+    return schemas.QSSWUploadResult(
+        ok=True,
+        dry_run=dry_run,
+        inserted=inserted,
+        updated=updated,
+        skipped=skipped,
+        errors=errors,
+    )
 # ============================================================
 # 7. UPLOAD QUESTIONS (B1)
 # ============================================================

@@ -71,7 +71,23 @@ class QuestionFacetTagUploadRow(BaseModel):
     question_id: int
     facet_id: str
 
+# =========================================================
+# PR45: Upload Question -> StudentSkill Weights (QSSW)
+# =========================================================
 
+class QSSWUploadRowError(BaseModel):
+    row: int
+    error: str
+    raw: Dict[str, Any] = Field(default_factory=dict)
+
+
+class QSSWUploadResult(BaseModel):
+    ok: bool = True
+    dry_run: bool = False
+    inserted: int = 0
+    updated: int = 0
+    skipped: int = 0
+    errors: List[QSSWUploadRowError] = Field(default_factory=list)
 # ===============================
 # ADMIN USER MANAGEMENT SCHEMAS
 # ===============================

@@ -19,6 +19,7 @@ from sqlalchemy import (
     Float,
     UniqueConstraint,
     Index,
+    Numeric,
     Text,
 )
 from sqlalchemy.orm import relationship
@@ -587,6 +588,45 @@ class QuestionFacetTag(Base):
     # Optional relationships (safe/additive)
     question = relationship("Question", backref="facet_tags")
     facet = relationship("AQFacet", backref="question_tags")
+
+# =========================================================
+# PR45: Question → StudentSkill Weights (QSSW)
+# =========================================================
+
+class QuestionStudentSkillWeight(Base):
+    """
+    PR45: Deterministic mapping of Question -> Student Skill with numeric weights.
+
+    IMPORTANT:
+    - This model is for ADMIN ingestion + future scoring.
+    - Adding this model alone does NOT change scoring/explainability.
+    """
+    __tablename__ = "question_student_skill_weights"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    question_id = Column(
+        Integer,
+        ForeignKey("questions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+
+    weight = Column(Numeric(6, 4), nullable=False)
+
+    # Optional metadata (already present in your DB table)
+    source = Column(String(200), nullable=True)
+    facet_id = Column(String(50), nullable=True)
+    aq_id = Column(String(50), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("question_id", "skill_id", name="question_student_skill_weights_question_id_skill_id_key"),
+    )
+
+    # Optional relationships (safe/additive)
+    question = relationship("Question", backref="student_skill_weights")
+    skill = relationship("Skill", backref="question_weights")
 
 # =========================================================
 # PR16: CMS-backed explainability content (versioned + locale-aware)
