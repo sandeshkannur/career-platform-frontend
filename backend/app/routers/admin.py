@@ -539,7 +539,7 @@ async def upload_career_keyskill_weights(
             status_code=400,
             detail={
                 "ok": False,
-                "error_code": "CAREER_KEYSILL_WEIGHT_SUM_NOT_100",
+                "error_code": "CAREER_KEYSKILL_WEIGHT_SUM_NOT_100",
                 "message": "One or more careers have weight_percentage sum != 100",
                 "bad_careers": sorted(bad, key=lambda x: x["career_id"]),
             },
