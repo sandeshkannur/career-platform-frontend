@@ -49,7 +49,12 @@ def run_validate_knowledge_pack(db: Session):
     issues: List[KnowledgePackIssue] = []
 
     def add_count(table_name: str, count_value: Any) -> None:
-        stats.append(KnowledgePackStat(table=table_name, rows=_safe_int(count_value)))
+        stats.append(
+            KnowledgePackStat(
+                table=table_name,
+                rows=_safe_int(count_value),
+            )
+        )
 
     # -------------------------
     # Core counts
@@ -83,6 +88,86 @@ def run_validate_knowledge_pack(db: Session):
         add_count("aq_student_skill_weights", aq_ss_weights_count)
     except Exception:
         # If table not present in some env, we simply skip
+        pass
+
+        # PR35: include QSSW table count in stats (read-only)
+    try:
+        qssw_count = db.execute(text("SELECT COUNT(*) FROM question_student_skill_weights")).scalar() or 0
+        add_count("question_student_skill_weights", int(qssw_count))
+    except Exception:
+        # If table not present in some env, we simply skip
+        pass
+
+    # -------------------------
+    # PR35: Validate Question -> StudentSkill weights (QSSW)
+    # Rules:
+    #  - Each question_id group must sum(weight) ~= 1.0 (tolerance)
+    #  - No negative weights
+    # -------------------------
+    try:
+        tolerance = 0.0001  # numeric(6,4) friendly; avoids false positives due to rounding
+
+        # A) Negative weights
+        neg_rows = (
+            db.execute(
+                text(
+                    """
+                    SELECT question_id, skill_id, weight
+                    FROM question_student_skill_weights
+                    WHERE weight < 0
+                    ORDER BY question_id, skill_id
+                    LIMIT 20
+                    """
+                )
+            )
+            .mappings()
+            .all()
+        )
+
+        if neg_rows:
+            issues.append(
+                KnowledgePackIssue(
+                    code="qssw.weight.negative",
+                    severity="error",
+                    message="Negative weights found in question_student_skill_weights. Weights must be non-negative.",
+                    sample={"examples": [dict(r) for r in neg_rows]},
+                )
+            )
+
+        # B) Per-question sum(weight) must be ~ 1.0
+        bad_sums = (
+            db.execute(
+                text(
+                    """
+                    SELECT
+                        question_id,
+                        ROUND(SUM(weight)::numeric, 6) AS sum_weight,
+                        COUNT(*) AS rows
+                    FROM question_student_skill_weights
+                    GROUP BY question_id
+                    HAVING ABS(SUM(weight) - 1.0) > :tolerance
+                    ORDER BY question_id
+                    LIMIT 50
+                    """
+                ),
+                {"tolerance": tolerance},
+            )
+            .mappings()
+            .all()
+        )
+
+        if bad_sums:
+            issues.append(
+                KnowledgePackIssue(
+                    code="qssw.weight_sum.invalid",
+                    severity="error",
+                    message="Per-question weights must sum to 1.0 (+/- tolerance). Fix QSSW mapping and re-upload.",
+                    sample={"tolerance": tolerance, "examples": [dict(r) for r in bad_sums]},
+                )
+            )
+
+    except Exception:
+        # Keep validator resilient across envs
         pass
 
     # -------------------------
@@ -483,7 +568,73 @@ def run_validate_knowledge_pack(db: Session):
             )
     except Exception:
         pass
+    # -------------------------
+    # PR35: Question -> StudentSkill weight governance (QSSW)
+    # -------------------------
+    try:
+        tolerance = 0.0001  # numeric(6,4) friendly
 
+        # 1) Negative weights (should be prevented by DB CHECK, but report if present)
+        neg_rows = (
+            db.execute(
+                text(
+                    """
+                    SELECT question_id, skill_id, weight
+                    FROM question_student_skill_weights
+                    WHERE weight < 0
+                    ORDER BY question_id, skill_id
+                    LIMIT 5
+                    """
+                )
+            )
+            .mappings()
+            .all()
+        )
+
+        if len(neg_rows) > 0:
+            issues.append(
+                KnowledgePackIssue(
+                    code="qssw.weight.negative",
+                    severity="error",
+                    message="Found negative weights in question_student_skill_weights. Weights must be non-negative.",
+                    sample={"examples": [dict(r) for r in neg_rows]},
+                )
+            )
+
+        # 2) Per-question sum must be ~ 1.0
+        bad_sums = (
+            db.execute(
+                text(
+                    """
+                    SELECT question_id,
+                           ROUND(SUM(weight)::numeric, 6) AS sum_weight,
+                           COUNT(*) AS rows
+                    FROM question_student_skill_weights
+                    GROUP BY question_id
+                    HAVING ABS(SUM(weight) - 1.0) > :tolerance
+                    ORDER BY question_id
+                    LIMIT 20
+                    """
+                ),
+                {"tolerance": tolerance},
+            )
+            .mappings()
+            .all()
+        )
+
+        if len(bad_sums) > 0:
+            issues.append(
+                KnowledgePackIssue(
+                    code="qssw.weight_sum.invalid",
+                    severity="error",
+                    message="Per-question QSSW weights must sum to 1.0 (± tolerance). Fix the mapping and re-upload.",
+                    sample={"examples": [dict(r) for r in bad_sums], "tolerance": tolerance},
+                )
+            )
+
+    except Exception:
+        # In some envs the table may not exist; keep validator resilient.
+        pass
     # -------------------------
     # Planned enhancement: Assessment consistency (Questions unlinked)
     # -------------------------
@@ -794,12 +945,21 @@ def run_validate_knowledge_pack(db: Session):
     # as an INFO issue so it can be used for beta readiness decisions without breaking clients.
     try:
         warning_issues = [i for i in issues if getattr(i, "severity", None) == "warning"]
+        error_issues = [i for i in issues if getattr(i, "severity", None) == "error"]
+
         warning_count = len(warning_issues)
+        error_count = len(error_issues)
 
         # Minimal, safe gating rule (tunable later):
-        # - If there are any warnings, suggest "needs_review"
-        # - Otherwise "pass"
-        decision = "pass" if warning_count == 0 else "needs_review"
+        # - If there are any errors, suggest "fail"
+        # - Else if there are warnings, suggest "needs_review"
+        # - Else "pass"
+        if error_count > 0:
+            decision = "fail"
+        elif warning_count > 0:
+            decision = "needs_review"
+        else:
+            decision = "pass"
 
         # Include top warning codes for fast remediation focus
         top_codes = []
@@ -813,12 +973,17 @@ def run_validate_knowledge_pack(db: Session):
                 code="gate.decision",
                 severity="info",
                 message=(
-                    "Beta gate suggestion: Pass. No warning-level data quality gaps were detected."
+                    "Beta gate suggestion: Pass. No data quality gaps were detected."
                     if decision == "pass"
-                    else "Beta gate suggestion: Needs review. There are warnings that may reduce explainability or assessment coverage."
+                    else (
+                        "Beta gate suggestion: Needs review. There are warnings that may reduce explainability or assessment coverage."
+                        if decision == "needs_review"
+                        else "Beta gate suggestion: Fail. Error-level data quality gaps were detected."
+                    )
                 ),
                 sample={
                     "decision": decision,
+                    "error_count": error_count,
                     "warning_count": warning_count,
                     "top_warning_codes": top_codes,
                 },
