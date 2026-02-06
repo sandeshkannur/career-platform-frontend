@@ -256,6 +256,7 @@ def build_report_document(
         assessment_id=assessment.id,
         assessment_version=assessment.assessment_version,
         scoring_config_version=assessment.scoring_config_version,
+        content_version=(assessment_result.content_version or assessment.assessment_version),
         generated_at=datetime.utcnow(),
         locale=locale,
         view=view,  # already enforced by router for role

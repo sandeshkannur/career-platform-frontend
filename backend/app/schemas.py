@@ -902,6 +902,7 @@ class ReportMeta(BaseModel):
     assessment_id: int
     assessment_version: str
     scoring_config_version: str
+    content_version: Optional[str] = None    
     generated_at: datetime
     locale: str
     view: Literal["student", "counsellor", "admin"]

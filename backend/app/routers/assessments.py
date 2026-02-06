@@ -869,6 +869,10 @@ def submit_assessment(
         existing.recommended_careers = []        # store as JSON list
         existing.skill_tiers = tiers
         existing.generated_at = datetime.utcnow()
+        # PR40: refresh bundle pins on regenerate/upsert
+        existing.assessment_version = assessment.assessment_version
+        existing.scoring_config_version = assessment.scoring_config_version
+        existing.content_version = assessment.assessment_version
         result = existing
     else:
         result = models.AssessmentResult(
@@ -876,6 +880,10 @@ def submit_assessment(
             recommended_stream="Auto",
             recommended_careers=[],   # JSON list
             skill_tiers=tiers,
+            # PR40: pin bundle versions at generation time (auditability)
+            assessment_version=assessment.assessment_version,
+            scoring_config_version=assessment.scoring_config_version,
+            content_version=assessment.assessment_version,
         )
         db.add(result)
 
@@ -1172,6 +1180,10 @@ def generate_result(assessment_id: int, student_id: int) -> None:
             recommended_stream="Auto",
             recommended_careers=[],
             skill_tiers=tiers,
+            # PR40: pin bundle versions at generation time (auditability)
+            assessment_version=assessment.assessment_version,
+            scoring_config_version=assessment.scoring_config_version,
+            content_version=assessment.assessment_version,
         )
         
         db.add(result)

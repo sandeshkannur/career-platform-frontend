@@ -403,7 +403,17 @@ class AssessmentResult(Base):
     # per-skill tiers/levels produced by scoring/analytics
     # Example: {"Creativity": "Intermediate", "Numerical Reasoning": "Advanced"}
     skill_tiers = Column(JSON_TYPE, nullable=True)
-
+    # =========================================================
+    # PR40: Version bundle pinning (auditability)
+    # These are pinned at report generation time.
+    # - assessment_version: which question set/assessment bundle was used
+    # - scoring_config_version: which scoring ruleset was used
+    # - content_version: which CMS/explainability content bundle was used
+    # =========================================================
+    assessment_version = Column(String(32), nullable=True, index=True)
+    scoring_config_version = Column(String(32), nullable=True, index=True)
+    content_version = Column(String(32), nullable=True, index=True)
+    
     generated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     assessment = relationship("Assessment", back_populates="result")
