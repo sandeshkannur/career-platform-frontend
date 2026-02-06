@@ -135,41 +135,47 @@ def fit_band_from_score(score: float) -> str:
         return "developing"
     return "exploring"
 
-def explain_cluster(cluster_obj, score, top_keyskills, band_breakdown=None):
+def explain_cluster(cluster_obj, score, contributing_keyskills, band_breakdown):
     """
-    Build natural-language explanation for a cluster, including
-    how the student's strengths are distributed across
-    core / supporting / auxiliary skills (band_breakdown).
+    PR54: Choose explanation key based on presence of top keyskills.
     """
-    if top_keyskills:
-        ks = ", ".join(k.name for k in top_keyskills)
-    else:
-        ks = "your overall profile"
+    has_keyskills = bool(contributing_keyskills)
 
-    # PR37: do NOT generate numeric narrative here.
-    # Return a CMS-resolvable ExplanationBlock shape (text resolved later).
-    return {
-        "explanation_key": "paid.cluster.overview",
-        "slots": {
+    if has_keyskills:
+        explanation_key = "paid.cluster.with_keyskills"
+        slots = {
             "cluster_name": cluster_obj.name,
-            "top_keyskills": ks,
-        },
+            "top_keyskills": ", ".join([ks.name for ks in contributing_keyskills]),
+        }
+    else:
+        explanation_key = "paid.cluster.no_keyskills"
+        slots = {
+            "cluster_name": cluster_obj.name,
+        }
+
+    return {
+        "explanation_key": explanation_key,
+        "slots": slots,
         "text": None,
     }
 
 
-def explain_career(career_obj, score, top_keyskills):
-    if top_keyskills:
-        ks = ", ".join(k.name for k in top_keyskills)
-    else:
-        ks = "relevant skills"
-    # PR37: do NOT generate numeric narrative here.
+def explain_career(career_obj, score, contributing_keyskills, fit_band: str):
+    """
+    PR54: Choose explanation key based on fit_band.
+    """
+    explanation_key = f"paid.career.{fit_band}"
+
+    slots = {
+        "career_title": career_obj.title,
+    }
+
+    if contributing_keyskills:
+        slots["top_keyskills"] = ", ".join([ks.name for ks in contributing_keyskills])
+
     return {
-        "explanation_key": "paid.career.overview",
-        "slots": {
-            "career_title": career_obj.title,
-            "top_keyskills": ks,
-        },
+        "explanation_key": explanation_key,
+        "slots": slots,
         "text": None,
     }
 
@@ -254,23 +260,23 @@ def build_full_explanation(
             ).all()
 
             for ks_id, weight in ks_rows:
-                  # Only count weights for keyskills the student actually has
-                  if student_keyskills.get(ks_id, 0) <= 0:
-                      continue
+                # Only count weights for keyskills the student actually has
+                if student_keyskills.get(ks_id, 0) <= 0:
+                    continue
 
-                  # Guard: legacy rows may have NULL weight_percentage
-                  if weight is None:
-                      continue
+                # Guard: legacy rows may have NULL weight_percentage
+                if weight is None:
+                    continue
 
-                  # classify into bands using weightage rationale
-                  if weight >= 30:
-                      band = "core"
-                  elif weight >= 20:
-                      band = "supporting"
-                  else:
-                      band = "auxiliary"
+                # classify into bands using weightage rationale
+                if weight >= 30:
+                    band = "core"
+                elif weight >= 20:
+                    band = "supporting"
+                else:
+                    band = "auxiliary"
 
-                  band_contrib[band] += float(weight)
+                band_contrib[band] += float(weight)
 
         total_band = sum(band_contrib.values())
         if total_band > 0:
@@ -304,7 +310,6 @@ def build_full_explanation(
         cluster_item["explanation"]["text"] = render_text_with_slots(
             cluster_item["explanation"]["text"],
             cluster_item["explanation"].get("slots", {}),
-
         )
 
         cluster_output.append(cluster_item)
@@ -336,13 +341,20 @@ def build_full_explanation(
 
         contributions = sorted(contributions, key=lambda x: (x[1] or 0), reverse=True)[:3]
 
+        fit_band = fit_band_from_score(score)
+
         career_item = {
             "career_id": career_id,
             "career_name": career.title,
             "score": score,
-            "fit_band": fit_band_from_score(score),
+            "fit_band": fit_band,
             "top_keyskills": [k.name for k, _ in contributions],
-            "explanation": explain_career(career, score, [k for k, _ in contributions]),
+            "explanation": explain_career(
+                career,
+                score,
+                [k for k, _ in contributions],
+                fit_band,
+            ),
         }
 
         # PR37: resolve CMS text
