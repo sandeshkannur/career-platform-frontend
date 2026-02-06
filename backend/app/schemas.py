@@ -268,6 +268,23 @@ class ClusterInsight(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+# ===============================
+# PR37: CMS-driven paid explainability blocks
+# ===============================
+
+FitBand = Literal["high_potential", "strong", "promising", "developing", "exploring"]
+
+
+class ExplanationBlock(BaseModel):
+    """
+    PR37: CMS-driven narrative.
+    - explanation_key: stable taxonomy key, resolved via explainability_content(version, locale, key)
+    - slots: safe placeholders (NO numeric values for student-facing usage)
+    - text: optional resolved copy (filled by service layer)
+    """
+    explanation_key: str
+    slots: Dict[str, str] = Field(default_factory=dict)
+    text: Optional[str] = None
 
 # ===============================
 # PAID ANALYTICS SCHEMAS - NEW (Weighted + Explanations + Bands)
@@ -283,7 +300,8 @@ class PaidClusterInsight(BaseModel):
     # e.g. {"core": 55.0, "supporting": 30.0, "auxiliary": 15.0}
     band_breakdown: Dict[str, float] = Field(default_factory=dict)
 
-    explanation: str
+    fit_band: FitBand
+    explanation: ExplanationBlock
 
 
 class PaidCareerInsight(BaseModel):
@@ -291,7 +309,8 @@ class PaidCareerInsight(BaseModel):
     career_name: str
     score: float
     top_keyskills: List[str] = Field(default_factory=list)
-    explanation: str
+    fit_band: FitBand
+    explanation: ExplanationBlock
 
 
 class PaidAnalyticsResponse(BaseModel):
@@ -300,10 +319,33 @@ class PaidAnalyticsResponse(BaseModel):
     careers: List[PaidCareerInsight] = Field(default_factory=list)
 
     # Raw score maps (useful for dashboards)
-    cluster_scores: Dict[int, float] = Field(default_factory=dict)
-    career_scores: Dict[int, float] = Field(default_factory=dict)
-    keyskill_scores: Dict[int, float] = Field(default_factory=dict)
+    cluster_scores: Optional[Dict[int, float]] = None
+    career_scores: Optional[Dict[int, float]] = None
+    keyskill_scores: Optional[Dict[int, float]] = None
 
+    message: Optional[str] = None
+
+
+class PaidClusterInsightStudent(BaseModel):
+    cluster_id: int
+    cluster_name: str
+    top_keyskills: List[str] = Field(default_factory=list)
+    fit_band: FitBand
+    explanation: ExplanationBlock
+
+
+class PaidCareerInsightStudent(BaseModel):
+    career_id: int
+    career_name: str
+    top_keyskills: List[str] = Field(default_factory=list)
+    fit_band: FitBand
+    explanation: ExplanationBlock
+
+
+class PaidAnalyticsStudentResponse(BaseModel):
+    student_id: int
+    clusters: List[PaidClusterInsightStudent] = Field(default_factory=list)
+    careers: List[PaidCareerInsightStudent] = Field(default_factory=list)
     message: Optional[str] = None
 
 
