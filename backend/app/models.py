@@ -140,7 +140,34 @@ class Skill(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, unique=True)
+class SkillAlias(Base):
+    """
+    PR42: Alias → Canonical mapping used during ingestion.
 
+    entity_type:
+      - "AQ"    (Associated Quality codes)
+      - "FACET" (Facet codes)
+      - "SKILL" (Student-skill name aliases, if needed later)
+
+    assessment_version:
+      - If set, alias applies only to that version
+      - If NULL, alias is global fallback
+    """
+    __tablename__ = "skill_aliases"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    entity_type = Column(String(20), nullable=False)
+    assessment_version = Column(String(32), nullable=True)
+
+    alias = Column(String(200), nullable=False)
+    canonical_code = Column(String(200), nullable=False)
+
+    is_active = Column(Boolean, nullable=False, default=True)
+    notes = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now())
 
 class StudentSkillMap(Base):
     """

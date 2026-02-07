@@ -56,6 +56,9 @@ class Message(BaseModel):
 class UploadResponse(BaseModel):
     status: str
     inserted: int
+    updated: int = 0
+    skipped: int = 0
+    warnings: List[str] = Field(default_factory=list)
 
 
 class UploadQuestionsResult(BaseModel):

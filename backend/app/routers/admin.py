@@ -9,7 +9,7 @@ from fastapi import (
 )
 import io
 from sqlalchemy.orm import Session
-from sqlalchemy import text,select
+from sqlalchemy import text,select,func
 from sqlalchemy.exc import IntegrityError
 import csv
 from openpyxl import load_workbook
@@ -19,6 +19,7 @@ import logging
 from typing import List, Dict
 from fastapi.responses import StreamingResponse
 import json
+import re
 
 from app.deps import get_db
 from app import models
@@ -61,6 +62,8 @@ from app.services.knowledge_pack_validation import (
 )
 
 from app.services.skill_keyskill_ingest import ingest_skill_keyskill_map
+from app.utils.alias_normalization import resolve_alias
+from app.utils.normalization import norm
 
 # ✅ B2 shared validation import
 from app.validators.question_ingestion import (
@@ -1596,10 +1599,22 @@ async def upload_aqs(
     inserted = 0
     updated = 0
     skipped = 0
+    warnings: List[str] = []
 
     for row_num, row in enumerate(reader, start=2):
         assessment_version = (row.get("assessment_version") or "").strip()
         aq_code = (row.get("aq_code") or "").strip()
+        original_aq_code = aq_code
+        aq_code, applied = resolve_alias(
+            db=db,
+            entity_type="AQ",
+            raw_value=aq_code,
+            assessment_version=assessment_version,
+        )
+        if applied:
+            warnings.append(
+                f"Row {row_num}: aq_code '{original_aq_code}' normalized to '{aq_code}'"
+            )
         name_en = (row.get("name_en") or "").strip()
 
         name_hi = (row.get("name_hi") or "").strip() or None
@@ -1656,7 +1671,13 @@ async def upload_aqs(
 
     db.commit()
     logger.info(f"upload-aqs(v): inserted={inserted}, updated={updated}, skipped={skipped}")
-    return {"status": "success", "inserted": inserted}
+    return {
+        "status": "success",
+        "inserted": inserted,
+        "updated": updated,
+        "skipped": skipped,
+        "warnings": warnings,
+    }
 
 # ============================================================
 # PR1. UPLOAD AQ FACETS (AQ_FACET_TAXONOMY) - VERSIONED
@@ -1737,11 +1758,42 @@ async def upload_aq_facets(
     inserted = 0
     updated = 0
     skipped = 0
+    warnings: List[str] = []
 
     for row_num, row in enumerate(reader, start=2):
         assessment_version = (row.get("assessment_version") or "").strip()
         facet_code = (row.get("facet_code") or "").strip()
+        original_facet_code = facet_code  # <-- MOVE HERE (this is the exact fix)
+
+        # PR42: normalize FACET codes like FACET01 -> FACET_01
+        m = re.match(r"^(FACET)(\d{1,3})$", facet_code, flags=re.IGNORECASE)
+        if m:
+            facet_code = f"{m.group(1).upper()}_{int(m.group(2)):02d}"
+
         aq_code = (row.get("aq_code") or "").strip()
+
+        facet_code, facet_applied = resolve_alias(
+            db=db,
+            entity_type="FACET",
+            raw_value=facet_code,
+            assessment_version=assessment_version,
+        )
+        if facet_applied:
+            warnings.append(
+                f"Row {row_num}: facet_code '{original_facet_code}' normalized to '{facet_code}'"
+            )
+
+        original_aq_code = aq_code
+        aq_code, aq_applied = resolve_alias(
+            db=db,
+            entity_type="AQ",
+            raw_value=aq_code,
+            assessment_version=assessment_version,
+        )
+        if aq_applied:
+            warnings.append(
+                f"Row {row_num}: aq_code '{original_aq_code}' normalized to '{aq_code}'"
+            )
         name_en = (row.get("name_en") or "").strip()
 
         name_hi = (row.get("name_hi") or "").strip() or None
@@ -1830,7 +1882,13 @@ async def upload_aq_facets(
 
     db.commit()
     logger.info(f"upload-aq-facets(v): inserted={inserted}, updated={updated}, skipped={skipped}")
-    return {"status": "success", "inserted": inserted}
+    return {
+        "status": "success",
+        "inserted": inserted,
+        "updated": updated,
+        "skipped": skipped,
+        "warnings": warnings,
+    }
 
 
 # ============================================================
@@ -1888,11 +1946,37 @@ async def upload_question_facet_tags(
     inserted = 0
     updated = 0
     skipped = 0
+    warnings: List[str] = []
 
     for row_num, row in enumerate(reader, start=2):
         assessment_version = (row.get("assessment_version") or "").strip()
         question_code = (row.get("question_code") or "").strip()
         facet_code = (row.get("facet_code") or "").strip()
+        original_facet_code = facet_code
+
+        # PR42 — deterministic normalization for AQ facet codes:
+        # Accepts variants like: AQ3F2, AQ03F2, AQ3_F2, aq3f2 -> AQ03_F2
+        normalized_facet_code = facet_code.strip().upper().replace(" ", "")
+
+        m = re.match(r"^AQ_?(\d{1,2})_?F_?(\d{1,2})$", normalized_facet_code)
+        if m:
+            aq_num = int(m.group(1))
+            f_num = int(m.group(2))
+            normalized_facet_code = f"AQ{aq_num:02d}_F{f_num}"
+        # else: leave as-is (it will be validated against aq_facets_v)
+
+        # PR42 — alias resolution second (optional, but consistent with PR42 framework)
+        facet_code, facet_applied = resolve_alias(
+            db=db,
+            entity_type="FACET",
+            raw_value=normalized_facet_code,
+            assessment_version=assessment_version,
+        )
+
+        if normalized_facet_code != original_facet_code.upper().replace(" ", "") or facet_applied:
+            warnings.append(
+                f"Row {row_num}: facet_code '{original_facet_code}' → '{facet_code}'"
+            )
         tag_weight_raw = (row.get("tag_weight") or "").strip()
 
         if not assessment_version or not question_code or not facet_code or not tag_weight_raw:
@@ -1959,7 +2043,7 @@ async def upload_question_facet_tags(
     logger.info(
         f"upload-question-facet-tags(v): inserted={inserted}, updated={updated}, skipped={skipped}"
     )
-    return {"status": "success", "inserted": inserted}
+    return {"status": "success", "inserted": inserted, "updated": updated, "skipped": skipped, "warnings": warnings}
 
 
 # ============================================================
@@ -1997,11 +2081,23 @@ async def upload_aq_studentskill_weights(
 
     rows = []
     errors = []
+    warnings: List[str] = []
 
     # Parse + basic validation
     for line_no, r in enumerate(reader, start=2):
         av = (r.get("assessment_version") or "").strip()
         aq = (r.get("aq_code") or "").strip()
+        original_aq = aq
+        aq, applied = resolve_alias(
+            db=db,
+            entity_type="AQ",
+            raw_value=aq,
+            assessment_version=av,
+        )
+        if applied:
+            warnings.append(
+                f"Row {line_no}: aq_code '{original_aq}' normalized to '{aq}'"
+            )
         status = (r.get("status") or "active").strip() or "active"
 
         # skill_id
@@ -2134,7 +2230,7 @@ async def upload_aq_studentskill_weights(
         inserted += 1
 
     db.commit()
-    return {"ok": True, "inserted": inserted, "errors": []}
+    return {"ok": True, "inserted": inserted, "errors": [], "warnings": warnings}
 
 # ============================================================
 # PR16. upload_explainability_language_pack
@@ -2250,4 +2346,155 @@ def upload_explainability_language_pack(
         skipped=skipped,
         errors=errors,
     )
+
+@router.post(
+    "/upload-skill-aliases",
+    response_model=UploadResponse,
+    summary="PR42: Upload alias → canonical mappings (AQ/FACET/SKILL) via CSV",
+)
+async def upload_skill_aliases(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    # Content-type gate (consistent with other endpoints)
+    if file.content_type not in ("text/csv", "application/vnd.ms-excel"):
+        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+
+    text_csv = (await file.read()).decode("utf-8-sig")
+    if not text_csv.strip():
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    reader = csv.DictReader(io.StringIO(text_csv))
+
+    expected_headers = [
+        "entity_type",
+        "assessment_version",
+        "alias",
+        "canonical_code",
+        "is_active",
+        "notes",
+    ]
+    actual_headers = reader.fieldnames or []
+    if actual_headers != expected_headers:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Header mismatch. Expected exactly {expected_headers} but got {actual_headers}",
+        )
+
+    def parse_bool(v: str, default: bool = True) -> bool:
+        if v is None:
+            return default
+        s = str(v).strip().lower()
+        if s == "":
+            return default
+        if s in ("true", "t", "1", "yes", "y"):
+            return True
+        if s in ("false", "f", "0", "no", "n"):
+            return False
+        raise ValueError(f"Invalid boolean value '{v}' (expected true/false)")
+
+    inserted = 0
+    updated = 0
+    skipped = 0
+    warnings: List[str] = []
+    errors = []
+
+    allowed_types = {"AQ", "FACET", "SKILL"}
+
+    for row_num, row in enumerate(reader, start=2):
+        try:
+            entity_type = (row.get("entity_type") or "").strip().upper()
+            assessment_version = (row.get("assessment_version") or "").strip() or None
+            alias = (row.get("alias") or "").strip()
+            canonical_code = (row.get("canonical_code") or "").strip()
+            is_active = parse_bool(row.get("is_active"), default=True)
+            notes = (row.get("notes") or "").strip() or None
+
+            if entity_type not in allowed_types:
+                raise ValueError(f"entity_type must be one of {sorted(list(allowed_types))}")
+
+            if not alias or not canonical_code:
+                skipped += 1
+                warnings.append(f"Row {row_num}: skipped (alias/canonical_code missing)")
+                continue
+
+            # Redundant alias (same as canonical after normalization) → skip with warning
+            if norm(alias) == norm(canonical_code):
+                skipped += 1
+                warnings.append(
+                    f"Row {row_num}: skipped (alias '{alias}' is same as canonical '{canonical_code}' after normalization)"
+                )
+                continue
+
+            # Locate existing mapping (case-insensitive alias)
+            existing = (
+                db.query(models.SkillAlias)
+                .filter(
+                    models.SkillAlias.entity_type == entity_type,
+                    models.SkillAlias.assessment_version.is_(None)
+                    if assessment_version is None
+                    else models.SkillAlias.assessment_version == assessment_version,
+                    func.lower(models.SkillAlias.alias) == alias.lower(),
+                )
+                .first()
+            )
+
+            if existing:
+                # Conflict protection: same alias cannot map to different canonical
+                if norm(existing.canonical_code) != norm(canonical_code):
+                    raise ValueError(
+                        f"Conflict: alias '{alias}' already maps to '{existing.canonical_code}', not '{canonical_code}'"
+                    )
+
+                # Update only non-key fields (idempotent)
+                changed = False
+                if existing.is_active != is_active:
+                    existing.is_active = is_active
+                    changed = True
+                if notes is not None and existing.notes != notes:
+                    existing.notes = notes
+                    changed = True
+
+                # Keep canonical_code stable; allow casing/format cleanup if equivalent
+                if existing.canonical_code != canonical_code and norm(existing.canonical_code) == norm(canonical_code):
+                    existing.canonical_code = canonical_code
+                    changed = True
+
+                if changed:
+                    updated += 1
+                else:
+                    skipped += 1
+
+            else:
+                db.add(
+                    models.SkillAlias(
+                        entity_type=entity_type,
+                        assessment_version=assessment_version,
+                        alias=alias,
+                        canonical_code=canonical_code,
+                        is_active=is_active,
+                        notes=notes,
+                    )
+                )
+                inserted += 1
+
+        except Exception as e:
+            errors.append({"row": row_num, "error": str(e), "raw": dict(row)})
+
+    if errors:
+        raise HTTPException(status_code=400, detail={"ok": False, "errors": errors})
+
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"DB constraint error: {str(e)}")
+
+    return {
+        "status": "success",
+        "inserted": inserted,
+        "updated": updated,
+        "skipped": skipped,
+        "warnings": warnings,
+    }
 
