@@ -17,6 +17,27 @@ def _contains_numbers(text: str) -> bool:
     # blocks digits and percent patterns
     return bool(re.search(r"\d", text)) or ("%" in text)
 
+# --- PR43: Tier Narrative Guardrails (content safety) ---
+# These narrative blocks must never read like grades/exams.
+_GRADELIKE_PATTERN = re.compile(
+    r"\b("
+    r"grade|marks?|percentile|percent|score|scored|pass|fail|topper|rank|ranking"
+    r")\b|%|\b\d{1,3}\s*/\s*\d{1,3}\b",
+    re.IGNORECASE,
+)
+
+def _contains_gradelike_language(text: str) -> bool:
+    if not text:
+        return False
+    return bool(_GRADELIKE_PATTERN.search(text))
+
+def _is_tier_narrative_key(explanation_key: str) -> bool:
+    # PR43 scope: tier/fit-band narratives used by paid analytics
+    # Keep tight to avoid breaking other CMS copy.
+    if not explanation_key:
+        return False
+    return explanation_key.startswith("paid.career.") or explanation_key.startswith("paid.cluster.")
+
 
 def resolve_cms_text(
     db,
@@ -80,6 +101,19 @@ def resolve_cms_text(
         )
         return f"[missing:{explanation_key}]"
 
+    # PR43: Guardrails for tier narrative content (never present as grades/exams)
+    if (
+        _is_tier_narrative_key(explanation_key)
+        and _contains_gradelike_language(text)
+    ):
+        logger.warning(
+            "CMS rejected (tier narrative guardrail): version=%s locale=%s key=%s",
+            version,
+            locale,
+            explanation_key,
+        )
+        return f"[unsafe:{explanation_key}]"
+        # Original safety rule: if numbers are not allowed, reject numeric CMS copy
     if not allow_numbers and _contains_numbers(text):
         logger.warning(
             "CMS rejected (numeric text not allowed): version=%s locale=%s key=%s",
@@ -88,6 +122,7 @@ def resolve_cms_text(
             explanation_key,
         )
         return f"[unsafe:{explanation_key}]"
+    
     if allow_numbers and _contains_numbers(text):
         logger.warning(
             "CMS contains numeric text (admin allowed, student would reject): version=%s locale=%s key=%s",
