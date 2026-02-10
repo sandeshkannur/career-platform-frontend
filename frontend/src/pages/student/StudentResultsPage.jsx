@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { apiGet } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
 import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
-import { renderCareerExplainabilityV1 } from "../../content/careerExplainability.v1";
+
 import {
   getResultsBlocksV1,
   formatTopCareerLabel,
@@ -100,12 +100,85 @@ function ResultsNotReadyView({ content }) {
   );
 }
 
+function TopCareerCard({ career, bandCopy, idx }) {
+
+  const band = bandCopy?.[career?.fit_band_key] || null;
+
+  const bandLabel = band?.label || career?.fit_band_key || "Fit band";
+  const bandDesc = band?.desc || "";
+
+  const title =
+    career?.career_title ||
+    career?.title ||
+    career?.career_name ||
+    career?.name ||
+    `Career #${idx + 1}`;
+
+  const cluster = career?.cluster_title || "";
+  const drivers = Array.isArray(career?.drivers) ? career.drivers.slice(0, 3) : [];
+
+  return (
+    <div className="card top-career-card">
+      <div className="top-career-card__header">
+        <div className="top-career-card__titleWrap">
+          <div className="top-career-card__title">
+            {title}
+          </div>
+
+          {cluster ? (
+            <div className="text-muted top-career-card__cluster">
+              {cluster}
+            </div>
+          ) : null}
+        </div>
+
+        <div
+          className="top-career-card__bandPill"
+          aria-label={`Fit band: ${bandLabel}`}
+          title={bandDesc || bandLabel}
+        >
+          {bandLabel}
+        </div>
+      </div>
+
+      {bandDesc ? (
+        <div className="text-muted top-career-card__bandDesc">
+          {bandDesc}
+        </div>
+      ) : null}
+
+      {drivers.length > 0 ? (
+        <ul className="top-career-card__drivers">
+          {drivers.map((d, i) => (
+            <li key={i}>{d}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { sessionUser } = useSession();
-    const canSeeScores =
-    sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
+  const canSeeScores =
+  sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
+
+  // PR-B (Beta): Tier gating is frontend-only until backend exposes plan/tier in /v1/auth/me.
+  // Default is "free" to avoid accidentally showing paid content.
+  // Local override for QA/dev:
+  //   localStorage.setItem("CP_RESULTS_TIER", "paid") or "premium" or "free"
+  const resultsTier =
+    (sessionUser?.subscription_tier ||
+      sessionUser?.tier ||
+      sessionUser?.plan ||
+      localStorage.getItem("CP_RESULTS_TIER") ||
+      "free")
+      .toString()
+      .toLowerCase();
+
+  const isPaidOrPremium = resultsTier === "paid" || resultsTier === "premium";
 
   // ✅ Page state (required by existing logic below)
   const [loading, setLoading] = useState(true);
@@ -180,20 +253,9 @@ export default function StudentResultsPage() {
 
   useEffect(() => {
     async function loadCtx() {
-      if (!selectedResult?.assessment_id) {
-        setCtx(null);
-        return;
-      }
-
-      try {
-        const res = await apiGet(
-          `/v1/assessments/${selectedResult.assessment_id}/context-profile`
-        );
-        setCtx(res);
-      } catch {
-        // Context is optional; keep the page usable if it fails
-        setCtx(null);
-      }
+      // PR-B Beta: context-profile endpoint is not available yet (405).
+      // Keep UX clean by skipping the call; context page remains usable.
+      setCtx(null);
     }
 
     loadCtx();
@@ -204,54 +266,6 @@ export default function StudentResultsPage() {
     return !val || val.toLowerCase() === "unknown" ? "Not shared yet" : val;
   }
 
-    function getMatchBandByRank(idx) {
-    if (idx === 0) return "Strong match";
-    if (idx === 1) return "Good match";
-    return "Emerging match";
-  }
-
-  function extractCareerMetaFromExplainability(lines) {
-    const meta = { cluster: null, driver: null, driverScore: null };
-
-    const text = (lines || []).join(" ");
-
-    // Extract: It sits under "Health Science"
-    const clusterMatch = text.match(/sits under\s+["“](.+?)["”]/i);
-    if (clusterMatch && clusterMatch[1]) meta.cluster = clusterMatch[1].trim();
-
-    // Extract: driven mainly by: Animal Care
-    const driverMatch = text.match(/driven mainly by:\s*(.+?)(\.|$)/i);
-    if (driverMatch && driverMatch[1]) {
-      meta.driver = driverMatch[1]
-        .trim()
-        .replace(/\s*\(\s*\d+\s*%\s*\)\s*/g, "")   // remove "(35%)"
-        .replace(/\s*\(\s*\d+\s*\/\s*\d+\s*\)\s*/g, "") // remove "(35/100)"
-        .replace(/\.$/, "");
-    }
-
-    return meta;
-  }
-    function sanitizeExplainabilityForStudent(text) {
-    if (!text || typeof text !== "string") return text;
-
-    let t = text;
-
-    // Remove bracketed scores like "(35/100)" or "(35%)"
-    t = t.replace(/\(\s*\d+\s*\/\s*\d+\s*\)/g, "");
-    t = t.replace(/\(\s*\d+\s*%\s*\)/g, "");
-
-    // Remove standalone "35/100" and "35%" if present in the sentence
-    t = t.replace(/\b\d+\s*\/\s*\d+\b/g, "");
-    t = t.replace(/\b\d+\s*%\b/g, "");
-
-    // Clean up double spaces created by removals
-    t = t.replace(/\s{2,}/g, " ").trim();
-
-    // Clean up awkward leftover punctuation like "answers ." or "by :"
-    t = t.replace(/\s+\./g, ".").replace(/\s+,/g, ",");
-
-    return t;
-  }
 
   const isContextUnknown = useMemo(() => {
     if (!ctx) return true;
@@ -264,65 +278,50 @@ export default function StudentResultsPage() {
     return fields.every((v) => (v || "unknown") === "unknown");
   }, [ctx]);
 
-  function renderTopCareersBlock(block) {
-    const items = Array.isArray(block.value) ? block.value : [];
+function renderTopCareersBlock(block, fitBandsCopy) {
+  const items = Array.isArray(block?.value) ? block.value : [];
 
-    if (items.length === 0) {
-      return (
-        <div className="text-muted" style={{ fontSize: 13 }}>
-          {block.emptyText}
-        </div>
-      );
-    }
-
+  if (items.length === 0) {
     return (
-      <ul style={{ margin: 0, paddingLeft: 18 }}>
-        {items.slice(0, block.maxItems ?? 5).map((c, idx) => {
-          const label = formatTopCareerLabel(c, idx);
-          
-
-          return (
-            <li key={`${label}-${idx}`} style={{ marginBottom: 6 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <span style={{ fontWeight: 700 }}>{label}</span>
-                <span className="text-muted" style={{ fontSize: 13 }}>
-                  — {getMatchBandByRank(idx)}
-                </span>
-              </div>
-
-              {Array.isArray(c?.explainability) && c.explainability.length > 0 ? (
-                (() => {
-                  const rawLines = c.explainability
-                    .map((item) => renderCareerExplainabilityV1(item))
-                    .filter(Boolean);
-
-                  const meta = extractCareerMetaFromExplainability(rawLines);
-
-                  return (
-                    <div className="text-muted" style={{ marginTop: 6, fontSize: 13, lineHeight: 1.5 }}>
-                      {meta.cluster ? (
-                        <div>
-                          <span style={{ fontWeight: 600 }}>Cluster:</span>{" "}
-                          {meta.cluster}
-                        </div>
-                      ) : null}
-
-                      {meta.driver ? (
-                        <div>
-                          <span style={{ fontWeight: 600 }}>Driven by:</span>{" "}
-                          {meta.driver}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })()
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
+      <div className="text-muted" style={{ fontSize: 13 }}>
+        {block.emptyText}
+      </div>
     );
   }
+
+  return (
+    <div
+      className="top-careers-grid"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: 16,
+        alignItems: "stretch",
+        width: "100%",
+      }}
+    >
+      {items.slice(0, block.maxItems ?? 3).map((c, idx) => (
+        <TopCareerCard key={`${c?.career_code || idx}`} career={c} bandCopy={fitBandsCopy} idx={idx} />
+      ))}
+
+      <style>{`
+        .top-careers-grid {
+          width: 100%;
+        }
+        @media (max-width: 980px) {
+          .top-careers-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+        @media (max-width: 560px) {
+          .top-careers-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 
   return (
@@ -351,49 +350,31 @@ export default function StudentResultsPage() {
       {!loading && !error && (
         <>
           {/* Context wrapper */}
-          <div className="card" style={{ marginTop: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                alignItems: "flex-start",
-                flexWrap: "wrap",
-              }}
-            >
+          <div className="results-section">
+            <div className="card">
+                        <div className="results-section__titleRow">
               <div>
-                <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                  Your context (optional)
-                </div>
+                <div className="results-section__title">Your context (optional)</div>
 
                 {isContextUnknown ? (
-                  <div className="text-muted" style={{ fontSize: 13 }}>
-                    Optional details that help us interpret results more fairly.
-                    You can change this anytime.
+                  <div className="text-muted results-section__sub">
+                    Optional details that help us interpret results more fairly. You can change this anytime.
                   </div>
                 ) : (
-                  <div className="text-muted" style={{ fontSize: 13 }}>
+                  <div className="text-muted results-section__sub">
                     We use this only to adjust assumptions, not to judge you.
                   </div>
                 )}
               </div>
 
-              <Button
-                variant="secondary"
-                onClick={() => navigate("/student/context")}
-              >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
+              <Button variant="secondary" onClick={() => navigate("/student/context")}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                   <PencilIcon />
                   {isContextUnknown ? "Add" : "Edit"}
                 </span>
               </Button>
             </div>
+          </div>
 
             <div
               style={{
@@ -509,14 +490,22 @@ export default function StudentResultsPage() {
             `}</style>
           </div>
 
-          {/* Results card */}
-          <div className="card" style={{ marginTop: 12 }}>
-            <h3>Latest Assessment</h3>
+          {/* Latest Assessment */}
+          <div className="results-section">
+            <div className="results-section__titleRow">
+              <div>
+                <div className="results-section__title">Latest Assessment</div>
+                <div className="text-muted results-section__sub">
+                  A summary of the most recent assessment used for these results.
+                </div>
+              </div>
+            </div>
 
-            <p>
-              You have completed{" "}
-              <strong>{data?.total_results ?? 0}</strong> assessment(s).
-            </p>
+            <div className="card" style={{ padding: 12 }}>
+              <p>
+                You have completed{" "}
+                <strong>{data?.total_results ?? 0}</strong> assessment(s).
+              </p>
 
             {selectedResult ? (
               <>
@@ -537,75 +526,150 @@ export default function StudentResultsPage() {
                 {(() => {
                   const copy = getResultsBlocksV1({ result: selectedResult });
                   const rec = copy.recommendations;
+                  const fitBandsCopy = copy.fitBands || {};
+                  const assoc = copy.associatedQualities || null;
 
                   return (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                        {rec.title}
-                      </div>
+                                         <div className="results-section">
+                       <div className="results-section__titleRow">
+                         <div>
+                           <div className="results-section__title">{rec.title}</div>
+                           <div className="text-muted results-section__sub">
+                             Your top matches are shown using student-safe fit bands (no scores).
+                           </div>
+                         </div>
+                       </div>
 
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                          gap: 10,
-                        }}
-                      >
-                        {rec.blocks.map((block) => (
-                          <div
-                            key={block.key}
-                            className="card"
-                            style={{ padding: 12 }}
-                          >
-                            <div
-                              className="text-muted"
-                              style={{ fontSize: 12, marginBottom: 4 }}
-                            >
-                              {block.title}
-                            </div>
+                       <div className="card" style={{ padding: 12 }}>
+                         <div
+                           className="results-reco-grid"
+                           style={{
+                             display: "grid",
+                             gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                             gap: 10,
+                           }}
+                         >
+                           {rec.blocks.map((block) => {
+                             const isTopCareers = block.key === "top_careers";
 
-                            {block.key === "top_careers" ? (
-                              renderTopCareersBlock(block)
-                            ) : (
-                              <>
-                                <div style={{ fontWeight: 600 }}>
-                                  {block.value}
-                                </div>
-                                {block.helper ? (
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: 13, marginTop: 6 }}
-                                  >
-                                    {block.helper}
-                                  </div>
-                                ) : null}
-                              </>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                             return (
+                               <div
+                                 key={block.key}
+                                 className="card"
+                                 style={{
+                                   padding: 12,
+                                   gridColumn: isTopCareers ? "1 / -1" : undefined,
+                                 }}
+                               >
+                                 <div
+                                   className="text-muted"
+                                   style={{ fontSize: 12, marginBottom: 4 }}
+                                 >
+                                   {block.title}
+                                 </div>
 
-                      <div className="text-muted" style={{ marginTop: 12 }}>
-                        {rec.footer}
-                      </div>
+                                 {isTopCareers ? (
+                                   renderTopCareersBlock(block, fitBandsCopy)
+                                 ) : (
+                                   <>
+                                     <div style={{ fontWeight: 600 }}>
+                                       {block.value}
+                                     </div>
+                                     {block.helper ? (
+                                       <div
+                                         className="text-muted"
+                                         style={{ fontSize: 13, marginTop: 6 }}
+                                       >
+                                         {block.helper}
+                                       </div>
+                                     ) : null}
+                                   </>
+                                 )}
+                               </div>
+                             );
+                           })}
+                         </div>
 
-                      <style>{`
-                        @media (max-width: 720px) {
-                          .card > div[style*="grid-template-columns: repeat(2"] {
-                            grid-template-columns: 1fr !important;
-                          }
-                        }
-                      `}</style>
-                    </div>
+                         <div className="text-muted" style={{ marginTop: 12 }}>
+                           {rec.footer}
+                         </div>
+
+                         {isPaidOrPremium && assoc ? (
+                           <div className="results-section">
+                             <div className="card" style={{ padding: 12 }}>
+                               <div className="results-section__titleRow">
+                                 <div>
+                                   <div className="results-section__title">
+                                     {assoc.title || "Associated qualities"}
+                                   </div>
+                                   {assoc.intro ? (
+                                     <div className="text-muted results-section__sub">
+                                       {assoc.intro}
+                                     </div>
+                                   ) : (
+                                     <div className="text-muted results-section__sub">
+                                       A few qualities that often support success in roles like these.
+                                     </div>
+                                   )}
+                                 </div>
+                               </div>
+
+                               <details>
+                                 <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                                   View qualities
+                                 </summary>
+
+                                 {Array.isArray(assoc.items) && assoc.items.length > 0 ? (
+                                   <ul
+                                     style={{
+                                       marginTop: 10,
+                                       marginBottom: 0,
+                                       paddingLeft: 18,
+                                       lineHeight: 1.6,
+                                     }}
+                                   >
+                                     {assoc.items.map((it, idx) => (
+                                       <li key={`${it}-${idx}`} style={{ marginBottom: 6 }}>
+                                         {it}
+                                       </li>
+                                     ))}
+                                   </ul>
+                                 ) : (
+                                   <div className="text-muted" style={{ fontSize: 13, marginTop: 8 }}>
+                                     No qualities available yet.
+                                   </div>
+                                 )}
+
+                                 {resultsTier === "paid" ? (
+                                   <div className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
+                                     Premium will include deeper “why this fits you” stories and guided next steps.
+                                   </div>
+                                 ) : null}
+                               </details>
+                             </div>
+                           </div>
+                         ) : null}
+
+                         <style>{`
+                           @media (max-width: 720px) {
+                             .results-reco-grid {
+                               grid-template-columns: 1fr !important;
+                             }
+                           }
+                         `}</style>
+                       </div>
+                     </div>
                   );
                 })()}
               </>
             ) : (
               <ResultsNotReadyView content={resultsNotReady_v1} />
             )}
+                </div>
           </div>
         </>
       )}
     </SkeletonPage>
   );
 }
+

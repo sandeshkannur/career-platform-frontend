@@ -16,7 +16,7 @@ export default function SkeletonPage({
   emptyDescription = "No data available.",
   emptyActions = null,
   footer = null,
-  maxWidth = "900px",
+  maxWidth = "1200px",
 }) {
   return (
     <Page maxWidth={maxWidth}>

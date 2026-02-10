@@ -1,42 +1,104 @@
+﻿/* src/App.css
+ * App-wide layout defaults (replaces Vite template styles).
+ * Keep pages left-aligned and avoid global ".card" collisions.
+ */
+
 #root {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 16px;
+  text-align: left;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+@media (min-width: 1024px) {
+  #root {
+    padding: 24px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* =========================================================
+   PR-B: Results page + Top Career Card (global-consistent)
+   Additive only: avoids touching shared Card/Button primitives
+   ========================================================= */
+
+/* Top Career Card */
+.top-career-card {
+  padding: 14px;
+  height: 100%;
+  min-height: 220px;
 }
 
-.card {
-  padding: 2em;
+.top-career-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
 }
 
-.read-the-docs {
-  color: #888;
+.top-career-card__titleWrap {
+  min-width: 0;
+}
+
+.top-career-card__title {
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.top-career-card__cluster {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.top-career-card__bandPill {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.top-career-card__bandDesc {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.top-career-card__drivers {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding-left: 18px;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.top-career-card__drivers li {
+  margin-bottom: 6px;
+}
+
+/* Results page “slot” demarcation (Context / Latest / Reco / Qualities) */
+.results-section {
+  margin-top: 14px;
+}
+
+.results-section__titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.results-section__title {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+.results-section__sub {
+  margin-top: 2px;
+  font-size: 12px;
 }
