@@ -557,6 +557,7 @@ def submit_responses(
             detail="Assessment has no question set. Start assessment first.",
         )
     try:
+        invalid_question_id_format: List[str] = []
         unknown_question_ids: List[int] = []
         out_of_pool_question_ids: List[int] = []
 
@@ -564,6 +565,14 @@ def submit_responses(
         to_insert: List[Dict] = []
 
         for r in responses:
+            raw_qid = getattr(r, "question_id", None)
+
+            try:
+                qid_int = int(str(raw_qid).strip())
+            except Exception:
+                invalid_question_id_format.append(str(raw_qid))
+                continue
+
             # 1) If idempotency_key was already used for this assessment, treat as replay-success
             if r.idempotency_key:
                 existing = (
@@ -586,15 +595,15 @@ def submit_responses(
             # ------------------------------------------------------
             q = (
                 db.query(models.Question)
-                .filter(models.Question.id == r.question_id)
+                .filter(models.Question.id == qid_int)
                 .first()
             )
             if not q:
-                unknown_question_ids.append(int(r.question_id))
+                unknown_question_ids.append(qid_int)
                 continue
 
-            if int(r.question_id) not in allowed_qids:
-                out_of_pool_question_ids.append(int(r.question_id))
+            if qid_int not in allowed_qids:
+                out_of_pool_question_ids.append(qid_int)
                 continue
 
             canonical_code = (q.question_code or "").strip()
@@ -616,20 +625,21 @@ def submit_responses(
                     )
 
             # 2) Skip if this question was already answered (offline replay batch safety)
-            if int(r.question_id) in existing_qids:
+            if qid_int in existing_qids:
                 continue
 
             # Defer insert until after validation passes for the whole batch
             to_insert.append(
-                {"r": r, "canonical_code": canonical_code}
+                {"r": r, "qid_int": qid_int, "canonical_code": canonical_code}
             )
 
         # If ANY invalids exist, raise ONE 422 with lists (PR34 requirement)
-        if unknown_question_ids or out_of_pool_question_ids:
+        if invalid_question_id_format or unknown_question_ids or out_of_pool_question_ids:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={
                     "message": "One or more question_ids are invalid for this assessment",
+                    "invalid_question_id_format": sorted(set(invalid_question_id_format)),
                     "unknown_question_ids": sorted(set(unknown_question_ids)),
                     "out_of_pool_question_ids": sorted(set(out_of_pool_question_ids)),
                 },
@@ -640,6 +650,7 @@ def submit_responses(
         # ------------------------------------------------------
         for item in to_insert:
             r = item["r"]
+            qid_int = item["qid_int"]
             canonical_code = item["canonical_code"]
 
             # ------------------------------------------------------
@@ -654,7 +665,7 @@ def submit_responses(
 
             resp = models.AssessmentResponse(
                 assessment_id=assessment_id,
-                question_id=r.question_id,
+                question_id=qid_int,
                 question_code=canonical_code,
                 answer=r.answer,                 # keep existing raw string for backward compatibility
                 answer_value=answer_value,       # NEW: canonical int
