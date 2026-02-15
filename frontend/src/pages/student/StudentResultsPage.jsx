@@ -177,9 +177,13 @@ export default function StudentResultsPage() {
   const [explainRes, setExplainRes] = useState({ facets: [], aqs: [] });
   const [explainLoading, setExplainLoading] = useState(false);
   const [explainError, setExplainError] = useState("");
+  const [deepRes, setDeepRes] = useState(null); // raw /deep response (keys only)
+  const [deepCopy, setDeepCopy] = useState({}); // key -> resolved text
+  const [deepLoading, setDeepLoading] = useState(false);
+  const [deepError, setDeepError] = useState("");
 
   const lastExplainSigRef = useRef("");
-
+  const lastDeepSigRef = useRef("");
   const selectedAssessmentId = useMemo(() => {
     const fromState =
       location?.state?.assessment_id ??
@@ -318,6 +322,101 @@ export default function StudentResultsPage() {
 
     loadExplainability();
   }, [isPaidOrPremium, hasPremiumSignals, contentLocale, facetKeys, aqKeys, selectedResult?.results_payload_version]);
+
+  useEffect(() => {
+    async function loadDeepInsights() {
+      if (!isPaidOrPremium || !hasPremiumSignals) {
+        setDeepRes(null);
+        setDeepCopy({});
+        setDeepError("");
+        setDeepLoading(false);
+        lastDeepSigRef.current = "";
+        return;
+      }
+
+      const version = selectedResult?.results_payload_version || "v1";
+      const locale = contentLocale || "en";
+      const sig = `${studentId}|${version}|${locale}`;
+
+      if (lastDeepSigRef.current === sig) return;
+      lastDeepSigRef.current = sig;
+
+      setDeepLoading(true);
+      setDeepError("");
+
+      try {
+
+        // 1) Get keys-only deep insights
+        const deep = await apiGet(
+          `/v1/paid-analytics/${studentId}/deep?version=${encodeURIComponent(version)}&locale=${encodeURIComponent(locale)}`
+        );
+
+        setDeepRes(deep);
+
+        // 2) Collect ALL keys to resolve via CMS content endpoint
+        const keys = [];
+
+        (deep?.cluster_insights || []).forEach((c) => {
+          (c?.insight_keys || []).forEach((k) => keys.push(k));
+        });
+
+        (deep?.career_insights || []).forEach((c) => {
+          (c?.why_keys || []).forEach((k) => keys.push(k));
+        });
+
+        (deep?.next_steps?.keys || []).forEach((k) => keys.push(k));
+
+        // de-dup + clean
+        const uniqueKeys = Array.from(
+          new Set(keys.filter((k) => typeof k === "string" && k.trim().length > 0))
+        );
+
+        if (uniqueKeys.length === 0) {
+          setDeepCopy({});
+          return;
+        }
+
+        const params = new URLSearchParams();
+        params.set("version", version);
+        params.set("locale", locale);
+        params.set("keys", uniqueKeys.join(","));
+
+        const resolved = await apiGet(`/v1/content/explainability?${params.toString()}`);
+        const items = Array.isArray(resolved?.items) ? resolved.items : [];
+
+        const map = {};
+        items.forEach((it) => {
+          const k = it?.explanation_key;
+          const t = it?.text;
+          if (typeof k === "string" && typeof t === "string") {
+            map[k] = t;
+          }
+        });
+
+        setDeepCopy(map);
+      } catch (e) {
+        setDeepError(e?.message || "Could not load deep insights yet.");
+        setDeepRes(null);
+        setDeepCopy({});
+      } finally {
+        setDeepLoading(false);
+      }
+    }
+
+    loadDeepInsights();
+  }, [isPaidOrPremium, hasPremiumSignals, studentId, contentLocale, selectedResult?.results_payload_version]);
+  const ComingSoon = ({ text = "Insights coming soon." }) => (
+    <div className="text-muted" style={{ fontSize: 13 }}>
+      {text}
+    </div>
+  );
+
+  function formatTemplate(text, vars = {}) {
+    if (!text) return "";
+    return text.replace(/\{(\w+)\}/g, (_, k) =>
+      vars?.[k] != null ? String(vars[k]) : `{${k}}`
+    );
+  }
 
   function labelOrNotShared(v) {
     const val = (v ?? "unknown").toString().trim();
@@ -534,9 +633,7 @@ export default function StudentResultsPage() {
                             ))}
                           </ul>
                         ) : (
-                          <div className="text-muted" style={{ fontSize: 13 }}>
-                            {"Insights coming soon."}
-                          </div>
+                          <ComingSoon />
                         );
 
                         const themesBody = explainLoading ? (
@@ -552,9 +649,7 @@ export default function StudentResultsPage() {
                             ))}
                           </ul>
                         ) : (
-                          <div className="text-muted" style={{ fontSize: 13 }}>
-                            {"Insights coming soon."}
-                          </div>
+                          <ComingSoon />
                         );
                                                 
                         return (
@@ -579,28 +674,183 @@ export default function StudentResultsPage() {
                                   Associated qualities
                                 </div>
 
-                                 {explainLoading || resolvedAqs.length > 0 ? (
-                                   <details>
-                                     <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-                                       View qualities
-                                     </summary>
+                                {explainLoading || resolvedAqs.length > 0 ? (
+                                  <details>
+                                    <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+                                      View qualities
+                                    </summary>
 
-                                     {qualitiesBody}
+                                    {qualitiesBody}
 
-                                     <div className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
-                                       Premium will include deeper “why this fits you” stories and guided next steps.
-                                     </div>
-                                   </details>
-                                 ) : (
-                                   <div className="text-muted" style={{ fontSize: 13 }}>
-                                     {"Insights coming soon."}
-                                   </div>
-                                 )}
+                                    <div className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
+                                      Premium will include deeper “why this fits you” stories and guided next steps.
+                                    </div>
+                                  </details>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="cp-insightsStack">
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  Cluster signals
+                                </div>
+
+                                {deepLoading ? (
+                                  <div className="text-muted" style={{ fontSize: 13 }}>
+                                    Loading cluster signals…
+                                  </div>
+                                ) : Array.isArray(deepRes?.cluster_insights) &&
+                                  deepRes.cluster_insights.length > 0 ? (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: 10,
+                                      marginTop: 10,
+                                    }}
+                                  >
+                                    {deepRes.cluster_insights.slice(0, 2).map((cl, idx) => {
+                                      const insightKeys = Array.isArray(cl?.insight_keys)
+                                        ? cl.insight_keys
+                                        : [];
+
+                                      const resolved = insightKeys
+                                        .map((k) => deepCopy?.[k])
+                                        .filter(
+                                          (t) => typeof t === "string" && t.trim().length > 0
+                                        );
+
+                                      return (
+                                        <div
+                                          key={cl?.cluster_id || cl?.cluster_title || idx}
+                                          style={{
+                                            paddingBottom: 10,
+                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                          }}
+                                        >
+                                          <div style={{ fontWeight: 700 }}>
+                                            {cl?.cluster_title || "Cluster"}
+                                          </div>
+
+                                          {resolved.length > 0 ? (
+                                            <ul style={{ marginTop: 8, paddingLeft: 18 }}>
+                                              {resolved.slice(0, 3).map((t, j) => (
+                                                <li key={j} style={{ marginBottom: 6 }}>
+                                                  {formatTemplate(t, {
+                                                    cluster_title: cl?.cluster_title || "",
+                                                  })}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          ) : (
+                                            <ComingSoon />
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  Why these careers fit you
+                                </div>
+
+                                {deepLoading ? (
+                                  <div className="text-muted" style={{ fontSize: 13 }}>
+                                    Loading deep insights…
+                                  </div>
+                                ) : Array.isArray(deepRes?.career_insights) &&
+                                  deepRes.career_insights.length > 0 ? (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: 10,
+                                      marginTop: 10,
+                                    }}
+                                  >
+                                    {deepRes.career_insights.slice(0, 3).map((ci, idx) => {
+                                      const whyKey = Array.isArray(ci?.why_keys)
+                                        ? ci.why_keys[0]
+                                        : "";
+
+                                      const rawWhy = deepCopy?.[whyKey] || "";
+                                      const whyText = formatTemplate(rawWhy, {
+                                        career_title: ci?.career_title || "",
+                                      });
+
+                                      return (
+                                        <div
+                                          key={ci?.career_id || idx}
+                                          style={{
+                                            paddingBottom: 10,
+                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                          }}
+                                        >
+                                          <div style={{ fontWeight: 700 }}>
+                                            {ci?.career_title || "Career"}
+                                          </div>
+
+                                          <div
+                                            className="text-muted"
+                                            style={{ fontSize: 13, marginTop: 4 }}
+                                          >
+                                            {whyText || "Insights coming soon."}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+
+                                {deepError ? (
+                                  <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
+                                    {deepError}
+                                  </div>
+                                ) : null}
+                              </div>
+
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  Guided next steps
+                                </div>
+
+                                {deepLoading ? (
+                                  <div className="text-muted" style={{ fontSize: 13 }}>
+                                    Loading next steps…
+                                  </div>
+                                ) : Array.isArray(deepRes?.next_steps?.keys) &&
+                                  deepRes.next_steps.keys.length > 0 ? (
+                                  <ul style={{ marginTop: 10, paddingLeft: 18 }}>
+                                    {deepRes.next_steps.keys.map((k, idx) => {
+                                      const raw = deepCopy?.[k] || "";
+                                      const txt = formatTemplate(raw);
+
+                                      return (
+                                        <li key={`${k}-${idx}`} style={{ marginBottom: 8 }}>
+                                          {txt || "Next step coming soon."}
+                                        </li>
+                                      );
+                                    })}
+                                  </ul>
+                                ) : (
+                                  <ComingSoon />
+                                )}
                               </div>
                             </div>
                           </div>
                         );
                       };
+
 
                       return (
                         <div className="results-section" style={{ marginTop: 10 }}>
@@ -648,6 +898,7 @@ export default function StudentResultsPage() {
                             .cp-linkButton { text-decoration: underline; cursor: pointer; }
                             .cp-cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
                             .cp-insights2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+                            .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
                             .cp-softPanel { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px; background: rgba(0,0,0,0.02); }
                             .top-career-card { padding: 16px; border-radius: 14px; }
                             .top-career-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
