@@ -36,6 +36,9 @@ def run_startup_tasks(database_url: str, skip_db_wait: str) -> None:
     env = (os.getenv("ENV", "dev") or "dev").strip().lower()
 
     if env == "dev" and skip_db_wait != "1":
+        print("INFO: ENV=dev → running Base.metadata.create_all()")
         Base.metadata.create_all(bind=engine)
     else:
         print("INFO: Skipping Base.metadata.create_all() (ENV != dev or SKIP_DB_WAIT=1)")
+        if env != "dev":
+            print("INFO: Production mode detected — expecting Alembic migrations to be applied.")
