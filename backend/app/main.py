@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
+from app.core.openapi import apply_openapi_security
 
 from app.database import engine, Base
 from app.wait_for_db import wait_for_postgres
@@ -112,38 +112,7 @@ def create_app() -> FastAPI:
     # ------------------------------------------------------------
     # 3B) OPENAPI CUSTOMIZATION (JWT BEARER SUPPORT IN SWAGGER)
     # ------------------------------------------------------------
-    def custom_openapi():
-        """
-        Adds a Bearer/JWT scheme so Swagger's 'Authorize' button works.
-        This aligns with OAuth2PasswordBearer token usage in dependencies.
-        """
-        if app.openapi_schema:
-            return app.openapi_schema
-
-        schema = get_openapi(
-            title="Career Counseling API",
-            version="0.1.0",
-            description="Career Counseling API with JWT Bearer authentication",
-            routes=app.routes,
-        )
-
-        schema.setdefault("components", {}).setdefault("securitySchemes", {})
-        schema["components"]["securitySchemes"]["OAuth2PasswordBearer"] = {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-        }
-
-        # Apply default security globally unless an operation overrides it
-        for path_item in schema.get("paths", {}).values():
-            for operation in path_item.values():
-                if "security" not in operation:
-                    operation["security"] = [{"OAuth2PasswordBearer": []}]
-
-        app.openapi_schema = schema
-        return schema
-
-    app.openapi = custom_openapi
+    apply_openapi_security(app)
 
     # ------------------------------------------------------------
     # 3C) DB TABLE CREATION (DEV MODE / NO MIGRATIONS YET)
