@@ -3,6 +3,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, text
 from app import models
+from sqlalchemy.exc import ProgrammingError
 
 
 def get_student_keyskill_scores(db: Session, student_id: int) -> dict:
@@ -58,15 +59,31 @@ def compute_career_scores(db: Session, student_id: int) -> dict:
     """
     student_scores = get_student_keyskill_scores(db, student_id)
 
-    rows = db.execute(
-        text("""
-            SELECT
-            career_id,
-            keyskill_id,
-            effective_weight_int AS weight_percentage
-            FROM career_keyskill_weights_effective_int_v
-        """)
-    ).all()
+    try:
+        rows = db.execute(
+            text("""
+                SELECT
+                    career_id,
+                    keyskill_id,
+                    effective_weight_int AS weight_percentage
+                FROM career_keyskill_weights_effective_int_v
+            """)
+        ).all()
+
+    except ProgrammingError:
+        # Clear failed transaction state before continuing
+        db.rollback()
+
+        # Fallback when the view doesn't exist (local/dev)
+        rows = db.execute(
+            text("""
+                SELECT
+                    career_id,
+                    keyskill_id,
+                    COALESCE(weight_percentage, 0) AS weight_percentage
+                FROM career_keyskill_association
+            """)
+        ).all()
 
     career_scores: dict[int, float] = {}
 

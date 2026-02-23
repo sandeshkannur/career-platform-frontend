@@ -1,5 +1,4 @@
-﻿name,description
-Engineering,Design and build structures and machines
-Healthcare,Provide care for patients and support medical research
-Arts & Design,Create visual and performing arts projects
-Business,"Manage operations, finance, and strategy in organizations"
+﻿cluster_id,cluster_name
+1,Engineering & Technology
+2,Healthcare & Life Sciences
+3,Business & Management

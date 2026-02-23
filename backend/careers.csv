@@ -1,6 +1,4 @@
-title,cluster_name,description
-Data Scientist,Engineering,Analyze data to build predictive models
-Mechanical Engineer,Engineering,Design mechanical systems and products
-Nurse,Healthcare,Care for patients in medical settings
-Graphic Designer,Arts & Design,Produce visual communication materials
-Accountant,Business,Manage financial records and reporting
+﻿career_id,career_name,cluster_id
+ENG_001,Software Engineer,1
+HLT_001,Nurse,2
+BUS_001,Business Analyst,3

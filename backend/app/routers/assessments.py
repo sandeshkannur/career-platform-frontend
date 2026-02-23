@@ -42,6 +42,7 @@ from app.services.keyskill_sync_service import sync_skill_scores_to_keyskills
 
 # B9 analytics orchestrator service (NEW - internal)
 from app.services.analytics_orchestrator_service import recompute_student_analytics
+from app.services.career_engine import compute_careers_for_student
 
 # Step 5 fix: background task must create its own session
 from app.database import SessionLocal
@@ -954,31 +955,36 @@ def submit_assessment(
     )
 
     if existing:
-        # PR21: deterministic fallback — "Auto" currently does not generate careers.
-        # Reuse seeded recommender logic to ensure beta-safe non-empty results.
-        seeded_careers: list = []
+        # Option A: unified career engine (single source of truth)
+        careers_safe: list = []
         try:
-            # Use the same compute pipeline as /v1/recommendations/{student_id}
-            from app.routers.recommendations import (
-                _compute_recommendations_payload,
-                _sanitize_recommendations_payload,
-            )
+            from app.routers.recommendations import _sanitize_recommendations_payload
             from app.projections.student_safe import project_student_safe
 
-            # IMPORTANT: recommender expects students.id (student_profile.id), NOT users.id
-            seeded_payload = _compute_recommendations_payload(student_id=student_profile.id, db=db)
-            seeded_payload_safe = project_student_safe(_sanitize_recommendations_payload(seeded_payload))
-            seeded_careers = seeded_payload_safe.get("recommended_careers") or []
-        except Exception as e:
-            print(f"[PR21] Seeded fallback failed in submit_assessment for student_profile.id={getattr(student_profile,'id',None)}: {e}")
-            seeded_careers = []
+            # IMPORTANT: engine expects students.id (student_profile.id), NOT users.id
+            if student_profile:
+                raw_careers = compute_careers_for_student(
+                    student_id=student_profile.id,
+                    db=db,
+                    limit=3,
+                )
+                raw_payload = {
+                    "student_id": student_profile.id,
+                    "recommended_careers": raw_careers,
+                }
+                careers_safe = project_student_safe(
+                    _sanitize_recommendations_payload(raw_payload)
+                ).get("recommended_careers") or []
 
-        if seeded_careers:
-            existing.recommended_stream = "Seeded (PR-B)"
-            existing.recommended_careers = seeded_careers
-        else:
-            existing.recommended_stream = "Auto"
-            existing.recommended_careers = []
+        except Exception as e:
+            print(
+                f"[PR-A] Career engine failed in submit_assessment(update) "
+                f"for student_profile.id={getattr(student_profile,'id',None)}: {e}"
+            )
+            careers_safe = []
+
+        existing.recommended_stream = "Auto"
+        existing.recommended_careers = careers_safe
         existing.skill_tiers = tiers
         existing.generated_at = datetime.utcnow()
         # PR40: refresh bundle pins on regenerate/upsert
@@ -994,10 +1000,40 @@ def submit_assessment(
         )
         result = existing
     else:
+        # Option A: unified career engine (single source of truth)
+        careers_safe: list = []
+        try:
+            from app.routers.recommendations import _sanitize_recommendations_payload
+            from app.projections.student_safe import project_student_safe
+
+            # IMPORTANT: engine expects students.id (student_profile.id), NOT users.id
+            if student_profile:
+                raw_careers = compute_careers_for_student(
+                    student_id=student_profile.id,
+                    db=db,
+                    limit=3,
+                )
+                raw_payload = {
+                    "student_id": student_profile.id,
+                    "recommended_careers": raw_careers,
+                }
+                careers_safe = project_student_safe(
+                    _sanitize_recommendations_payload(raw_payload)
+                ).get("recommended_careers") or []
+
+        except Exception as e:
+            print(
+                f"[PR-A] Career engine failed in submit_assessment(create) "
+                f"for student_profile.id={getattr(student_profile,'id',None)}: {e}"
+            )
+            careers_safe = []
+
+        stream_used = "Auto"
+
         result = models.AssessmentResult(
             assessment_id=assessment_id,
-            recommended_stream="Auto",
-            recommended_careers=[],   # JSON list
+            recommended_stream=stream_used,
+            recommended_careers=careers_safe,   # JSON list
             skill_tiers=tiers,
             # PR40: pin bundle versions at generation time (auditability)
             assessment_version=assessment.assessment_version,
@@ -1487,31 +1523,40 @@ def generate_result(assessment_id: int, student_id: int) -> None:
 
         # Beta policy: tiers come from SCALED (0..100), not HSI
         tiers = assign_tiers_scaled_0_100(scores_for_tiers)
-        # PR21: deterministic fallback for background generation as well
-        seeded_careers: list = []
+        # Option A: unified career engine (single source of truth)
+        careers_safe: list = []
         try:
-            from app.routers.recommendations import (
-                _compute_recommendations_payload,
-                _sanitize_recommendations_payload,
-            )
+            from app.routers.recommendations import _sanitize_recommendations_payload
             from app.projections.student_safe import project_student_safe
 
-            # Background arg "student_id" is users.id; recommender needs students.id
+            # Background arg "student_id" is users.id; engine needs students.id
             if student_profile:
-                seeded_payload = _compute_recommendations_payload(student_id=student_profile.id, db=db)
-                seeded_payload_safe = project_student_safe(_sanitize_recommendations_payload(seeded_payload))
-                seeded_careers = seeded_payload_safe.get("recommended_careers") or []
-        except Exception as e:
-            print(f"[PR21] Seeded fallback failed in generate_result for users.id={student_id}: {e}")
-            seeded_careers = []
+                raw_careers = compute_careers_for_student(
+                    student_id=student_profile.id,
+                    db=db,
+                    limit=3,
+                )
+                raw_payload = {
+                    "student_id": student_profile.id,
+                    "recommended_careers": raw_careers,
+                }
+                careers_safe = project_student_safe(
+                    _sanitize_recommendations_payload(raw_payload)
+                ).get("recommended_careers") or []
 
-        stream_used = "Seeded (PR-B)" if seeded_careers else "Auto"
+        except Exception as e:
+            print(
+                f"[PR-A] Career engine failed in generate_result for users.id={student_id}: {e}"
+            )
+            careers_safe = []
+
+        stream_used = "Auto"
 
         # Save assessment result
         result = models.AssessmentResult(
             assessment_id=assessment_id,
             recommended_stream=stream_used,
-            recommended_careers=seeded_careers,
+            recommended_careers=careers_safe,
             skill_tiers=tiers,
             # PR40: pin bundle versions at generation time (auditability)
             assessment_version=assessment.assessment_version,
@@ -1526,15 +1571,22 @@ def generate_result(assessment_id: int, student_id: int) -> None:
             ),
         )
         
-        db.add(result)
-        db.commit()
+        db.add(new_result)
+        try:
+            db.commit()
+        except IntegrityError:
+            # Another request/background task already wrote the result row for this assessment_id.
+            # Make this idempotent instead of crashing the ASGI background task.
+            db.rollback()
+            return
 
         # Write tiers → numeric → student_keyskill_map.score (existing behavior retained)
-        apply_keyskill_tiers(
-            db=db,
-            student_id=student_id,
-            keyskill_tiers=tiers
-        )
+        if student_profile:
+            apply_keyskill_tiers(
+                db=db,
+                student_id=student_profile.id,
+                keyskill_tiers=tiers
+            )
 
     finally:
         db.close()

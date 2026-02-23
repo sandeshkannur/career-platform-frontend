@@ -1,6 +1,1881 @@
-career_id,keyskill_id,weight_percentage
-1,1,58
-2,2,71
-5,5,48
-3,3,34
-4,4,62
+cluster_name,career_title,keyskill_name,weight_percentage
+"Agriculture, Food & Natural Resources",Agricultural Engineer,Engineering Design,30
+"Agriculture, Food & Natural Resources",Agricultural Engineer,Problem Solving,25
+"Agriculture, Food & Natural Resources",Agricultural Engineer,Technical Skills,20
+"Agriculture, Food & Natural Resources",Agricultural Engineer,Project Management,15
+"Agriculture, Food & Natural Resources",Agricultural Engineer,Environmental Awareness,10
+"Agriculture, Food & Natural Resources",Agronomist,Plant Science,35
+"Agriculture, Food & Natural Resources",Agronomist,Data Analysis,20
+"Agriculture, Food & Natural Resources",Agronomist,Research Skills,20
+"Agriculture, Food & Natural Resources",Agronomist,Observation,15
+"Agriculture, Food & Natural Resources",Agronomist,Communication,10
+"Agriculture, Food & Natural Resources",Agricultural Scientist,Research Skills,30
+"Agriculture, Food & Natural Resources",Agricultural Scientist,Experimentation,25
+"Agriculture, Food & Natural Resources",Agricultural Scientist,Data Analysis,20
+"Agriculture, Food & Natural Resources",Agricultural Scientist,Critical Thinking,15
+"Agriculture, Food & Natural Resources",Agricultural Scientist,Scientific Writing,10
+"Agriculture, Food & Natural Resources",Food Scientist,Chemistry,30
+"Agriculture, Food & Natural Resources",Food Scientist,Laboratory Skills,25
+"Agriculture, Food & Natural Resources",Food Scientist,Quality Control,20
+"Agriculture, Food & Natural Resources",Food Scientist,Research,15
+"Agriculture, Food & Natural Resources",Food Scientist,Attention to Detail,10
+"Agriculture, Food & Natural Resources",Soil and Plant Scientist,Soil Analysis,30
+"Agriculture, Food & Natural Resources",Soil and Plant Scientist,Botany,25
+"Agriculture, Food & Natural Resources",Soil and Plant Scientist,Data Analysis,20
+"Agriculture, Food & Natural Resources",Soil and Plant Scientist,Problem Solving,15
+"Agriculture, Food & Natural Resources",Soil and Plant Scientist,Laboratory Skills,10
+"Agriculture, Food & Natural Resources",Horticulturist,Plant Cultivation,35
+"Agriculture, Food & Natural Resources",Horticulturist,Observation,20
+"Agriculture, Food & Natural Resources",Horticulturist,Creativity,20
+"Agriculture, Food & Natural Resources",Horticulturist,Research,15
+"Agriculture, Food & Natural Resources",Horticulturist,Communication,10
+"Agriculture, Food & Natural Resources",Animal Scientist,Animal Biology,30
+"Agriculture, Food & Natural Resources",Animal Scientist,Research Skills,25
+"Agriculture, Food & Natural Resources",Animal Scientist,Data Analysis,20
+"Agriculture, Food & Natural Resources",Animal Scientist,Laboratory Skills,15
+"Agriculture, Food & Natural Resources",Animal Scientist,Observation,10
+"Agriculture, Food & Natural Resources",Veterinarian,Animal Care,30
+"Agriculture, Food & Natural Resources",Veterinarian,Clinical Skills,25
+"Agriculture, Food & Natural Resources",Veterinarian,Empathy,20
+"Agriculture, Food & Natural Resources",Veterinarian,Problem Solving,15
+"Agriculture, Food & Natural Resources",Veterinarian,Communication,10
+"Agriculture, Food & Natural Resources",Dairy Technologist,Dairy Processing,30
+"Agriculture, Food & Natural Resources",Dairy Technologist,Quality Control,25
+"Agriculture, Food & Natural Resources",Dairy Technologist,Technical Skills,20
+"Agriculture, Food & Natural Resources",Dairy Technologist,Problem Solving,15
+"Agriculture, Food & Natural Resources",Dairy Technologist,Data Analysis,10
+"Agriculture, Food & Natural Resources",Poultry Farm Manager,Farm Management,30
+"Agriculture, Food & Natural Resources",Poultry Farm Manager,Animal Husbandry,25
+"Agriculture, Food & Natural Resources",Poultry Farm Manager,Problem Solving,20
+"Agriculture, Food & Natural Resources",Poultry Farm Manager,Team Management,15
+"Agriculture, Food & Natural Resources",Poultry Farm Manager,Record Keeping,10
+"Agriculture, Food & Natural Resources",Farm Manager,Operations Management,30
+"Agriculture, Food & Natural Resources",Farm Manager,Decision Making,25
+"Agriculture, Food & Natural Resources",Farm Manager,Resource Allocation,20
+"Agriculture, Food & Natural Resources",Farm Manager,Leadership,15
+"Agriculture, Food & Natural Resources",Farm Manager,Financial Skills,10
+"Agriculture, Food & Natural Resources",Agricultural Equipment Operator,Equipment Handling,35
+"Agriculture, Food & Natural Resources",Agricultural Equipment Operator,Technical Skills,25
+"Agriculture, Food & Natural Resources",Agricultural Equipment Operator,Maintenance,20
+"Agriculture, Food & Natural Resources",Agricultural Equipment Operator,Safety Awareness,10
+"Agriculture, Food & Natural Resources",Agricultural Equipment Operator,Problem Solving,10
+"Agriculture, Food & Natural Resources",Agricultural Inspector,Inspection,30
+"Agriculture, Food & Natural Resources",Agricultural Inspector,Compliance,25
+"Agriculture, Food & Natural Resources",Agricultural Inspector,Attention to Detail,20
+"Agriculture, Food & Natural Resources",Agricultural Inspector,Report Writing,15
+"Agriculture, Food & Natural Resources",Agricultural Inspector,Analytical Skills,10
+"Agriculture, Food & Natural Resources",Fishery Scientist,Aquatic Biology,30
+"Agriculture, Food & Natural Resources",Fishery Scientist,Research,25
+"Agriculture, Food & Natural Resources",Fishery Scientist,Data Analysis,20
+"Agriculture, Food & Natural Resources",Fishery Scientist,Observation,15
+"Agriculture, Food & Natural Resources",Fishery Scientist,Fieldwork,10
+"Agriculture, Food & Natural Resources",Forest Officer,Environmental Awareness,30
+"Agriculture, Food & Natural Resources",Forest Officer,Law Enforcement,25
+"Agriculture, Food & Natural Resources",Forest Officer,Leadership,20
+"Agriculture, Food & Natural Resources",Forest Officer,Communication,15
+"Agriculture, Food & Natural Resources",Forest Officer,Patrolling,10
+"Agriculture, Food & Natural Resources",Plantation Manager,Plantation Management,30
+"Agriculture, Food & Natural Resources",Plantation Manager,Resource Planning,25
+"Agriculture, Food & Natural Resources",Plantation Manager,Leadership,20
+"Agriculture, Food & Natural Resources",Plantation Manager,Problem Solving,15
+"Agriculture, Food & Natural Resources",Plantation Manager,Operations Management,10
+"Agriculture, Food & Natural Resources",Greenhouse Technician,Plant Care,35
+"Agriculture, Food & Natural Resources",Greenhouse Technician,Climate Control,20
+"Agriculture, Food & Natural Resources",Greenhouse Technician,Technical Skills,20
+"Agriculture, Food & Natural Resources",Greenhouse Technician,Problem Solving,15
+"Agriculture, Food & Natural Resources",Greenhouse Technician,Attention to Detail,10
+"Agriculture, Food & Natural Resources",Irrigation Specialist,Irrigation System Design,30
+"Agriculture, Food & Natural Resources",Irrigation Specialist,Water Management,25
+"Agriculture, Food & Natural Resources",Irrigation Specialist,Technical Skills,20
+"Agriculture, Food & Natural Resources",Irrigation Specialist,Planning,15
+"Agriculture, Food & Natural Resources",Irrigation Specialist,Troubleshooting,10
+"Agriculture, Food & Natural Resources",Environmental Engineer (Agri),Environmental Engineering,30
+"Agriculture, Food & Natural Resources",Environmental Engineer (Agri),Data Analysis,25
+"Agriculture, Food & Natural Resources",Environmental Engineer (Agri),Problem Solving,20
+"Agriculture, Food & Natural Resources",Environmental Engineer (Agri),Compliance,15
+"Agriculture, Food & Natural Resources",Environmental Engineer (Agri),Project Management,10
+"Agriculture, Food & Natural Resources",Food Technologist,Food Processing,30
+"Agriculture, Food & Natural Resources",Food Technologist,Quality Assurance,25
+"Agriculture, Food & Natural Resources",Food Technologist,Research Skills,20
+"Agriculture, Food & Natural Resources",Food Technologist,Laboratory Techniques,15
+"Agriculture, Food & Natural Resources",Food Technologist,Attention to Detail,10
+"Agriculture, Food & Natural Resources",Food Safety Inspector,Food Safety,30
+"Agriculture, Food & Natural Resources",Food Safety Inspector,Inspection,25
+"Agriculture, Food & Natural Resources",Food Safety Inspector,Regulatory Compliance,20
+"Agriculture, Food & Natural Resources",Food Safety Inspector,Attention to Detail,15
+"Agriculture, Food & Natural Resources",Food Safety Inspector,Reporting,10
+"Agriculture, Food & Natural Resources",Nutritionist (Food Industry),Nutrition Science,30
+"Agriculture, Food & Natural Resources",Nutritionist (Food Industry),Communication,25
+"Agriculture, Food & Natural Resources",Nutritionist (Food Industry),Analytical Skills,20
+"Agriculture, Food & Natural Resources",Nutritionist (Food Industry),Research,15
+"Agriculture, Food & Natural Resources",Nutritionist (Food Industry),Client Counseling,10
+"Agriculture, Food & Natural Resources",Organic Farm Specialist,Organic Farming,30
+"Agriculture, Food & Natural Resources",Organic Farm Specialist,Sustainability,25
+"Agriculture, Food & Natural Resources",Organic Farm Specialist,Resource Planning,20
+"Agriculture, Food & Natural Resources",Organic Farm Specialist,Quality Assurance,15
+"Agriculture, Food & Natural Resources",Organic Farm Specialist,Innovation,10
+"Agriculture, Food & Natural Resources",Forestry Technician,Forest Management,30
+"Agriculture, Food & Natural Resources",Forestry Technician,Data Collection,25
+"Agriculture, Food & Natural Resources",Forestry Technician,Equipment Handling,20
+"Agriculture, Food & Natural Resources",Forestry Technician,Observation,15
+"Agriculture, Food & Natural Resources",Forestry Technician,Safety Awareness,10
+"Agriculture, Food & Natural Resources",Pest Control Specialist,Pest Identification,30
+"Agriculture, Food & Natural Resources",Pest Control Specialist,Chemical Application,25
+"Agriculture, Food & Natural Resources",Pest Control Specialist,Problem Solving,20
+"Agriculture, Food & Natural Resources",Pest Control Specialist,Safety,15
+"Agriculture, Food & Natural Resources",Pest Control Specialist,Record Keeping,10
+"Agriculture, Food & Natural Resources",Seed Technologist,Seed Testing,30
+"Agriculture, Food & Natural Resources",Seed Technologist,Quality Control,25
+"Agriculture, Food & Natural Resources",Seed Technologist,Laboratory Skills,20
+"Agriculture, Food & Natural Resources",Seed Technologist,Research,15
+"Agriculture, Food & Natural Resources",Seed Technologist,Data Analysis,10
+"Agriculture, Food & Natural Resources",Florist,Flower Arrangement,30
+"Agriculture, Food & Natural Resources",Florist,Creativity,25
+"Agriculture, Food & Natural Resources",Florist,Customer Service,20
+"Agriculture, Food & Natural Resources",Florist,Plant Care,15
+"Agriculture, Food & Natural Resources",Florist,Aesthetic Sense,10
+"Agriculture, Food & Natural Resources",Landscape Designer (Agri),Landscape Planning,30
+"Agriculture, Food & Natural Resources",Landscape Designer (Agri),CAD Skills,25
+"Agriculture, Food & Natural Resources",Landscape Designer (Agri),Creativity,20
+"Agriculture, Food & Natural Resources",Landscape Designer (Agri),Plant Knowledge,15
+"Agriculture, Food & Natural Resources",Landscape Designer (Agri),Project Management,10
+"Agriculture, Food & Natural Resources",Sericulture Expert,Sericulture Techniques,30
+"Agriculture, Food & Natural Resources",Sericulture Expert,Research,25
+"Agriculture, Food & Natural Resources",Sericulture Expert,Quality Control,20
+"Agriculture, Food & Natural Resources",Sericulture Expert,Resource Management,15
+"Agriculture, Food & Natural Resources",Sericulture Expert,Training,10
+"Agriculture, Food & Natural Resources",Apiculturist,Bee Management,30
+"Agriculture, Food & Natural Resources",Apiculturist,Honey Extraction,25
+"Agriculture, Food & Natural Resources",Apiculturist,Environmental Awareness,20
+"Agriculture, Food & Natural Resources",Apiculturist,Observation,15
+"Agriculture, Food & Natural Resources",Apiculturist,Problem Solving,10
+"Agriculture, Food & Natural Resources",Agricultural Extension Officer,Communication,30
+"Agriculture, Food & Natural Resources",Agricultural Extension Officer,Community Outreach,25
+"Agriculture, Food & Natural Resources",Agricultural Extension Officer,Training,20
+"Agriculture, Food & Natural Resources",Agricultural Extension Officer,Technical Knowledge,15
+"Agriculture, Food & Natural Resources",Agricultural Extension Officer,Problem Solving,10
+"Agriculture, Food & Natural Resources",Agriculture Policy Analyst,Policy Analysis,30
+"Agriculture, Food & Natural Resources",Agriculture Policy Analyst,Research,25
+"Agriculture, Food & Natural Resources",Agriculture Policy Analyst,Data Interpretation,20
+"Agriculture, Food & Natural Resources",Agriculture Policy Analyst,Communication,15
+"Agriculture, Food & Natural Resources",Agriculture Policy Analyst,Report Writing,10
+Architecture & Construction,Architect,Architectural Design,30
+Architecture & Construction,Architect,CAD Skills,25
+Architecture & Construction,Architect,Creativity,20
+Architecture & Construction,Architect,Project Management,15
+Architecture & Construction,Architect,Communication,10
+Architecture & Construction,Civil Engineer,Structural Analysis,30
+Architecture & Construction,Civil Engineer,Project Management,25
+Architecture & Construction,Civil Engineer,Technical Skills,20
+Architecture & Construction,Civil Engineer,Site Supervision,15
+Architecture & Construction,Civil Engineer,Safety Awareness,10
+Architecture & Construction,Surveyor,Land Surveying,30
+Architecture & Construction,Surveyor,Data Analysis,25
+Architecture & Construction,Surveyor,Technical Skills,20
+Architecture & Construction,Surveyor,Compliance,15
+Architecture & Construction,Surveyor,Communication,10
+Architecture & Construction,Quantity Surveyor,Cost Estimation,30
+Architecture & Construction,Quantity Surveyor,Contract Management,25
+Architecture & Construction,Quantity Surveyor,Data Analysis,20
+Architecture & Construction,Quantity Surveyor,Negotiation Skills,15
+Architecture & Construction,Quantity Surveyor,Reporting,10
+Architecture & Construction,Building Inspector,Inspection,30
+Architecture & Construction,Building Inspector,Regulatory Compliance,25
+Architecture & Construction,Building Inspector,Attention to Detail,20
+Architecture & Construction,Building Inspector,Reporting,15
+Architecture & Construction,Building Inspector,Communication,10
+Architecture & Construction,Construction Manager,Project Management,30
+Architecture & Construction,Construction Manager,Leadership,25
+Architecture & Construction,Construction Manager,Resource Allocation,20
+Architecture & Construction,Construction Manager,Scheduling,15
+Architecture & Construction,Construction Manager,Safety Awareness,10
+Architecture & Construction,Site Engineer,Site Supervision,30
+Architecture & Construction,Site Engineer,Technical Skills,25
+Architecture & Construction,Site Engineer,Problem Solving,20
+Architecture & Construction,Site Engineer,Planning,15
+Architecture & Construction,Site Engineer,Communication,10
+Architecture & Construction,Urban Planner,Urban Planning,30
+Architecture & Construction,Urban Planner,Data Analysis,25
+Architecture & Construction,Urban Planner,Project Management,20
+Architecture & Construction,Urban Planner,Regulatory Knowledge,15
+Architecture & Construction,Urban Planner,Communication,10
+Architecture & Construction,Structural Drafter,CAD Skills,30
+Architecture & Construction,Structural Drafter,Structural Drawing,25
+Architecture & Construction,Structural Drafter,Technical Detailing,20
+Architecture & Construction,Structural Drafter,Measurement Skills,15
+Architecture & Construction,Structural Drafter,Documentation,10
+Architecture & Construction,Interior Designer,Interior Design,30
+Architecture & Construction,Interior Designer,Creativity,25
+Architecture & Construction,Interior Designer,Client Consultation,20
+Architecture & Construction,Interior Designer,Project Coordination,15
+Architecture & Construction,Interior Designer,Attention to Detail,10
+Architecture & Construction,Landscape Architect,Landscape Design,30
+Architecture & Construction,Landscape Architect,Plant Knowledge,25
+Architecture & Construction,Landscape Architect,Creativity,20
+Architecture & Construction,Landscape Architect,CAD Skills,15
+Architecture & Construction,Landscape Architect,Project Management,10
+Architecture & Construction,Mason,Masonry Skills,30
+Architecture & Construction,Mason,Measurement,25
+Architecture & Construction,Mason,Blueprint Reading,20
+Architecture & Construction,Mason,Safety Awareness,15
+Architecture & Construction,Mason,Teamwork,10
+Architecture & Construction,Carpenter,Carpentry Skills,30
+Architecture & Construction,Carpenter,Precision Cutting,25
+Architecture & Construction,Carpenter,Blueprint Reading,20
+Architecture & Construction,Carpenter,Problem Solving,15
+Architecture & Construction,Carpenter,Safety Awareness,10
+Architecture & Construction,Electrician,Electrical Wiring,30
+Architecture & Construction,Electrician,Troubleshooting,25
+Architecture & Construction,Electrician,Safety Practices,20
+Architecture & Construction,Electrician,Technical Skills,15
+Architecture & Construction,Electrician,Planning,10
+Architecture & Construction,Plumber,Plumbing Skills,30
+Architecture & Construction,Plumber,Pipe Fitting,25
+Architecture & Construction,Plumber,Problem Solving,20
+Architecture & Construction,Plumber,Safety Practices,15
+Architecture & Construction,Plumber,Blueprint Reading,10
+Architecture & Construction,HVAC Technician,HVAC Installation,30
+Architecture & Construction,HVAC Technician,Troubleshooting,25
+Architecture & Construction,HVAC Technician,Technical Skills,20
+Architecture & Construction,HVAC Technician,Safety Practices,15
+Architecture & Construction,HVAC Technician,Customer Service,10
+Architecture & Construction,Welder,Welding Techniques,30
+Architecture & Construction,Welder,Blueprint Reading,25
+Architecture & Construction,Welder,Safety Awareness,20
+Architecture & Construction,Welder,Equipment Handling,15
+Architecture & Construction,Welder,Maintenance Skills,10
+Architecture & Construction,Painter,Painting Techniques,30
+Architecture & Construction,Painter,Surface Preparation,25
+Architecture & Construction,Painter,Color Mixing,20
+Architecture & Construction,Painter,Attention to Detail,15
+Architecture & Construction,Painter,Safety Practices,10
+Architecture & Construction,Roofer,Roofing Techniques,30
+Architecture & Construction,Roofer,Safety Practices,25
+Architecture & Construction,Roofer,Material Handling,20
+Architecture & Construction,Roofer,Measurement,15
+Architecture & Construction,Roofer,Teamwork,10
+Architecture & Construction,Construction Equipment Operator,Equipment Operation,30
+Architecture & Construction,Construction Equipment Operator,Safety Practices,25
+Architecture & Construction,Construction Equipment Operator,Maintenance Skills,20
+Architecture & Construction,Construction Equipment Operator,Material Handling,15
+Architecture & Construction,Construction Equipment Operator,Communication,10
+Architecture & Construction,Building Maintenance Technician,Maintenance Skills,30
+Architecture & Construction,Building Maintenance Technician,Troubleshooting,25
+Architecture & Construction,Building Maintenance Technician,Safety Practices,20
+Architecture & Construction,Building Maintenance Technician,Technical Skills,15
+Architecture & Construction,Building Maintenance Technician,Record Keeping,10
+"Arts, A/V Technology & Communications",Graphic Designer,Creativity,35
+"Arts, A/V Technology & Communications",Graphic Designer,Digital Illustration,25
+"Arts, A/V Technology & Communications",Graphic Designer,Design Software,20
+"Arts, A/V Technology & Communications",Graphic Designer,Attention to Detail,10
+"Arts, A/V Technology & Communications",Graphic Designer,Communication,10
+"Arts, A/V Technology & Communications",Animator,Animation Skills,30
+"Arts, A/V Technology & Communications",Animator,Creativity,25
+"Arts, A/V Technology & Communications",Animator,Storytelling,20
+"Arts, A/V Technology & Communications",Animator,Design Software,15
+"Arts, A/V Technology & Communications",Animator,Collaboration,10
+"Arts, A/V Technology & Communications",Audio Engineer,Sound Engineering,30
+"Arts, A/V Technology & Communications",Audio Engineer,Technical Skills,25
+"Arts, A/V Technology & Communications",Audio Engineer,Equipment Handling,20
+"Arts, A/V Technology & Communications",Audio Engineer,Attention to Detail,15
+"Arts, A/V Technology & Communications",Audio Engineer,Communication,10
+"Arts, A/V Technology & Communications",Video Editor,Video Editing,30
+"Arts, A/V Technology & Communications",Video Editor,Storytelling,25
+"Arts, A/V Technology & Communications",Video Editor,Design Software,20
+"Arts, A/V Technology & Communications",Video Editor,Attention to Detail,15
+"Arts, A/V Technology & Communications",Video Editor,Communication,10
+"Arts, A/V Technology & Communications",Photographer,Photography,35
+"Arts, A/V Technology & Communications",Photographer,Creativity,25
+"Arts, A/V Technology & Communications",Photographer,Editing Skills,20
+"Arts, A/V Technology & Communications",Photographer,Equipment Handling,10
+"Arts, A/V Technology & Communications",Photographer,Communication,10
+"Arts, A/V Technology & Communications",Broadcast Technician,Technical Skills,30
+"Arts, A/V Technology & Communications",Broadcast Technician,Equipment Handling,25
+"Arts, A/V Technology & Communications",Broadcast Technician,Troubleshooting,20
+"Arts, A/V Technology & Communications",Broadcast Technician,Communication,15
+"Arts, A/V Technology & Communications",Broadcast Technician,Scheduling,10
+"Arts, A/V Technology & Communications",Art Director,Creative Direction,35
+"Arts, A/V Technology & Communications",Art Director,Leadership,25
+"Arts, A/V Technology & Communications",Art Director,Communication,15
+"Arts, A/V Technology & Communications",Art Director,Project Management,15
+"Arts, A/V Technology & Communications",Art Director,Design Software,10
+"Arts, A/V Technology & Communications",Set Designer,Set Design,35
+"Arts, A/V Technology & Communications",Set Designer,Creativity,20
+"Arts, A/V Technology & Communications",Set Designer,Project Management,20
+"Arts, A/V Technology & Communications",Set Designer,Collaboration,15
+"Arts, A/V Technology & Communications",Set Designer,Technical Drawing,10
+"Arts, A/V Technology & Communications",Actor,Acting,40
+"Arts, A/V Technology & Communications",Actor,Creativity,25
+"Arts, A/V Technology & Communications",Actor,Memorization,15
+"Arts, A/V Technology & Communications",Actor,Communication,10
+"Arts, A/V Technology & Communications",Actor,Collaboration,10
+"Arts, A/V Technology & Communications",Musician,Musical Talent,35
+"Arts, A/V Technology & Communications",Musician,Creativity,25
+"Arts, A/V Technology & Communications",Musician,Performance,20
+"Arts, A/V Technology & Communications",Musician,Collaboration,10
+"Arts, A/V Technology & Communications",Musician,Practice Discipline,10
+"Arts, A/V Technology & Communications",Dancer,Dance Technique,35
+"Arts, A/V Technology & Communications",Dancer,Performance,25
+"Arts, A/V Technology & Communications",Dancer,Creativity,20
+"Arts, A/V Technology & Communications",Dancer,Physical Stamina,10
+"Arts, A/V Technology & Communications",Dancer,Teamwork,10
+"Arts, A/V Technology & Communications",Journalist,Reporting,30
+"Arts, A/V Technology & Communications",Journalist,Writing,25
+"Arts, A/V Technology & Communications",Journalist,Research,20
+"Arts, A/V Technology & Communications",Journalist,Interviewing,15
+"Arts, A/V Technology & Communications",Journalist,Communication,10
+"Arts, A/V Technology & Communications",Editor (Print/Digital),Editing,35
+"Arts, A/V Technology & Communications",Editor (Print/Digital),Writing,25
+"Arts, A/V Technology & Communications",Editor (Print/Digital),Research,20
+"Arts, A/V Technology & Communications",Editor (Print/Digital),Attention to Detail,10
+"Arts, A/V Technology & Communications",Editor (Print/Digital),Communication,10
+"Arts, A/V Technology & Communications",Producer (Media),Project Management,30
+"Arts, A/V Technology & Communications",Producer (Media),Creative Direction,25
+"Arts, A/V Technology & Communications",Producer (Media),Budgeting,20
+"Arts, A/V Technology & Communications",Producer (Media),Scheduling,15
+"Arts, A/V Technology & Communications",Producer (Media),Communication,10
+"Arts, A/V Technology & Communications",Public Relations Specialist,Communication,35
+"Arts, A/V Technology & Communications",Public Relations Specialist,Media Relations,25
+"Arts, A/V Technology & Communications",Public Relations Specialist,Writing,20
+"Arts, A/V Technology & Communications",Public Relations Specialist,Event Planning,10
+"Arts, A/V Technology & Communications",Public Relations Specialist,Research,10
+"Arts, A/V Technology & Communications",Technical Writer,Technical Writing,35
+"Arts, A/V Technology & Communications",Technical Writer,Research,25
+"Arts, A/V Technology & Communications",Technical Writer,Editing,20
+"Arts, A/V Technology & Communications",Technical Writer,Documentation,10
+"Arts, A/V Technology & Communications",Technical Writer,Communication,10
+"Arts, A/V Technology & Communications",Web Designer,Web Design,35
+"Arts, A/V Technology & Communications",Web Designer,Design Software,25
+"Arts, A/V Technology & Communications",Web Designer,User Experience,20
+"Arts, A/V Technology & Communications",Web Designer,Coding Basics,10
+"Arts, A/V Technology & Communications",Web Designer,Communication,10
+"Arts, A/V Technology & Communications",Content Creator,Content Creation,35
+"Arts, A/V Technology & Communications",Content Creator,Storytelling,25
+"Arts, A/V Technology & Communications",Content Creator,Digital Marketing,20
+"Arts, A/V Technology & Communications",Content Creator,Editing,10
+"Arts, A/V Technology & Communications",Content Creator,Communication,10
+"Arts, A/V Technology & Communications",Event Manager,Event Planning,30
+"Arts, A/V Technology & Communications",Event Manager,Project Management,25
+"Arts, A/V Technology & Communications",Event Manager,Budgeting,20
+"Arts, A/V Technology & Communications",Event Manager,Communication,15
+"Arts, A/V Technology & Communications",Event Manager,Marketing,10
+"Arts, A/V Technology & Communications",Social Media Manager,Social Media Strategy,35
+"Arts, A/V Technology & Communications",Social Media Manager,Content Creation,25
+"Arts, A/V Technology & Communications",Social Media Manager,Communication,20
+"Arts, A/V Technology & Communications",Social Media Manager,Analytics,10
+"Arts, A/V Technology & Communications",Social Media Manager,Branding,10
+"Arts, A/V Technology & Communications",Film Director,Direction,35
+"Arts, A/V Technology & Communications",Film Director,Creative Vision,25
+"Arts, A/V Technology & Communications",Film Director,Leadership,20
+"Arts, A/V Technology & Communications",Film Director,Communication,10
+"Arts, A/V Technology & Communications",Film Director,Project Management,10
+"Arts, A/V Technology & Communications",Cinematographer,Cinematography,35
+"Arts, A/V Technology & Communications",Cinematographer,Technical Skills,25
+"Arts, A/V Technology & Communications",Cinematographer,Creativity,20
+"Arts, A/V Technology & Communications",Cinematographer,Equipment Handling,10
+"Arts, A/V Technology & Communications",Cinematographer,Collaboration,10
+"Arts, A/V Technology & Communications",Sound Designer,Sound Design,35
+"Arts, A/V Technology & Communications",Sound Designer,Creativity,25
+"Arts, A/V Technology & Communications",Sound Designer,Technical Skills,20
+"Arts, A/V Technology & Communications",Sound Designer,Equipment Handling,10
+"Arts, A/V Technology & Communications",Sound Designer,Collaboration,10
+"Arts, A/V Technology & Communications",Lighting Technician,Lighting Techniques,30
+"Arts, A/V Technology & Communications",Lighting Technician,Equipment Handling,25
+"Arts, A/V Technology & Communications",Lighting Technician,Technical Skills,20
+"Arts, A/V Technology & Communications",Lighting Technician,Safety Awareness,15
+"Arts, A/V Technology & Communications",Lighting Technician,Teamwork,10
+"Arts, A/V Technology & Communications",Choreographer,Choreography,35
+"Arts, A/V Technology & Communications",Choreographer,Creativity,25
+"Arts, A/V Technology & Communications",Choreographer,Leadership,20
+"Arts, A/V Technology & Communications",Choreographer,Performance,10
+"Arts, A/V Technology & Communications",Choreographer,Communication,10
+"Arts, A/V Technology & Communications",Makeup Artist,Makeup Application,35
+"Arts, A/V Technology & Communications",Makeup Artist,Creativity,25
+"Arts, A/V Technology & Communications",Makeup Artist,Color Theory,20
+"Arts, A/V Technology & Communications",Makeup Artist,Attention to Detail,10
+"Arts, A/V Technology & Communications",Makeup Artist,Communication,10
+"Arts, A/V Technology & Communications",Costume Designer,Costume Design,35
+"Arts, A/V Technology & Communications",Costume Designer,Creativity,25
+"Arts, A/V Technology & Communications",Costume Designer,Fabric Knowledge,20
+"Arts, A/V Technology & Communications",Costume Designer,Trend Analysis,10
+"Arts, A/V Technology & Communications",Costume Designer,Collaboration,10
+"Arts, A/V Technology & Communications",Voice-over Artist,Voice Modulation,40
+"Arts, A/V Technology & Communications",Voice-over Artist,Acting,25
+"Arts, A/V Technology & Communications",Voice-over Artist,Language Skills,15
+"Arts, A/V Technology & Communications",Voice-over Artist,Creativity,10
+"Arts, A/V Technology & Communications",Voice-over Artist,Communication,10
+"Arts, A/V Technology & Communications",Art Teacher,Art Instruction,35
+"Arts, A/V Technology & Communications",Art Teacher,Creativity,25
+"Arts, A/V Technology & Communications",Art Teacher,Communication,20
+"Arts, A/V Technology & Communications",Art Teacher,Classroom Management,10
+"Arts, A/V Technology & Communications",Art Teacher,Assessment Skills,10
+"Arts, A/V Technology & Communications",Gallery Curator,Curation,35
+"Arts, A/V Technology & Communications",Gallery Curator,Art Knowledge,25
+"Arts, A/V Technology & Communications",Gallery Curator,Organization,20
+"Arts, A/V Technology & Communications",Gallery Curator,Communication,10
+"Arts, A/V Technology & Communications",Gallery Curator,Research,10
+"Business, Management & Administration",Business Analyst,Data Analysis,35
+"Business, Management & Administration",Business Analyst,Problem Solving,25
+"Business, Management & Administration",Business Analyst,Communication,20
+"Business, Management & Administration",Business Analyst,Documentation,10
+"Business, Management & Administration",Business Analyst,Project Management,10
+"Business, Management & Administration",Management Consultant,Problem Solving,30
+"Business, Management & Administration",Management Consultant,Analytical Thinking,25
+"Business, Management & Administration",Management Consultant,Communication,20
+"Business, Management & Administration",Management Consultant,Research Skills,15
+"Business, Management & Administration",Management Consultant,Project Management,10
+"Business, Management & Administration",Operations Manager,Operations Management,35
+"Business, Management & Administration",Operations Manager,Decision Making,25
+"Business, Management & Administration",Operations Manager,Leadership,20
+"Business, Management & Administration",Operations Manager,Resource Allocation,10
+"Business, Management & Administration",Operations Manager,Communication,10
+"Business, Management & Administration",Administrative Assistant,Organization,30
+"Business, Management & Administration",Administrative Assistant,Communication,25
+"Business, Management & Administration",Administrative Assistant,Scheduling,20
+"Business, Management & Administration",Administrative Assistant,Record Keeping,15
+"Business, Management & Administration",Administrative Assistant,Attention to Detail,10
+"Business, Management & Administration",Office Manager,Office Management,35
+"Business, Management & Administration",Office Manager,Leadership,25
+"Business, Management & Administration",Office Manager,Organization,20
+"Business, Management & Administration",Office Manager,Communication,10
+"Business, Management & Administration",Office Manager,Scheduling,10
+"Business, Management & Administration",Human Resources Specialist,HR Knowledge,35
+"Business, Management & Administration",Human Resources Specialist,Communication,25
+"Business, Management & Administration",Human Resources Specialist,Conflict Resolution,20
+"Business, Management & Administration",Human Resources Specialist,Record Keeping,10
+"Business, Management & Administration",Human Resources Specialist,Interviewing Skills,10
+"Business, Management & Administration",Recruiter,Recruitment,35
+"Business, Management & Administration",Recruiter,Communication,25
+"Business, Management & Administration",Recruiter,Interviewing Skills,20
+"Business, Management & Administration",Recruiter,Relationship Building,10
+"Business, Management & Administration",Recruiter,Organization,10
+"Business, Management & Administration",Training & Development Manager,Training Design,35
+"Business, Management & Administration",Training & Development Manager,Communication,25
+"Business, Management & Administration",Training & Development Manager,Facilitation,20
+"Business, Management & Administration",Training & Development Manager,Evaluation,10
+"Business, Management & Administration",Training & Development Manager,Leadership,10
+"Business, Management & Administration",Compensation & Benefits Manager,Compensation Planning,35
+"Business, Management & Administration",Compensation & Benefits Manager,Data Analysis,25
+"Business, Management & Administration",Compensation & Benefits Manager,Communication,20
+"Business, Management & Administration",Compensation & Benefits Manager,Compliance,10
+"Business, Management & Administration",Compensation & Benefits Manager,Negotiation Skills,10
+"Business, Management & Administration",Compliance Officer,Regulatory Knowledge,35
+"Business, Management & Administration",Compliance Officer,Attention to Detail,25
+"Business, Management & Administration",Compliance Officer,Analytical Skills,20
+"Business, Management & Administration",Compliance Officer,Communication,10
+"Business, Management & Administration",Compliance Officer,Reporting,10
+"Business, Management & Administration",Executive Assistant,Scheduling,30
+"Business, Management & Administration",Executive Assistant,Organization,25
+"Business, Management & Administration",Executive Assistant,Communication,20
+"Business, Management & Administration",Executive Assistant,Confidentiality,15
+"Business, Management & Administration",Executive Assistant,Problem Solving,10
+"Business, Management & Administration",Customer Service Manager,Customer Service,35
+"Business, Management & Administration",Customer Service Manager,Communication,25
+"Business, Management & Administration",Customer Service Manager,Problem Solving,20
+"Business, Management & Administration",Customer Service Manager,Conflict Resolution,10
+"Business, Management & Administration",Customer Service Manager,Leadership,10
+"Business, Management & Administration",Receptionist,Communication,35
+"Business, Management & Administration",Receptionist,Customer Service,25
+"Business, Management & Administration",Receptionist,Organization,20
+"Business, Management & Administration",Receptionist,Scheduling,10
+"Business, Management & Administration",Receptionist,Record Keeping,10
+"Business, Management & Administration",Office Clerk,Record Keeping,30
+"Business, Management & Administration",Office Clerk,Data Entry,25
+"Business, Management & Administration",Office Clerk,Organization,20
+"Business, Management & Administration",Office Clerk,Communication,15
+"Business, Management & Administration",Office Clerk,Scheduling,10
+"Business, Management & Administration",Project Manager,Project Management,35
+"Business, Management & Administration",Project Manager,Leadership,25
+"Business, Management & Administration",Project Manager,Communication,20
+"Business, Management & Administration",Project Manager,Scheduling,10
+"Business, Management & Administration",Project Manager,Risk Management,10
+"Business, Management & Administration",Event Planner,Event Planning,35
+"Business, Management & Administration",Event Planner,Organization,25
+"Business, Management & Administration",Event Planner,Communication,20
+"Business, Management & Administration",Event Planner,Vendor Management,10
+"Business, Management & Administration",Event Planner,Budgeting,10
+"Business, Management & Administration",Procurement Specialist,Procurement,35
+"Business, Management & Administration",Procurement Specialist,Negotiation Skills,25
+"Business, Management & Administration",Procurement Specialist,Data Analysis,20
+"Business, Management & Administration",Procurement Specialist,Vendor Management,10
+"Business, Management & Administration",Procurement Specialist,Communication,10
+"Business, Management & Administration",Logistician,Logistics Management,35
+"Business, Management & Administration",Logistician,Data Analysis,25
+"Business, Management & Administration",Logistician,Organization,20
+"Business, Management & Administration",Logistician,Problem Solving,10
+"Business, Management & Administration",Logistician,Communication,10
+"Business, Management & Administration",Supply Chain Analyst,Supply Chain Analysis,35
+"Business, Management & Administration",Supply Chain Analyst,Data Analysis,25
+"Business, Management & Administration",Supply Chain Analyst,Problem Solving,20
+"Business, Management & Administration",Supply Chain Analyst,Organization,10
+"Business, Management & Administration",Supply Chain Analyst,Communication,10
+"Business, Management & Administration",Entrepreneur,Business Planning,30
+"Business, Management & Administration",Entrepreneur,Risk Taking,25
+"Business, Management & Administration",Entrepreneur,Decision Making,20
+"Business, Management & Administration",Entrepreneur,Leadership,15
+"Business, Management & Administration",Entrepreneur,Networking,10
+"Business, Management & Administration",Franchise Owner,Business Management,30
+"Business, Management & Administration",Franchise Owner,Marketing,25
+"Business, Management & Administration",Franchise Owner,Financial Planning,20
+"Business, Management & Administration",Franchise Owner,Leadership,15
+"Business, Management & Administration",Franchise Owner,Customer Service,10
+"Business, Management & Administration",MIS Executive (Admin),MIS Reporting,35
+"Business, Management & Administration",MIS Executive (Admin),Data Analysis,25
+"Business, Management & Administration",MIS Executive (Admin),Communication,20
+"Business, Management & Administration",MIS Executive (Admin),Attention to Detail,10
+"Business, Management & Administration",MIS Executive (Admin),Organization,10
+"Business, Management & Administration",Office Executive,Office Administration,30
+"Business, Management & Administration",Office Executive,Organization,25
+"Business, Management & Administration",Office Executive,Communication,20
+"Business, Management & Administration",Office Executive,Scheduling,15
+"Business, Management & Administration",Office Executive,Record Keeping,10
+"Business, Management & Administration",Admin Officer,Administration,35
+"Business, Management & Administration",Admin Officer,Organization,25
+"Business, Management & Administration",Admin Officer,Record Keeping,20
+"Business, Management & Administration",Admin Officer,Communication,10
+"Business, Management & Administration",Admin Officer,Scheduling,10
+"Business, Management & Administration",Accounts Payable Clerk,Accounts Payable,35
+"Business, Management & Administration",Accounts Payable Clerk,Data Entry,25
+"Business, Management & Administration",Accounts Payable Clerk,Organization,20
+"Business, Management & Administration",Accounts Payable Clerk,Communication,10
+"Business, Management & Administration",Accounts Payable Clerk,Attention to Detail,10
+"Business, Management & Administration",Business Process Executive,Process Management,35
+"Business, Management & Administration",Business Process Executive,Data Analysis,25
+"Business, Management & Administration",Business Process Executive,Communication,20
+"Business, Management & Administration",Business Process Executive,Problem Solving,10
+"Business, Management & Administration",Business Process Executive,Organization,10
+"Business, Management & Administration",Front Office Executive,Communication,35
+"Business, Management & Administration",Front Office Executive,Customer Service,25
+"Business, Management & Administration",Front Office Executive,Organization,20
+"Business, Management & Administration",Front Office Executive,Scheduling,10
+"Business, Management & Administration",Front Office Executive,Record Keeping,10
+"Business, Management & Administration",Data Entry Operator,Data Entry,35
+"Business, Management & Administration",Data Entry Operator,Attention to Detail,25
+"Business, Management & Administration",Data Entry Operator,Typing Skills,20
+"Business, Management & Administration",Data Entry Operator,Organization,10
+"Business, Management & Administration",Data Entry Operator,Record Keeping,10
+"Business, Management & Administration",Documentation Executive,Documentation,35
+"Business, Management & Administration",Documentation Executive,Data Management,25
+"Business, Management & Administration",Documentation Executive,Communication,20
+"Business, Management & Administration",Documentation Executive,Organization,10
+"Business, Management & Administration",Documentation Executive,Attention to Detail,10
+Education & Training,Primary School Teacher,Teaching,35
+Education & Training,Primary School Teacher,Lesson Planning,25
+Education & Training,Primary School Teacher,Child Development,20
+Education & Training,Primary School Teacher,Classroom Management,10
+Education & Training,Primary School Teacher,Communication,10
+Education & Training,Secondary School Teacher,Subject Knowledge,35
+Education & Training,Secondary School Teacher,Teaching,25
+Education & Training,Secondary School Teacher,Lesson Planning,20
+Education & Training,Secondary School Teacher,Assessment,10
+Education & Training,Secondary School Teacher,Classroom Management,10
+Education & Training,Special Education Teacher,Special Education,35
+Education & Training,Special Education Teacher,Individualized Instruction,25
+Education & Training,Special Education Teacher,Empathy,20
+Education & Training,Special Education Teacher,Communication,10
+Education & Training,Special Education Teacher,Classroom Management,10
+Education & Training,Preschool Teacher,Early Childhood Development,35
+Education & Training,Preschool Teacher,Teaching,25
+Education & Training,Preschool Teacher,Creativity,20
+Education & Training,Preschool Teacher,Patience,10
+Education & Training,Preschool Teacher,Communication,10
+Education & Training,Educational Counselor,Counseling,35
+Education & Training,Educational Counselor,Communication,25
+Education & Training,Educational Counselor,Assessment,20
+Education & Training,Educational Counselor,Empathy,10
+Education & Training,Educational Counselor,Guidance,10
+Education & Training,Principal,Leadership,35
+Education & Training,Principal,Administration,25
+Education & Training,Principal,Communication,20
+Education & Training,Principal,Conflict Resolution,10
+Education & Training,Principal,Decision Making,10
+Education & Training,Vice Principal,Administration,35
+Education & Training,Vice Principal,Leadership,25
+Education & Training,Vice Principal,Communication,20
+Education & Training,Vice Principal,Scheduling,10
+Education & Training,Vice Principal,Conflict Resolution,10
+Education & Training,School Administrator,Administration,35
+Education & Training,School Administrator,Organization,25
+Education & Training,School Administrator,Communication,20
+Education & Training,School Administrator,Scheduling,10
+Education & Training,School Administrator,Record Keeping,10
+Education & Training,Librarian,Library Management,35
+Education & Training,Librarian,Information Retrieval,25
+Education & Training,Librarian,Organization,20
+Education & Training,Librarian,Communication,10
+Education & Training,Librarian,Cataloguing,10
+Education & Training,School Counselor,Counseling,35
+Education & Training,School Counselor,Assessment,25
+Education & Training,School Counselor,Communication,20
+Education & Training,School Counselor,Empathy,10
+Education & Training,School Counselor,Guidance,10
+Education & Training,Physical Education Teacher,Physical Training,35
+Education & Training,Physical Education Teacher,Teaching,25
+Education & Training,Physical Education Teacher,Motivation,20
+Education & Training,Physical Education Teacher,Communication,10
+Education & Training,Physical Education Teacher,Organization,10
+Education & Training,Art Teacher,Art Instruction,35
+Education & Training,Art Teacher,Creativity,25
+Education & Training,Art Teacher,Communication,20
+Education & Training,Art Teacher,Classroom Management,10
+Education & Training,Art Teacher,Assessment,10
+Education & Training,Music Teacher,Music Instruction,35
+Education & Training,Music Teacher,Performance,25
+Education & Training,Music Teacher,Creativity,20
+Education & Training,Music Teacher,Communication,10
+Education & Training,Music Teacher,Assessment,10
+Education & Training,Language Teacher,Language Instruction,35
+Education & Training,Language Teacher,Communication,25
+Education & Training,Language Teacher,Assessment,20
+Education & Training,Language Teacher,Classroom Management,10
+Education & Training,Language Teacher,Curriculum Planning,10
+Education & Training,Computer Teacher,Computer Instruction,35
+Education & Training,Computer Teacher,Subject Knowledge,25
+Education & Training,Computer Teacher,Communication,20
+Education & Training,Computer Teacher,Assessment,10
+Education & Training,Computer Teacher,Curriculum Planning,10
+Education & Training,Laboratory Instructor,Lab Instruction,35
+Education & Training,Laboratory Instructor,Experimentation,25
+Education & Training,Laboratory Instructor,Safety Practices,20
+Education & Training,Laboratory Instructor,Record Keeping,10
+Education & Training,Laboratory Instructor,Communication,10
+Education & Training,Educational Coordinator,Coordination,35
+Education & Training,Educational Coordinator,Organization,25
+Education & Training,Educational Coordinator,Communication,20
+Education & Training,Educational Coordinator,Curriculum Planning,10
+Education & Training,Educational Coordinator,Scheduling,10
+Education & Training,Academic Advisor,Advising,35
+Education & Training,Academic Advisor,Communication,25
+Education & Training,Academic Advisor,Assessment,20
+Education & Training,Academic Advisor,Scheduling,10
+Education & Training,Academic Advisor,Record Keeping,10
+Education & Training,Instructional Designer,Instructional Design,35
+Education & Training,Instructional Designer,Curriculum Planning,25
+Education & Training,Instructional Designer,Research,20
+Education & Training,Instructional Designer,Communication,10
+Education & Training,Instructional Designer,Assessment,10
+Education & Training,Tutor,Subject Knowledge,35
+Education & Training,Tutor,Individual Instruction,25
+Education & Training,Tutor,Communication,20
+Education & Training,Tutor,Assessment,10
+Education & Training,Tutor,Motivation,10
+Finance,Accountant,Accounting,35
+Finance,Accountant,Financial Reporting,25
+Finance,Accountant,Taxation,20
+Finance,Accountant,Compliance,10
+Finance,Accountant,Attention to Detail,10
+Finance,Auditor,Auditing,35
+Finance,Auditor,Compliance,25
+Finance,Auditor,Risk Assessment,20
+Finance,Auditor,Analytical Skills,10
+Finance,Auditor,Reporting,10
+Finance,Financial Analyst,Financial Analysis,35
+Finance,Financial Analyst,Data Interpretation,25
+Finance,Financial Analyst,Reporting,20
+Finance,Financial Analyst,Market Research,10
+Finance,Financial Analyst,Communication,10
+Finance,Investment Banker,Investment Analysis,35
+Finance,Investment Banker,Financial Modeling,25
+Finance,Investment Banker,Communication,20
+Finance,Investment Banker,Negotiation Skills,10
+Finance,Investment Banker,Risk Assessment,10
+Finance,Credit Analyst,Credit Analysis,35
+Finance,Credit Analyst,Risk Assessment,25
+Finance,Credit Analyst,Financial Reporting,20
+Finance,Credit Analyst,Communication,10
+Finance,Credit Analyst,Decision Making,10
+Finance,Loan Officer,Loan Processing,35
+Finance,Loan Officer,Credit Evaluation,25
+Finance,Loan Officer,Communication,20
+Finance,Loan Officer,Risk Assessment,10
+Finance,Loan Officer,Compliance,10
+Finance,Tax Consultant,Tax Planning,35
+Finance,Tax Consultant,Compliance,25
+Finance,Tax Consultant,Accounting,20
+Finance,Tax Consultant,Communication,10
+Finance,Tax Consultant,Research,10
+Finance,Treasury Manager,Treasury Management,35
+Finance,Treasury Manager,Cash Flow Analysis,25
+Finance,Treasury Manager,Risk Management,20
+Finance,Treasury Manager,Compliance,10
+Finance,Treasury Manager,Reporting,10
+Finance,Financial Planner,Financial Planning,35
+Finance,Financial Planner,Client Counseling,25
+Finance,Financial Planner,Investment Advisory,20
+Finance,Financial Planner,Communication,10
+Finance,Financial Planner,Risk Assessment,10
+Finance,Risk Manager,Risk Management,35
+Finance,Risk Manager,Data Analysis,25
+Finance,Risk Manager,Compliance,20
+Finance,Risk Manager,Communication,10
+Finance,Risk Manager,Reporting,10
+Finance,Insurance Underwriter,Underwriting,35
+Finance,Insurance Underwriter,Risk Assessment,25
+Finance,Insurance Underwriter,Compliance,20
+Finance,Insurance Underwriter,Data Analysis,10
+Finance,Insurance Underwriter,Communication,10
+Finance,Insurance Agent,Insurance Sales,35
+Finance,Insurance Agent,Communication,25
+Finance,Insurance Agent,Client Counseling,20
+Finance,Insurance Agent,Risk Assessment,10
+Finance,Insurance Agent,Product Knowledge,10
+Finance,Stock Broker,Stock Trading,35
+Finance,Stock Broker,Investment Advisory,25
+Finance,Stock Broker,Communication,20
+Finance,Stock Broker,Data Analysis,10
+Finance,Stock Broker,Negotiation Skills,10
+Finance,Mutual Fund Analyst,Mutual Fund Analysis,35
+Finance,Mutual Fund Analyst,Financial Research,25
+Finance,Mutual Fund Analyst,Reporting,20
+Finance,Mutual Fund Analyst,Data Analysis,10
+Finance,Mutual Fund Analyst,Communication,10
+Finance,Actuary,Actuarial Analysis,35
+Finance,Actuary,Risk Assessment,25
+Finance,Actuary,Data Modeling,20
+Finance,Actuary,Statistical Skills,10
+Finance,Actuary,Reporting,10
+Finance,Cost Accountant,Cost Accounting,35
+Finance,Cost Accountant,Data Analysis,25
+Finance,Cost Accountant,Reporting,20
+Finance,Cost Accountant,Budgeting,10
+Finance,Cost Accountant,Compliance,10
+Finance,Budget Analyst,Budget Planning,35
+Finance,Budget Analyst,Data Analysis,25
+Finance,Budget Analyst,Reporting,20
+Finance,Budget Analyst,Financial Forecasting,10
+Finance,Budget Analyst,Communication,10
+Finance,Payroll Manager,Payroll Processing,35
+Finance,Payroll Manager,Compliance,25
+Finance,Payroll Manager,Data Entry,20
+Finance,Payroll Manager,Communication,10
+Finance,Payroll Manager,Record Keeping,10
+Finance,Finance Manager,Financial Management,35
+Finance,Finance Manager,Leadership,25
+Finance,Finance Manager,Data Analysis,20
+Finance,Finance Manager,Communication,10
+Finance,Finance Manager,Reporting,10
+Government & Public Administration,Administrative Officer,Administration,35
+Government & Public Administration,Administrative Officer,Organization,25
+Government & Public Administration,Administrative Officer,Record Keeping,20
+Government & Public Administration,Administrative Officer,Communication,10
+Government & Public Administration,Administrative Officer,Compliance,10
+Government & Public Administration,Public Policy Analyst,Policy Analysis,35
+Government & Public Administration,Public Policy Analyst,Research,25
+Government & Public Administration,Public Policy Analyst,Data Interpretation,20
+Government & Public Administration,Public Policy Analyst,Communication,10
+Government & Public Administration,Public Policy Analyst,Reporting,10
+Government & Public Administration,Urban Development Officer,Urban Planning,35
+Government & Public Administration,Urban Development Officer,Project Management,25
+Government & Public Administration,Urban Development Officer,Regulatory Knowledge,20
+Government & Public Administration,Urban Development Officer,Communication,10
+Government & Public Administration,Urban Development Officer,Data Analysis,10
+Government & Public Administration,Tax Officer,Tax Administration,35
+Government & Public Administration,Tax Officer,Compliance,25
+Government & Public Administration,Tax Officer,Data Analysis,20
+Government & Public Administration,Tax Officer,Communication,10
+Government & Public Administration,Tax Officer,Reporting,10
+Government & Public Administration,Revenue Inspector,Inspection,35
+Government & Public Administration,Revenue Inspector,Compliance,25
+Government & Public Administration,Revenue Inspector,Reporting,20
+Government & Public Administration,Revenue Inspector,Communication,10
+Government & Public Administration,Revenue Inspector,Data Analysis,10
+Government & Public Administration,Law Enforcement Officer,Law Enforcement,35
+Government & Public Administration,Law Enforcement Officer,Investigation,25
+Government & Public Administration,Law Enforcement Officer,Communication,20
+Government & Public Administration,Law Enforcement Officer,Compliance,10
+Government & Public Administration,Law Enforcement Officer,Report Writing,10
+Government & Public Administration,Intelligence Officer,Intelligence Gathering,35
+Government & Public Administration,Intelligence Officer,Data Analysis,25
+Government & Public Administration,Intelligence Officer,Communication,20
+Government & Public Administration,Intelligence Officer,Critical Thinking,10
+Government & Public Administration,Intelligence Officer,Report Writing,10
+Government & Public Administration,Foreign Service Officer,Diplomacy,35
+Government & Public Administration,Foreign Service Officer,Communication,25
+Government & Public Administration,Foreign Service Officer,Policy Analysis,20
+Government & Public Administration,Foreign Service Officer,Cultural Knowledge,10
+Government & Public Administration,Foreign Service Officer,Negotiation Skills,10
+Government & Public Administration,Election Officer,Election Management,35
+Government & Public Administration,Election Officer,Communication,25
+Government & Public Administration,Election Officer,Compliance,20
+Government & Public Administration,Election Officer,Data Entry,10
+Government & Public Administration,Election Officer,Organization,10
+Government & Public Administration,Social Welfare Officer,Social Work,35
+Government & Public Administration,Social Welfare Officer,Communication,25
+Government & Public Administration,Social Welfare Officer,Community Outreach,20
+Government & Public Administration,Social Welfare Officer,Empathy,10
+Government & Public Administration,Social Welfare Officer,Counseling,10
+Government & Public Administration,Panchayat Secretary,Administration,35
+Government & Public Administration,Panchayat Secretary,Record Keeping,25
+Government & Public Administration,Panchayat Secretary,Communication,20
+Government & Public Administration,Panchayat Secretary,Compliance,10
+Government & Public Administration,Panchayat Secretary,Community Engagement,10
+Government & Public Administration,District Collector,District Administration,35
+Government & Public Administration,District Collector,Leadership,25
+Government & Public Administration,District Collector,Decision Making,20
+Government & Public Administration,District Collector,Communication,10
+Government & Public Administration,District Collector,Crisis Management,10
+Government & Public Administration,Municipal Commissioner,Urban Administration,35
+Government & Public Administration,Municipal Commissioner,Project Management,25
+Government & Public Administration,Municipal Commissioner,Leadership,20
+Government & Public Administration,Municipal Commissioner,Communication,10
+Government & Public Administration,Municipal Commissioner,Compliance,10
+Government & Public Administration,Registrar,Registration,35
+Government & Public Administration,Registrar,Record Keeping,25
+Government & Public Administration,Registrar,Compliance,20
+Government & Public Administration,Registrar,Communication,10
+Government & Public Administration,Registrar,Documentation,10
+Government & Public Administration,Legislative Assistant,Legislative Research,35
+Government & Public Administration,Legislative Assistant,Communication,25
+Government & Public Administration,Legislative Assistant,Drafting,20
+Government & Public Administration,Legislative Assistant,Compliance,10
+Government & Public Administration,Legislative Assistant,Data Analysis,10
+Government & Public Administration,Protocol Officer,Protocol Management,35
+Government & Public Administration,Protocol Officer,Communication,25
+Government & Public Administration,Protocol Officer,Organization,20
+Government & Public Administration,Protocol Officer,Event Planning,10
+Government & Public Administration,Protocol Officer,Coordination,10
+Health Science,General Physician,Medical Knowledge,35
+Health Science,General Physician,Diagnosis,25
+Health Science,General Physician,Patient Care,20
+Health Science,General Physician,Communication,10
+Health Science,General Physician,Record Keeping,10
+Health Science,Surgeon,Surgical Skills,35
+Health Science,Surgeon,Medical Knowledge,25
+Health Science,Surgeon,Patient Care,20
+Health Science,Surgeon,Precision,10
+Health Science,Surgeon,Decision Making,10
+Health Science,Dentist,Dental Procedures,35
+Health Science,Dentist,Patient Care,25
+Health Science,Dentist,Medical Knowledge,20
+Health Science,Dentist,Communication,10
+Health Science,Dentist,Attention to Detail,10
+Health Science,Pharmacist,Pharmacology,35
+Health Science,Pharmacist,Dispensing,25
+Health Science,Pharmacist,Communication,20
+Health Science,Pharmacist,Patient Counseling,10
+Health Science,Pharmacist,Attention to Detail,10
+Health Science,Nurse,Nursing Care,35
+Health Science,Nurse,Patient Assessment,25
+Health Science,Nurse,Communication,20
+Health Science,Nurse,Record Keeping,10
+Health Science,Nurse,Empathy,10
+Health Science,Physiotherapist,Physiotherapy,35
+Health Science,Physiotherapist,Patient Assessment,25
+Health Science,Physiotherapist,Communication,20
+Health Science,Physiotherapist,Rehabilitation,10
+Health Science,Physiotherapist,Empathy,10
+Health Science,Occupational Therapist,Therapy Planning,35
+Health Science,Occupational Therapist,Patient Assessment,25
+Health Science,Occupational Therapist,Rehabilitation,20
+Health Science,Occupational Therapist,Communication,10
+Health Science,Occupational Therapist,Empathy,10
+Health Science,Radiologist,Radiology,35
+Health Science,Radiologist,Diagnosis,25
+Health Science,Radiologist,Technical Skills,20
+Health Science,Radiologist,Communication,10
+Health Science,Radiologist,Record Keeping,10
+Health Science,Pathologist,Pathology,35
+Health Science,Pathologist,Diagnosis,25
+Health Science,Pathologist,Laboratory Skills,20
+Health Science,Pathologist,Attention to Detail,10
+Health Science,Pathologist,Reporting,10
+Health Science,Medical Lab Technician,Lab Testing,35
+Health Science,Medical Lab Technician,Technical Skills,25
+Health Science,Medical Lab Technician,Attention to Detail,20
+Health Science,Medical Lab Technician,Reporting,10
+Health Science,Medical Lab Technician,Safety Practices,10
+Health Science,Optometrist,Vision Assessment,35
+Health Science,Optometrist,Patient Care,25
+Health Science,Optometrist,Communication,20
+Health Science,Optometrist,Diagnosis,10
+Health Science,Optometrist,Attention to Detail,10
+Health Science,Audiologist,Hearing Assessment,35
+Health Science,Audiologist,Patient Care,25
+Health Science,Audiologist,Communication,20
+Health Science,Audiologist,Counseling,10
+Health Science,Audiologist,Technical Skills,10
+Health Science,Nutritionist,Nutrition Counseling,35
+Health Science,Nutritionist,Diet Planning,25
+Health Science,Nutritionist,Communication,20
+Health Science,Nutritionist,Research,10
+Health Science,Nutritionist,Client Education,10
+Health Science,Speech Therapist,Speech Therapy,35
+Health Science,Speech Therapist,Patient Assessment,25
+Health Science,Speech Therapist,Communication,20
+Health Science,Speech Therapist,Counseling,10
+Health Science,Speech Therapist,Empathy,10
+Health Science,Psychiatrist,Psychiatry,35
+Health Science,Psychiatrist,Diagnosis,25
+Health Science,Psychiatrist,Patient Care,20
+Health Science,Psychiatrist,Counseling,10
+Health Science,Psychiatrist,Communication,10
+Health Science,Psychologist,Psychology,35
+Health Science,Psychologist,Assessment,25
+Health Science,Psychologist,Counseling,20
+Health Science,Psychologist,Research,10
+Health Science,Psychologist,Communication,10
+Health Science,Medical Social Worker,Social Work,35
+Health Science,Medical Social Worker,Counseling,25
+Health Science,Medical Social Worker,Communication,20
+Health Science,Medical Social Worker,Empathy,10
+Health Science,Medical Social Worker,Case Management,10
+Health Science,Hospital Administrator,Hospital Management,35
+Health Science,Hospital Administrator,Leadership,25
+Health Science,Hospital Administrator,Communication,20
+Health Science,Hospital Administrator,Compliance,10
+Health Science,Hospital Administrator,Decision Making,10
+Health Science,Medical Coder,Medical Coding,35
+Health Science,Medical Coder,Data Entry,25
+Health Science,Medical Coder,Attention to Detail,20
+Health Science,Medical Coder,Compliance,10
+Health Science,Medical Coder,Communication,10
+Health Science,Emergency Medical Technician,Emergency Response,35
+Health Science,Emergency Medical Technician,Patient Care,25
+Health Science,Emergency Medical Technician,Communication,20
+Health Science,Emergency Medical Technician,Decision Making,10
+Health Science,Emergency Medical Technician,Technical Skills,10
+Health Science,Dental Hygienist,Dental Hygiene,35
+Health Science,Dental Hygienist,Patient Care,25
+Health Science,Dental Hygienist,Communication,20
+Health Science,Dental Hygienist,Infection Control,10
+Health Science,Dental Hygienist,Attention to Detail,10
+Health Science,Paramedic,Emergency Care,35
+Health Science,Paramedic,Patient Assessment,25
+Health Science,Paramedic,Technical Skills,20
+Health Science,Paramedic,Communication,10
+Health Science,Paramedic,Decision Making,10
+Health Science,Veterinary Doctor,Veterinary Medicine,35
+Health Science,Veterinary Doctor,Animal Care,25
+Health Science,Veterinary Doctor,Diagnosis,20
+Health Science,Veterinary Doctor,Communication,10
+Health Science,Veterinary Doctor,Empathy,10
+Health Science,Veterinary Assistant,Animal Care,35
+Health Science,Veterinary Assistant,Assistance Skills,25
+Health Science,Veterinary Assistant,Communication,20
+Health Science,Veterinary Assistant,Record Keeping,10
+Health Science,Veterinary Assistant,Attention to Detail,10
+Health Science,Medical Records Technician,Medical Records,35
+Health Science,Medical Records Technician,Data Entry,25
+Health Science,Medical Records Technician,Attention to Detail,20
+Health Science,Medical Records Technician,Compliance,10
+Health Science,Medical Records Technician,Organization,10
+Health Science,Health Educator,Health Education,35
+Health Science,Health Educator,Communication,25
+Health Science,Health Educator,Counseling,20
+Health Science,Health Educator,Research,10
+Health Science,Health Educator,Client Engagement,10
+Health Science,Occupational Health & Safety Officer,Safety Management,35
+Health Science,Occupational Health & Safety Officer,Compliance,25
+Health Science,Occupational Health & Safety Officer,Training,20
+Health Science,Occupational Health & Safety Officer,Risk Assessment,10
+Health Science,Occupational Health & Safety Officer,Communication,10
+Health Science,Blood Bank Technician,Blood Testing,35
+Health Science,Blood Bank Technician,Lab Skills,25
+Health Science,Blood Bank Technician,Attention to Detail,20
+Health Science,Blood Bank Technician,Compliance,10
+Health Science,Blood Bank Technician,Record Keeping,10
+Health Science,Anaesthesiologist,Anaesthesia,35
+Health Science,Anaesthesiologist,Patient Monitoring,25
+Health Science,Anaesthesiologist,Medical Knowledge,20
+Health Science,Anaesthesiologist,Communication,10
+Health Science,Anaesthesiologist,Decision Making,10
+Health Science,Ophthalmic Assistant,Ophthalmic Assistance,35
+Health Science,Ophthalmic Assistant,Patient Care,25
+Health Science,Ophthalmic Assistant,Technical Skills,20
+Health Science,Ophthalmic Assistant,Communication,10
+Health Science,Ophthalmic Assistant,Record Keeping,10
+Hospitality & Tourism,Hotel Manager,Hotel Management,35
+Hospitality & Tourism,Hotel Manager,Leadership,25
+Hospitality & Tourism,Hotel Manager,Customer Service,20
+Hospitality & Tourism,Hotel Manager,Communication,10
+Hospitality & Tourism,Hotel Manager,Problem Solving,10
+Hospitality & Tourism,Front Office Manager,Front Office Operations,35
+Hospitality & Tourism,Front Office Manager,Customer Service,25
+Hospitality & Tourism,Front Office Manager,Communication,20
+Hospitality & Tourism,Front Office Manager,Organization,10
+Hospitality & Tourism,Front Office Manager,Team Management,10
+Hospitality & Tourism,Housekeeping Supervisor,Housekeeping Management,35
+Hospitality & Tourism,Housekeeping Supervisor,Supervision,25
+Hospitality & Tourism,Housekeeping Supervisor,Attention to Detail,20
+Hospitality & Tourism,Housekeeping Supervisor,Communication,10
+Hospitality & Tourism,Housekeeping Supervisor,Training,10
+Hospitality & Tourism,Chef,Culinary Skills,35
+Hospitality & Tourism,Chef,Menu Planning,25
+Hospitality & Tourism,Chef,Kitchen Management,20
+Hospitality & Tourism,Chef,Creativity,10
+Hospitality & Tourism,Chef,Hygiene Practices,10
+Hospitality & Tourism,Sous Chef,Culinary Skills,35
+Hospitality & Tourism,Sous Chef,Team Management,25
+Hospitality & Tourism,Sous Chef,Menu Planning,20
+Hospitality & Tourism,Sous Chef,Communication,10
+Hospitality & Tourism,Sous Chef,Hygiene Practices,10
+Hospitality & Tourism,Pastry Chef,Pastry Skills,35
+Hospitality & Tourism,Pastry Chef,Creativity,25
+Hospitality & Tourism,Pastry Chef,Menu Planning,20
+Hospitality & Tourism,Pastry Chef,Attention to Detail,10
+Hospitality & Tourism,Pastry Chef,Hygiene Practices,10
+Hospitality & Tourism,Steward,Table Service,35
+Hospitality & Tourism,Steward,Communication,25
+Hospitality & Tourism,Steward,Hygiene Practices,20
+Hospitality & Tourism,Steward,Customer Service,10
+Hospitality & Tourism,Steward,Organization,10
+Hospitality & Tourism,Restaurant Manager,Restaurant Management,35
+Hospitality & Tourism,Restaurant Manager,Customer Service,25
+Hospitality & Tourism,Restaurant Manager,Team Management,20
+Hospitality & Tourism,Restaurant Manager,Communication,10
+Hospitality & Tourism,Restaurant Manager,Problem Solving,10
+Hospitality & Tourism,Food & Beverage Manager,F&B Management,35
+Hospitality & Tourism,Food & Beverage Manager,Leadership,25
+Hospitality & Tourism,Food & Beverage Manager,Customer Service,20
+Hospitality & Tourism,Food & Beverage Manager,Communication,10
+Hospitality & Tourism,Food & Beverage Manager,Menu Planning,10
+Hospitality & Tourism,Banquet Manager,Banquet Management,35
+Hospitality & Tourism,Banquet Manager,Event Planning,25
+Hospitality & Tourism,Banquet Manager,Customer Service,20
+Hospitality & Tourism,Banquet Manager,Communication,10
+Hospitality & Tourism,Banquet Manager,Organization,10
+Hospitality & Tourism,Catering Manager,Catering Operations,35
+Hospitality & Tourism,Catering Manager,Menu Planning,25
+Hospitality & Tourism,Catering Manager,Customer Service,20
+Hospitality & Tourism,Catering Manager,Communication,10
+Hospitality & Tourism,Catering Manager,Team Management,10
+Hospitality & Tourism,Bartender,Bartending Skills,35
+Hospitality & Tourism,Bartender,Customer Service,25
+Hospitality & Tourism,Bartender,Communication,20
+Hospitality & Tourism,Bartender,Attention to Detail,10
+Hospitality & Tourism,Bartender,Product Knowledge,10
+Hospitality & Tourism,Sommelier,Wine Knowledge,35
+Hospitality & Tourism,Sommelier,Customer Service,25
+Hospitality & Tourism,Sommelier,Communication,20
+Hospitality & Tourism,Sommelier,Pairing Skills,10
+Hospitality & Tourism,Sommelier,Product Knowledge,10
+Hospitality & Tourism,Travel Agent,Travel Planning,35
+Hospitality & Tourism,Travel Agent,Communication,25
+Hospitality & Tourism,Travel Agent,Customer Service,20
+Hospitality & Tourism,Travel Agent,Sales Skills,10
+Hospitality & Tourism,Travel Agent,Destination Knowledge,10
+Hospitality & Tourism,Tour Guide,Tour Guiding,35
+Hospitality & Tourism,Tour Guide,Communication,25
+Hospitality & Tourism,Tour Guide,Customer Service,20
+Hospitality & Tourism,Tour Guide,Storytelling,10
+Hospitality & Tourism,Tour Guide,Local Knowledge,10
+Hospitality & Tourism,Event Manager,Event Management,35
+Hospitality & Tourism,Event Manager,Planning,25
+Hospitality & Tourism,Event Manager,Customer Service,20
+Hospitality & Tourism,Event Manager,Communication,10
+Hospitality & Tourism,Event Manager,Organization,10
+Hospitality & Tourism,Ticketing Executive,Ticketing Operations,35
+Hospitality & Tourism,Ticketing Executive,Communication,25
+Hospitality & Tourism,Ticketing Executive,Customer Service,20
+Hospitality & Tourism,Ticketing Executive,Attention to Detail,10
+Hospitality & Tourism,Ticketing Executive,Organization,10
+Hospitality & Tourism,Reservation Executive,Reservation Handling,35
+Hospitality & Tourism,Reservation Executive,Communication,25
+Hospitality & Tourism,Reservation Executive,Customer Service,20
+Hospitality & Tourism,Reservation Executive,Attention to Detail,10
+Hospitality & Tourism,Reservation Executive,Organization,10
+Hospitality & Tourism,Front Desk Executive,Front Desk Operations,35
+Hospitality & Tourism,Front Desk Executive,Communication,25
+Hospitality & Tourism,Front Desk Executive,Customer Service,20
+Hospitality & Tourism,Front Desk Executive,Organization,10
+Hospitality & Tourism,Front Desk Executive,Attention to Detail,10
+Hospitality & Tourism,Concierge,Concierge Services,35
+Hospitality & Tourism,Concierge,Communication,25
+Hospitality & Tourism,Concierge,Customer Service,20
+Hospitality & Tourism,Concierge,Problem Solving,10
+Hospitality & Tourism,Concierge,Local Knowledge,10
+Hospitality & Tourism,Guest Relations Executive,Guest Relations,35
+Hospitality & Tourism,Guest Relations Executive,Communication,25
+Hospitality & Tourism,Guest Relations Executive,Customer Service,20
+Hospitality & Tourism,Guest Relations Executive,Problem Solving,10
+Hospitality & Tourism,Guest Relations Executive,Organization,10
+Human Services,Social Worker,Social Work,35
+Human Services,Social Worker,Counseling,25
+Human Services,Social Worker,Communication,20
+Human Services,Social Worker,Empathy,10
+Human Services,Social Worker,Community Outreach,10
+Human Services,Counselor,Counseling,35
+Human Services,Counselor,Communication,25
+Human Services,Counselor,Assessment,20
+Human Services,Counselor,Empathy,10
+Human Services,Counselor,Guidance,10
+Human Services,Family Therapist,Therapy,35
+Human Services,Family Therapist,Communication,25
+Human Services,Family Therapist,Counseling,20
+Human Services,Family Therapist,Assessment,10
+Human Services,Family Therapist,Empathy,10
+Human Services,Rehabilitation Counselor,Rehabilitation,35
+Human Services,Rehabilitation Counselor,Counseling,25
+Human Services,Rehabilitation Counselor,Communication,20
+Human Services,Rehabilitation Counselor,Assessment,10
+Human Services,Rehabilitation Counselor,Empathy,10
+Human Services,Substance Abuse Counselor,Counseling,35
+Human Services,Substance Abuse Counselor,Communication,25
+Human Services,Substance Abuse Counselor,Assessment,20
+Human Services,Substance Abuse Counselor,Empathy,10
+Human Services,Substance Abuse Counselor,Crisis Management,10
+Human Services,Career Counselor,Career Counseling,35
+Human Services,Career Counselor,Communication,25
+Human Services,Career Counselor,Assessment,20
+Human Services,Career Counselor,Empathy,10
+Human Services,Career Counselor,Guidance,10
+Human Services,Child Care Worker,Child Care,35
+Human Services,Child Care Worker,Communication,25
+Human Services,Child Care Worker,Empathy,20
+Human Services,Child Care Worker,Supervision,10
+Human Services,Child Care Worker,Patience,10
+Human Services,Elderly Caregiver,Elderly Care,35
+Human Services,Elderly Caregiver,Communication,25
+Human Services,Elderly Caregiver,Empathy,20
+Human Services,Elderly Caregiver,Patience,10
+Human Services,Elderly Caregiver,Observation,10
+Human Services,Disability Support Worker,Disability Support,35
+Human Services,Disability Support Worker,Communication,25
+Human Services,Disability Support Worker,Empathy,20
+Human Services,Disability Support Worker,Patience,10
+Human Services,Disability Support Worker,Adaptability,10
+Human Services,Community Service Worker,Community Service,35
+Human Services,Community Service Worker,Outreach,25
+Human Services,Community Service Worker,Communication,20
+Human Services,Community Service Worker,Empathy,10
+Human Services,Community Service Worker,Organization,10
+Human Services,Youth Worker,Youth Development,35
+Human Services,Youth Worker,Communication,25
+Human Services,Youth Worker,Empathy,20
+Human Services,Youth Worker,Guidance,10
+Human Services,Youth Worker,Patience,10
+Human Services,Probation Officer,Probation Management,35
+Human Services,Probation Officer,Communication,25
+Human Services,Probation Officer,Assessment,20
+Human Services,Probation Officer,Supervision,10
+Human Services,Probation Officer,Report Writing,10
+Human Services,Welfare Officer,Welfare Services,35
+Human Services,Welfare Officer,Communication,25
+Human Services,Welfare Officer,Counseling,20
+Human Services,Welfare Officer,Outreach,10
+Human Services,Welfare Officer,Empathy,10
+Human Services,Marriage Counselor,Counseling,35
+Human Services,Marriage Counselor,Communication,25
+Human Services,Marriage Counselor,Assessment,20
+Human Services,Marriage Counselor,Empathy,10
+Human Services,Marriage Counselor,Mediation,10
+Human Services,NGO Worker,Program Implementation,35
+Human Services,NGO Worker,Communication,25
+Human Services,NGO Worker,Outreach,20
+Human Services,NGO Worker,Advocacy,10
+Human Services,NGO Worker,Organization,10
+Human Services,Adoption Counselor,Counseling,35
+Human Services,Adoption Counselor,Communication,25
+Human Services,Adoption Counselor,Assessment,20
+Human Services,Adoption Counselor,Empathy,10
+Human Services,Adoption Counselor,Documentation,10
+Human Services,Mental Health Worker,Mental Health Support,35
+Human Services,Mental Health Worker,Counseling,25
+Human Services,Mental Health Worker,Communication,20
+Human Services,Mental Health Worker,Empathy,10
+Human Services,Mental Health Worker,Observation,10
+Human Services,Personal Care Aide,Personal Care,35
+Human Services,Personal Care Aide,Communication,25
+Human Services,Personal Care Aide,Empathy,20
+Human Services,Personal Care Aide,Patience,10
+Human Services,Personal Care Aide,Observation,10
+Human Services,Community Health Worker,Health Education,35
+Human Services,Community Health Worker,Outreach,25
+Human Services,Community Health Worker,Communication,20
+Human Services,Community Health Worker,Empathy,10
+Human Services,Community Health Worker,Organization,10
+Human Services,Life Coach,Coaching,35
+Human Services,Life Coach,Communication,25
+Human Services,Life Coach,Assessment,20
+Human Services,Life Coach,Motivation,10
+Human Services,Life Coach,Goal Setting,10
+Information Technology,Software Developer,Programming,35
+Information Technology,Software Developer,Problem Solving,25
+Information Technology,Software Developer,Software Design,20
+Information Technology,Software Developer,Communication,10
+Information Technology,Software Developer,Debugging,10
+Information Technology,Web Developer,Web Development,35
+Information Technology,Web Developer,Programming,25
+Information Technology,Web Developer,UI/UX Design,20
+Information Technology,Web Developer,Communication,10
+Information Technology,Web Developer,Testing,10
+Information Technology,Mobile App Developer,Mobile Development,35
+Information Technology,Mobile App Developer,Programming,25
+Information Technology,Mobile App Developer,UI/UX Design,20
+Information Technology,Mobile App Developer,Communication,10
+Information Technology,Mobile App Developer,Testing,10
+Information Technology,System Analyst,Systems Analysis,35
+Information Technology,System Analyst,Problem Solving,25
+Information Technology,System Analyst,Documentation,20
+Information Technology,System Analyst,Communication,10
+Information Technology,System Analyst,Requirement Gathering,10
+Information Technology,Database Administrator,Database Management,35
+Information Technology,Database Administrator,SQL Skills,25
+Information Technology,Database Administrator,Data Security,20
+Information Technology,Database Administrator,Troubleshooting,10
+Information Technology,Database Administrator,Backup Management,10
+Information Technology,Network Administrator,Network Management,35
+Information Technology,Network Administrator,Troubleshooting,25
+Information Technology,Network Administrator,Security,20
+Information Technology,Network Administrator,Communication,10
+Information Technology,Network Administrator,Documentation,10
+Information Technology,IT Support Specialist,Technical Support,35
+Information Technology,IT Support Specialist,Troubleshooting,25
+Information Technology,IT Support Specialist,Communication,20
+Information Technology,IT Support Specialist,Customer Service,10
+Information Technology,IT Support Specialist,Documentation,10
+Information Technology,Cyber Security Analyst,Security Analysis,35
+Information Technology,Cyber Security Analyst,Threat Detection,25
+Information Technology,Cyber Security Analyst,Incident Response,20
+Information Technology,Cyber Security Analyst,Communication,10
+Information Technology,Cyber Security Analyst,Reporting,10
+Information Technology,Data Scientist,Data Analysis,35
+Information Technology,Data Scientist,Machine Learning,25
+Information Technology,Data Scientist,Programming,20
+Information Technology,Data Scientist,Communication,10
+Information Technology,Data Scientist,Data Visualization,10
+Information Technology,Business Intelligence Analyst,BI Tools,35
+Information Technology,Business Intelligence Analyst,Data Analysis,25
+Information Technology,Business Intelligence Analyst,Reporting,20
+Information Technology,Business Intelligence Analyst,Communication,10
+Information Technology,Business Intelligence Analyst,Visualization,10
+Information Technology,Cloud Solutions Architect,Cloud Architecture,35
+Information Technology,Cloud Solutions Architect,Solution Design,25
+Information Technology,Cloud Solutions Architect,Security,20
+Information Technology,Cloud Solutions Architect,Communication,10
+Information Technology,Cloud Solutions Architect,Project Management,10
+Information Technology,DevOps Engineer,DevOps Practices,35
+Information Technology,DevOps Engineer,Automation,25
+Information Technology,DevOps Engineer,Scripting,20
+Information Technology,DevOps Engineer,Communication,10
+Information Technology,DevOps Engineer,CI/CD,10
+Information Technology,QA Engineer,Quality Assurance,35
+Information Technology,QA Engineer,Testing,25
+Information Technology,QA Engineer,Problem Solving,20
+Information Technology,QA Engineer,Communication,10
+Information Technology,QA Engineer,Documentation,10
+Information Technology,Game Developer,Game Programming,35
+Information Technology,Game Developer,Game Design,25
+Information Technology,Game Developer,Creativity,20
+Information Technology,Game Developer,Communication,10
+Information Technology,Game Developer,Testing,10
+Information Technology,IT Project Manager,Project Management,35
+Information Technology,IT Project Manager,Leadership,25
+Information Technology,IT Project Manager,Communication,20
+Information Technology,IT Project Manager,Scheduling,10
+Information Technology,IT Project Manager,Risk Management,10
+Information Technology,Systems Engineer,Systems Engineering,35
+Information Technology,Systems Engineer,Troubleshooting,25
+Information Technology,Systems Engineer,System Design,20
+Information Technology,Systems Engineer,Communication,10
+Information Technology,Systems Engineer,Documentation,10
+Information Technology,Information Security Manager,Security Management,35
+Information Technology,Information Security Manager,Risk Assessment,25
+Information Technology,Information Security Manager,Compliance,20
+Information Technology,Information Security Manager,Communication,10
+Information Technology,Information Security Manager,Incident Response,10
+Information Technology,Web Designer,Web Design,35
+Information Technology,Web Designer,Creativity,25
+Information Technology,Web Designer,UI/UX Design,20
+Information Technology,Web Designer,Communication,10
+Information Technology,Web Designer,HTML/CSS,10
+Information Technology,CRM Specialist,CRM Management,35
+Information Technology,CRM Specialist,Data Analysis,25
+Information Technology,CRM Specialist,Communication,20
+Information Technology,CRM Specialist,Customer Service,10
+Information Technology,CRM Specialist,Reporting,10
+Information Technology,ERP Consultant,ERP Implementation,35
+Information Technology,ERP Consultant,Solution Design,25
+Information Technology,ERP Consultant,Data Analysis,20
+Information Technology,ERP Consultant,Communication,10
+Information Technology,ERP Consultant,Training,10
+Information Technology,Hardware Engineer,Hardware Design,35
+Information Technology,Hardware Engineer,Troubleshooting,25
+Information Technology,Hardware Engineer,Testing,20
+Information Technology,Hardware Engineer,Communication,10
+Information Technology,Hardware Engineer,Documentation,10
+Information Technology,UI/UX Designer,UI/UX Design,35
+Information Technology,UI/UX Designer,Creativity,25
+Information Technology,UI/UX Designer,User Research,20
+Information Technology,UI/UX Designer,Communication,10
+Information Technology,UI/UX Designer,Prototyping,10
+Information Technology,Technical Writer,Technical Writing,35
+Information Technology,Technical Writer,Documentation,25
+Information Technology,Technical Writer,Communication,20
+Information Technology,Technical Writer,Research,10
+Information Technology,Technical Writer,Attention to Detail,10
+"Law, Public Safety, Corrections & Security",Lawyer,Legal Knowledge,35
+"Law, Public Safety, Corrections & Security",Lawyer,Case Analysis,25
+"Law, Public Safety, Corrections & Security",Lawyer,Communication,20
+"Law, Public Safety, Corrections & Security",Lawyer,Research,10
+"Law, Public Safety, Corrections & Security",Lawyer,Drafting,10
+"Law, Public Safety, Corrections & Security",Judge,Legal Judgment,35
+"Law, Public Safety, Corrections & Security",Judge,Decision Making,25
+"Law, Public Safety, Corrections & Security",Judge,Legal Knowledge,20
+"Law, Public Safety, Corrections & Security",Judge,Communication,10
+"Law, Public Safety, Corrections & Security",Judge,Case Analysis,10
+"Law, Public Safety, Corrections & Security",Legal Advisor,Legal Advisory,35
+"Law, Public Safety, Corrections & Security",Legal Advisor,Research,25
+"Law, Public Safety, Corrections & Security",Legal Advisor,Communication,20
+"Law, Public Safety, Corrections & Security",Legal Advisor,Compliance,10
+"Law, Public Safety, Corrections & Security",Legal Advisor,Drafting,10
+"Law, Public Safety, Corrections & Security",Public Prosecutor,Legal Prosecution,35
+"Law, Public Safety, Corrections & Security",Public Prosecutor,Case Analysis,25
+"Law, Public Safety, Corrections & Security",Public Prosecutor,Communication,20
+"Law, Public Safety, Corrections & Security",Public Prosecutor,Research,10
+"Law, Public Safety, Corrections & Security",Public Prosecutor,Court Proceedings,10
+"Law, Public Safety, Corrections & Security",Defense Counsel,Legal Defense,35
+"Law, Public Safety, Corrections & Security",Defense Counsel,Case Analysis,25
+"Law, Public Safety, Corrections & Security",Defense Counsel,Communication,20
+"Law, Public Safety, Corrections & Security",Defense Counsel,Research,10
+"Law, Public Safety, Corrections & Security",Defense Counsel,Drafting,10
+"Law, Public Safety, Corrections & Security",Notary,Notarization,35
+"Law, Public Safety, Corrections & Security",Notary,Documentation,25
+"Law, Public Safety, Corrections & Security",Notary,Compliance,20
+"Law, Public Safety, Corrections & Security",Notary,Communication,10
+"Law, Public Safety, Corrections & Security",Notary,Record Keeping,10
+"Law, Public Safety, Corrections & Security",Legal Clerk,Legal Documentation,35
+"Law, Public Safety, Corrections & Security",Legal Clerk,Record Keeping,25
+"Law, Public Safety, Corrections & Security",Legal Clerk,Research,20
+"Law, Public Safety, Corrections & Security",Legal Clerk,Compliance,10
+"Law, Public Safety, Corrections & Security",Legal Clerk,Communication,10
+"Law, Public Safety, Corrections & Security",Police Officer,Law Enforcement,35
+"Law, Public Safety, Corrections & Security",Police Officer,Investigation,25
+"Law, Public Safety, Corrections & Security",Police Officer,Communication,20
+"Law, Public Safety, Corrections & Security",Police Officer,Physical Fitness,10
+"Law, Public Safety, Corrections & Security",Police Officer,Report Writing,10
+"Law, Public Safety, Corrections & Security",Detective,Investigation,35
+"Law, Public Safety, Corrections & Security",Detective,Law Enforcement,25
+"Law, Public Safety, Corrections & Security",Detective,Research,20
+"Law, Public Safety, Corrections & Security",Detective,Communication,10
+"Law, Public Safety, Corrections & Security",Detective,Report Writing,10
+"Law, Public Safety, Corrections & Security",Prison Officer,Prison Management,35
+"Law, Public Safety, Corrections & Security",Prison Officer,Supervision,25
+"Law, Public Safety, Corrections & Security",Prison Officer,Communication,20
+"Law, Public Safety, Corrections & Security",Prison Officer,Conflict Resolution,10
+"Law, Public Safety, Corrections & Security",Prison Officer,Record Keeping,10
+"Law, Public Safety, Corrections & Security",Firefighter,Firefighting,35
+"Law, Public Safety, Corrections & Security",Firefighter,Emergency Response,25
+"Law, Public Safety, Corrections & Security",Firefighter,Physical Fitness,20
+"Law, Public Safety, Corrections & Security",Firefighter,Teamwork,10
+"Law, Public Safety, Corrections & Security",Firefighter,Communication,10
+"Law, Public Safety, Corrections & Security",Forensic Scientist,Forensic Analysis,35
+"Law, Public Safety, Corrections & Security",Forensic Scientist,Lab Skills,25
+"Law, Public Safety, Corrections & Security",Forensic Scientist,Research,20
+"Law, Public Safety, Corrections & Security",Forensic Scientist,Reporting,10
+"Law, Public Safety, Corrections & Security",Forensic Scientist,Attention to Detail,10
+"Law, Public Safety, Corrections & Security",Security Officer,Security Management,35
+"Law, Public Safety, Corrections & Security",Security Officer,Surveillance,25
+"Law, Public Safety, Corrections & Security",Security Officer,Communication,20
+"Law, Public Safety, Corrections & Security",Security Officer,Patrolling,10
+"Law, Public Safety, Corrections & Security",Security Officer,Emergency Response,10
+"Law, Public Safety, Corrections & Security",Customs Officer,Customs Regulations,35
+"Law, Public Safety, Corrections & Security",Customs Officer,Inspection,25
+"Law, Public Safety, Corrections & Security",Customs Officer,Communication,20
+"Law, Public Safety, Corrections & Security",Customs Officer,Record Keeping,10
+"Law, Public Safety, Corrections & Security",Customs Officer,Compliance,10
+"Law, Public Safety, Corrections & Security",Immigration Officer,Immigration Procedures,35
+"Law, Public Safety, Corrections & Security",Immigration Officer,Inspection,25
+"Law, Public Safety, Corrections & Security",Immigration Officer,Communication,20
+"Law, Public Safety, Corrections & Security",Immigration Officer,Record Keeping,10
+"Law, Public Safety, Corrections & Security",Immigration Officer,Compliance,10
+"Law, Public Safety, Corrections & Security",Traffic Police Officer,Traffic Regulation,35
+"Law, Public Safety, Corrections & Security",Traffic Police Officer,Communication,25
+"Law, Public Safety, Corrections & Security",Traffic Police Officer,Law Enforcement,20
+"Law, Public Safety, Corrections & Security",Traffic Police Officer,Reporting,10
+"Law, Public Safety, Corrections & Security",Traffic Police Officer,Patrolling,10
+"Law, Public Safety, Corrections & Security",Private Investigator,Investigation,35
+"Law, Public Safety, Corrections & Security",Private Investigator,Surveillance,25
+"Law, Public Safety, Corrections & Security",Private Investigator,Communication,20
+"Law, Public Safety, Corrections & Security",Private Investigator,Research,10
+"Law, Public Safety, Corrections & Security",Private Investigator,Reporting,10
+"Law, Public Safety, Corrections & Security",Paralegal,Legal Assistance,35
+"Law, Public Safety, Corrections & Security",Paralegal,Documentation,25
+"Law, Public Safety, Corrections & Security",Paralegal,Research,20
+"Law, Public Safety, Corrections & Security",Paralegal,Compliance,10
+"Law, Public Safety, Corrections & Security",Paralegal,Communication,10
+"Law, Public Safety, Corrections & Security",Court Reporter,Court Reporting,35
+"Law, Public Safety, Corrections & Security",Court Reporter,Documentation,25
+"Law, Public Safety, Corrections & Security",Court Reporter,Record Keeping,20
+"Law, Public Safety, Corrections & Security",Court Reporter,Communication,10
+"Law, Public Safety, Corrections & Security",Court Reporter,Attention to Detail,10
+Manufacturing,Production Manager,Production Management,35
+Manufacturing,Production Manager,Leadership,25
+Manufacturing,Production Manager,Process Optimization,20
+Manufacturing,Production Manager,Communication,10
+Manufacturing,Production Manager,Quality Control,10
+Manufacturing,Production Engineer,Process Engineering,35
+Manufacturing,Production Engineer,Technical Skills,25
+Manufacturing,Production Engineer,Quality Control,20
+Manufacturing,Production Engineer,Communication,10
+Manufacturing,Production Engineer,Maintenance,10
+Manufacturing,Manufacturing Engineer,Manufacturing Process,35
+Manufacturing,Manufacturing Engineer,Technical Skills,25
+Manufacturing,Manufacturing Engineer,Process Optimization,20
+Manufacturing,Manufacturing Engineer,Communication,10
+Manufacturing,Manufacturing Engineer,Quality Control,10
+Manufacturing,Quality Control Manager,Quality Management,35
+Manufacturing,Quality Control Manager,Inspection,25
+Manufacturing,Quality Control Manager,Documentation,20
+Manufacturing,Quality Control Manager,Communication,10
+Manufacturing,Quality Control Manager,Problem Solving,10
+Manufacturing,Quality Inspector,Inspection,35
+Manufacturing,Quality Inspector,Quality Assurance,25
+Manufacturing,Quality Inspector,Documentation,20
+Manufacturing,Quality Inspector,Attention to Detail,10
+Manufacturing,Quality Inspector,Communication,10
+Manufacturing,Maintenance Engineer,Maintenance,35
+Manufacturing,Maintenance Engineer,Troubleshooting,25
+Manufacturing,Maintenance Engineer,Technical Skills,20
+Manufacturing,Maintenance Engineer,Communication,10
+Manufacturing,Maintenance Engineer,Planning,10
+Manufacturing,Plant Supervisor,Supervision,35
+Manufacturing,Plant Supervisor,Leadership,25
+Manufacturing,Plant Supervisor,Communication,20
+Manufacturing,Plant Supervisor,Scheduling,10
+Manufacturing,Plant Supervisor,Quality Control,10
+Manufacturing,Machine Operator,Machine Operation,35
+Manufacturing,Machine Operator,Technical Skills,25
+Manufacturing,Machine Operator,Maintenance,20
+Manufacturing,Machine Operator,Safety Awareness,10
+Manufacturing,Machine Operator,Quality Control,10
+Manufacturing,Assembler,Assembly Skills,35
+Manufacturing,Assembler,Technical Skills,25
+Manufacturing,Assembler,Attention to Detail,20
+Manufacturing,Assembler,Communication,10
+Manufacturing,Assembler,Safety Awareness,10
+Manufacturing,Welder,Welding Skills,35
+Manufacturing,Welder,Technical Skills,25
+Manufacturing,Welder,Safety Practices,20
+Manufacturing,Welder,Blueprint Reading,10
+Manufacturing,Welder,Maintenance,10
+Manufacturing,Fitter,Fitting Skills,35
+Manufacturing,Fitter,Technical Skills,25
+Manufacturing,Fitter,Maintenance,20
+Manufacturing,Fitter,Communication,10
+Manufacturing,Fitter,Safety Awareness,10
+Manufacturing,Machinist,Machining Skills,35
+Manufacturing,Machinist,Technical Skills,25
+Manufacturing,Machinist,Attention to Detail,20
+Manufacturing,Machinist,Maintenance,10
+Manufacturing,Machinist,Safety Awareness,10
+Manufacturing,CNC Operator,CNC Operation,35
+Manufacturing,CNC Operator,Technical Skills,25
+Manufacturing,CNC Operator,Programming,20
+Manufacturing,CNC Operator,Maintenance,10
+Manufacturing,CNC Operator,Quality Control,10
+Manufacturing,Electrician,Electrical Skills,35
+Manufacturing,Electrician,Troubleshooting,25
+Manufacturing,Electrician,Maintenance,20
+Manufacturing,Electrician,Safety Practices,10
+Manufacturing,Electrician,Communication,10
+Manufacturing,Electronic Technician,Electronics,35
+Manufacturing,Electronic Technician,Troubleshooting,25
+Manufacturing,Electronic Technician,Technical Skills,20
+Manufacturing,Electronic Technician,Communication,10
+Manufacturing,Electronic Technician,Maintenance,10
+Manufacturing,Tool & Die Maker,Tool Making,35
+Manufacturing,Tool & Die Maker,Die Making,25
+Manufacturing,Tool & Die Maker,Technical Skills,20
+Manufacturing,Tool & Die Maker,Maintenance,10
+Manufacturing,Tool & Die Maker,Quality Control,10
+Manufacturing,Production Planner,Production Planning,35
+Manufacturing,Production Planner,Scheduling,25
+Manufacturing,Production Planner,Communication,20
+Manufacturing,Production Planner,Organization,10
+Manufacturing,Production Planner,Data Analysis,10
+Manufacturing,Inventory Manager,Inventory Management,35
+Manufacturing,Inventory Manager,Data Analysis,25
+Manufacturing,Inventory Manager,Organization,20
+Manufacturing,Inventory Manager,Communication,10
+Manufacturing,Inventory Manager,Record Keeping,10
+Manufacturing,Store Keeper,Store Management,35
+Manufacturing,Store Keeper,Inventory Control,25
+Manufacturing,Store Keeper,Record Keeping,20
+Manufacturing,Store Keeper,Communication,10
+Manufacturing,Store Keeper,Data Entry,10
+Manufacturing,Packaging Technician,Packaging,35
+Manufacturing,Packaging Technician,Attention to Detail,25
+Manufacturing,Packaging Technician,Technical Skills,20
+Manufacturing,Packaging Technician,Quality Control,10
+Manufacturing,Packaging Technician,Safety Practices,10
+Manufacturing,Production Chemist,Production Chemistry,35
+Manufacturing,Production Chemist,Process Control,25
+Manufacturing,Production Chemist,Quality Assurance,20
+Manufacturing,Production Chemist,Lab Skills,10
+Manufacturing,Production Chemist,Safety Practices,10
+Manufacturing,Production Worker,Production Work,35
+Manufacturing,Production Worker,Technical Skills,25
+Manufacturing,Production Worker,Attention to Detail,20
+Manufacturing,Production Worker,Teamwork,10
+Manufacturing,Production Worker,Safety Awareness,10
+Manufacturing,Quality Assurance Officer,Quality Assurance,35
+Manufacturing,Quality Assurance Officer,Documentation,25
+Manufacturing,Quality Assurance Officer,Inspection,20
+Manufacturing,Quality Assurance Officer,Problem Solving,10
+Manufacturing,Quality Assurance Officer,Communication,10
+Manufacturing,Materials Engineer,Materials Science,35
+Manufacturing,Materials Engineer,Technical Skills,25
+Manufacturing,Materials Engineer,Research,20
+Manufacturing,Materials Engineer,Quality Control,10
+Manufacturing,Materials Engineer,Testing,10
+Manufacturing,Production Supervisor,Supervision,35
+Manufacturing,Production Supervisor,Production Control,25
+Manufacturing,Production Supervisor,Communication,20
+Manufacturing,Production Supervisor,Scheduling,10
+Manufacturing,Production Supervisor,Quality Assurance,10
+Manufacturing,Industrial Engineer,Industrial Engineering,35
+Manufacturing,Industrial Engineer,Process Optimization,25
+Manufacturing,Industrial Engineer,Data Analysis,20
+Manufacturing,Industrial Engineer,Quality Control,10
+Manufacturing,Industrial Engineer,Communication,10
+"Marketing, Sales & Service",Marketing Manager,Marketing Strategy,35
+"Marketing, Sales & Service",Marketing Manager,Campaign Management,25
+"Marketing, Sales & Service",Marketing Manager,Communication,20
+"Marketing, Sales & Service",Marketing Manager,Data Analysis,10
+"Marketing, Sales & Service",Marketing Manager,Team Leadership,10
+"Marketing, Sales & Service",Brand Manager,Brand Management,35
+"Marketing, Sales & Service",Brand Manager,Marketing Strategy,25
+"Marketing, Sales & Service",Brand Manager,Communication,20
+"Marketing, Sales & Service",Brand Manager,Creativity,10
+"Marketing, Sales & Service",Brand Manager,Market Research,10
+"Marketing, Sales & Service",Sales Manager,Sales Management,35
+"Marketing, Sales & Service",Sales Manager,Team Leadership,25
+"Marketing, Sales & Service",Sales Manager,Communication,20
+"Marketing, Sales & Service",Sales Manager,Data Analysis,10
+"Marketing, Sales & Service",Sales Manager,Negotiation,10
+"Marketing, Sales & Service",Business Development Manager,Business Development,35
+"Marketing, Sales & Service",Business Development Manager,Relationship Building,25
+"Marketing, Sales & Service",Business Development Manager,Communication,20
+"Marketing, Sales & Service",Business Development Manager,Market Research,10
+"Marketing, Sales & Service",Business Development Manager,Negotiation,10
+"Marketing, Sales & Service",Digital Marketing Specialist,Digital Marketing,35
+"Marketing, Sales & Service",Digital Marketing Specialist,Content Creation,25
+"Marketing, Sales & Service",Digital Marketing Specialist,Analytics,20
+"Marketing, Sales & Service",Digital Marketing Specialist,Communication,10
+"Marketing, Sales & Service",Digital Marketing Specialist,SEO/SEM,10
+"Marketing, Sales & Service",Content Writer,Content Writing,35
+"Marketing, Sales & Service",Content Writer,Research,25
+"Marketing, Sales & Service",Content Writer,Creativity,20
+"Marketing, Sales & Service",Content Writer,Communication,10
+"Marketing, Sales & Service",Content Writer,Editing,10
+"Marketing, Sales & Service",Copywriter,Copywriting,35
+"Marketing, Sales & Service",Copywriter,Creativity,25
+"Marketing, Sales & Service",Copywriter,Research,20
+"Marketing, Sales & Service",Copywriter,Communication,10
+"Marketing, Sales & Service",Copywriter,Editing,10
+"Marketing, Sales & Service",Public Relations Officer,Public Relations,35
+"Marketing, Sales & Service",Public Relations Officer,Communication,25
+"Marketing, Sales & Service",Public Relations Officer,Media Relations,20
+"Marketing, Sales & Service",Public Relations Officer,Event Planning,10
+"Marketing, Sales & Service",Public Relations Officer,Crisis Management,10
+"Marketing, Sales & Service",Advertising Manager,Advertising Strategy,35
+"Marketing, Sales & Service",Advertising Manager,Campaign Management,25
+"Marketing, Sales & Service",Advertising Manager,Creativity,20
+"Marketing, Sales & Service",Advertising Manager,Communication,10
+"Marketing, Sales & Service",Advertising Manager,Media Planning,10
+"Marketing, Sales & Service",Event Manager,Event Management,35
+"Marketing, Sales & Service",Event Manager,Planning,25
+"Marketing, Sales & Service",Event Manager,Communication,20
+"Marketing, Sales & Service",Event Manager,Budgeting,10
+"Marketing, Sales & Service",Event Manager,Vendor Management,10
+"Marketing, Sales & Service",Market Research Analyst,Market Research,35
+"Marketing, Sales & Service",Market Research Analyst,Data Analysis,25
+"Marketing, Sales & Service",Market Research Analyst,Reporting,20
+"Marketing, Sales & Service",Market Research Analyst,Communication,10
+"Marketing, Sales & Service",Market Research Analyst,Survey Design,10
+"Marketing, Sales & Service",Customer Service Executive,Customer Service,35
+"Marketing, Sales & Service",Customer Service Executive,Communication,25
+"Marketing, Sales & Service",Customer Service Executive,Problem Solving,20
+"Marketing, Sales & Service",Customer Service Executive,Conflict Resolution,10
+"Marketing, Sales & Service",Customer Service Executive,Patience,10
+"Marketing, Sales & Service",Telecaller,Telecalling,35
+"Marketing, Sales & Service",Telecaller,Communication,25
+"Marketing, Sales & Service",Telecaller,Persuasion,20
+"Marketing, Sales & Service",Telecaller,Product Knowledge,10
+"Marketing, Sales & Service",Telecaller,Data Entry,10
+"Marketing, Sales & Service",Retail Sales Associate,Sales,35
+"Marketing, Sales & Service",Retail Sales Associate,Communication,25
+"Marketing, Sales & Service",Retail Sales Associate,Product Knowledge,20
+"Marketing, Sales & Service",Retail Sales Associate,Customer Service,10
+"Marketing, Sales & Service",Retail Sales Associate,Inventory Handling,10
+"Marketing, Sales & Service",Visual Merchandiser,Visual Merchandising,35
+"Marketing, Sales & Service",Visual Merchandiser,Creativity,25
+"Marketing, Sales & Service",Visual Merchandiser,Store Layout,20
+"Marketing, Sales & Service",Visual Merchandiser,Product Knowledge,10
+"Marketing, Sales & Service",Visual Merchandiser,Communication,10
+"Marketing, Sales & Service",Real Estate Agent,Real Estate Sales,35
+"Marketing, Sales & Service",Real Estate Agent,Communication,25
+"Marketing, Sales & Service",Real Estate Agent,Negotiation,20
+"Marketing, Sales & Service",Real Estate Agent,Market Research,10
+"Marketing, Sales & Service",Real Estate Agent,Client Relations,10
+"Marketing, Sales & Service",Insurance Advisor,Insurance Sales,35
+"Marketing, Sales & Service",Insurance Advisor,Communication,25
+"Marketing, Sales & Service",Insurance Advisor,Client Counseling,20
+"Marketing, Sales & Service",Insurance Advisor,Product Knowledge,10
+"Marketing, Sales & Service",Insurance Advisor,Compliance,10
+"Marketing, Sales & Service",Travel Consultant,Travel Consulting,35
+"Marketing, Sales & Service",Travel Consultant,Communication,25
+"Marketing, Sales & Service",Travel Consultant,Product Knowledge,20
+"Marketing, Sales & Service",Travel Consultant,Itinerary Planning,10
+"Marketing, Sales & Service",Travel Consultant,Customer Service,10
+"Marketing, Sales & Service",Logistics Coordinator,Logistics Coordination,35
+"Marketing, Sales & Service",Logistics Coordinator,Communication,25
+"Marketing, Sales & Service",Logistics Coordinator,Organization,20
+"Marketing, Sales & Service",Logistics Coordinator,Problem Solving,10
+"Marketing, Sales & Service",Logistics Coordinator,Scheduling,10
+"Marketing, Sales & Service",Distribution Manager,Distribution Management,35
+"Marketing, Sales & Service",Distribution Manager,Team Leadership,25
+"Marketing, Sales & Service",Distribution Manager,Communication,20
+"Marketing, Sales & Service",Distribution Manager,Organization,10
+"Marketing, Sales & Service",Distribution Manager,Inventory Control,10
+"Marketing, Sales & Service",Customer Relationship Manager,Relationship Management,35
+"Marketing, Sales & Service",Customer Relationship Manager,Communication,25
+"Marketing, Sales & Service",Customer Relationship Manager,Problem Solving,20
+"Marketing, Sales & Service",Customer Relationship Manager,Customer Service,10
+"Marketing, Sales & Service",Customer Relationship Manager,Data Analysis,10
+"Marketing, Sales & Service",Product Manager,Product Management,35
+"Marketing, Sales & Service",Product Manager,Marketing Strategy,25
+"Marketing, Sales & Service",Product Manager,Communication,20
+"Marketing, Sales & Service",Product Manager,Data Analysis,10
+"Marketing, Sales & Service",Product Manager,Team Leadership,10
+"Marketing, Sales & Service",Service Manager,Service Management,35
+"Marketing, Sales & Service",Service Manager,Customer Service,25
+"Marketing, Sales & Service",Service Manager,Team Leadership,20
+"Marketing, Sales & Service",Service Manager,Communication,10
+"Marketing, Sales & Service",Service Manager,Problem Solving,10
+"Marketing, Sales & Service",Inventory Manager,Inventory Management,35
+"Marketing, Sales & Service",Inventory Manager,Organization,25
+"Marketing, Sales & Service",Inventory Manager,Data Analysis,20
+"Marketing, Sales & Service",Inventory Manager,Communication,10
+"Marketing, Sales & Service",Inventory Manager,Record Keeping,10
+"Marketing, Sales & Service",Retail Store Manager,Store Management,35
+"Marketing, Sales & Service",Retail Store Manager,Team Leadership,25
+"Marketing, Sales & Service",Retail Store Manager,Communication,20
+"Marketing, Sales & Service",Retail Store Manager,Sales,10
+"Marketing, Sales & Service",Retail Store Manager,Customer Service,10
+"Marketing, Sales & Service",Customer Support Executive,Customer Support,35
+"Marketing, Sales & Service",Customer Support Executive,Communication,25
+"Marketing, Sales & Service",Customer Support Executive,Problem Solving,20
+"Marketing, Sales & Service",Customer Support Executive,Conflict Resolution,10
+"Marketing, Sales & Service",Customer Support Executive,Patience,10
+"Marketing, Sales & Service",After Sales Service Manager,After Sales Service,35
+"Marketing, Sales & Service",After Sales Service Manager,Customer Service,25
+"Marketing, Sales & Service",After Sales Service Manager,Team Leadership,20
+"Marketing, Sales & Service",After Sales Service Manager,Communication,10
+"Marketing, Sales & Service",After Sales Service Manager,Problem Solving,10
+STEM,Research Scientist,Research,35
+STEM,Research Scientist,Experimentation,25
+STEM,Research Scientist,Data Analysis,20
+STEM,Research Scientist,Communication,10
+STEM,Research Scientist,Reporting,10
+STEM,Biologist,Biology,35
+STEM,Biologist,Experimentation,25
+STEM,Biologist,Data Analysis,20
+STEM,Biologist,Communication,10
+STEM,Biologist,Research,10
+STEM,Chemist,Chemistry,35
+STEM,Chemist,Experimentation,25
+STEM,Chemist,Lab Skills,20
+STEM,Chemist,Data Analysis,10
+STEM,Chemist,Communication,10
+STEM,Physicist,Physics,35
+STEM,Physicist,Experimentation,25
+STEM,Physicist,Data Analysis,20
+STEM,Physicist,Research,10
+STEM,Physicist,Communication,10
+STEM,Mathematician,Mathematics,35
+STEM,Mathematician,Problem Solving,25
+STEM,Mathematician,Data Analysis,20
+STEM,Mathematician,Research,10
+STEM,Mathematician,Communication,10
+STEM,Statistician,Statistics,35
+STEM,Statistician,Data Analysis,25
+STEM,Statistician,Research,20
+STEM,Statistician,Communication,10
+STEM,Statistician,Reporting,10
+STEM,Environmental Scientist,Environmental Science,35
+STEM,Environmental Scientist,Research,25
+STEM,Environmental Scientist,Data Analysis,20
+STEM,Environmental Scientist,Experimentation,10
+STEM,Environmental Scientist,Communication,10
+STEM,Geologist,Geology,35
+STEM,Geologist,Fieldwork,25
+STEM,Geologist,Data Analysis,20
+STEM,Geologist,Research,10
+STEM,Geologist,Reporting,10
+STEM,Astronomer,Astronomy,35
+STEM,Astronomer,Data Analysis,25
+STEM,Astronomer,Research,20
+STEM,Astronomer,Experimentation,10
+STEM,Astronomer,Communication,10
+STEM,Oceanographer,Oceanography,35
+STEM,Oceanographer,Fieldwork,25
+STEM,Oceanographer,Data Analysis,20
+STEM,Oceanographer,Research,10
+STEM,Oceanographer,Reporting,10
+STEM,Meteorologist,Meteorology,35
+STEM,Meteorologist,Data Analysis,25
+STEM,Meteorologist,Research,20
+STEM,Meteorologist,Reporting,10
+STEM,Meteorologist,Communication,10
+STEM,Ecologist,Ecology,35
+STEM,Ecologist,Fieldwork,25
+STEM,Ecologist,Data Analysis,20
+STEM,Ecologist,Research,10
+STEM,Ecologist,Reporting,10
+STEM,Zoologist,Zoology,35
+STEM,Zoologist,Research,25
+STEM,Zoologist,Data Analysis,20
+STEM,Zoologist,Fieldwork,10
+STEM,Zoologist,Communication,10
+STEM,Botanist,Botany,35
+STEM,Botanist,Research,25
+STEM,Botanist,Data Analysis,20
+STEM,Botanist,Experimentation,10
+STEM,Botanist,Communication,10
+STEM,Microbiologist,Microbiology,35
+STEM,Microbiologist,Laboratory Skills,25
+STEM,Microbiologist,Research,20
+STEM,Microbiologist,Data Analysis,10
+STEM,Microbiologist,Reporting,10
+STEM,Geneticist,Genetics,35
+STEM,Geneticist,Research,25
+STEM,Geneticist,Data Analysis,20
+STEM,Geneticist,Laboratory Skills,10
+STEM,Geneticist,Reporting,10
+STEM,Biochemist,Biochemistry,35
+STEM,Biochemist,Research,25
+STEM,Biochemist,Laboratory Skills,20
+STEM,Biochemist,Data Analysis,10
+STEM,Biochemist,Communication,10
+STEM,Biomedical Engineer,Biomedical Engineering,35
+STEM,Biomedical Engineer,Technical Skills,25
+STEM,Biomedical Engineer,Research,20
+STEM,Biomedical Engineer,Data Analysis,10
+STEM,Biomedical Engineer,Communication,10
+STEM,Materials Scientist,Materials Science,35
+STEM,Materials Scientist,Research,25
+STEM,Materials Scientist,Data Analysis,20
+STEM,Materials Scientist,Experimentation,10
+STEM,Materials Scientist,Reporting,10
+STEM,Robotics Engineer,Robotics,35
+STEM,Robotics Engineer,Programming,25
+STEM,Robotics Engineer,Problem Solving,20
+STEM,Robotics Engineer,Research,10
+STEM,Robotics Engineer,Communication,10
+STEM,Data Analyst,Data Analysis,35
+STEM,Data Analyst,Statistics,25
+STEM,Data Analyst,Reporting,20
+STEM,Data Analyst,Communication,10
+STEM,Data Analyst,Problem Solving,10
+STEM,Statistician (Math),Statistics,35
+STEM,Statistician (Math),Data Analysis,25
+STEM,Statistician (Math),Research,20
+STEM,Statistician (Math),Communication,10
+STEM,Statistician (Math),Reporting,10
+STEM,Computer Scientist,Computer Science,35
+STEM,Computer Scientist,Programming,25
+STEM,Computer Scientist,Problem Solving,20
+STEM,Computer Scientist,Research,10
+STEM,Computer Scientist,Communication,10
+"Transportation, Distribution & Logistics",Logistics Manager,Logistics Management,35
+"Transportation, Distribution & Logistics",Logistics Manager,Supply Chain,25
+"Transportation, Distribution & Logistics",Logistics Manager,Communication,20
+"Transportation, Distribution & Logistics",Logistics Manager,Problem Solving,10
+"Transportation, Distribution & Logistics",Logistics Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Transportation Manager,Transportation Planning,35
+"Transportation, Distribution & Logistics",Transportation Manager,Operations,25
+"Transportation, Distribution & Logistics",Transportation Manager,Communication,20
+"Transportation, Distribution & Logistics",Transportation Manager,Scheduling,10
+"Transportation, Distribution & Logistics",Transportation Manager,Problem Solving,10
+"Transportation, Distribution & Logistics",Fleet Manager,Fleet Management,35
+"Transportation, Distribution & Logistics",Fleet Manager,Maintenance,25
+"Transportation, Distribution & Logistics",Fleet Manager,Communication,20
+"Transportation, Distribution & Logistics",Fleet Manager,Scheduling,10
+"Transportation, Distribution & Logistics",Fleet Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Warehouse Manager,Warehouse Management,35
+"Transportation, Distribution & Logistics",Warehouse Manager,Inventory Control,25
+"Transportation, Distribution & Logistics",Warehouse Manager,Communication,20
+"Transportation, Distribution & Logistics",Warehouse Manager,Organization,10
+"Transportation, Distribution & Logistics",Warehouse Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Supply Chain Analyst,Supply Chain Analysis,35
+"Transportation, Distribution & Logistics",Supply Chain Analyst,Data Analysis,25
+"Transportation, Distribution & Logistics",Supply Chain Analyst,Communication,20
+"Transportation, Distribution & Logistics",Supply Chain Analyst,Problem Solving,10
+"Transportation, Distribution & Logistics",Supply Chain Analyst,Reporting,10
+"Transportation, Distribution & Logistics",Freight Forwarder,Freight Management,35
+"Transportation, Distribution & Logistics",Freight Forwarder,Documentation,25
+"Transportation, Distribution & Logistics",Freight Forwarder,Communication,20
+"Transportation, Distribution & Logistics",Freight Forwarder,Compliance,10
+"Transportation, Distribution & Logistics",Freight Forwarder,Scheduling,10
+"Transportation, Distribution & Logistics",Customs Broker,Customs Clearance,35
+"Transportation, Distribution & Logistics",Customs Broker,Compliance,25
+"Transportation, Distribution & Logistics",Customs Broker,Communication,20
+"Transportation, Distribution & Logistics",Customs Broker,Documentation,10
+"Transportation, Distribution & Logistics",Customs Broker,Data Analysis,10
+"Transportation, Distribution & Logistics",Inventory Control Manager,Inventory Control,35
+"Transportation, Distribution & Logistics",Inventory Control Manager,Data Analysis,25
+"Transportation, Distribution & Logistics",Inventory Control Manager,Organization,20
+"Transportation, Distribution & Logistics",Inventory Control Manager,Communication,10
+"Transportation, Distribution & Logistics",Inventory Control Manager,Reporting,10
+"Transportation, Distribution & Logistics",Distribution Manager,Distribution Management,35
+"Transportation, Distribution & Logistics",Distribution Manager,Logistics,25
+"Transportation, Distribution & Logistics",Distribution Manager,Communication,20
+"Transportation, Distribution & Logistics",Distribution Manager,Scheduling,10
+"Transportation, Distribution & Logistics",Distribution Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Shipping & Receiving Clerk,Shipping & Receiving,35
+"Transportation, Distribution & Logistics",Shipping & Receiving Clerk,Documentation,25
+"Transportation, Distribution & Logistics",Shipping & Receiving Clerk,Communication,20
+"Transportation, Distribution & Logistics",Shipping & Receiving Clerk,Organization,10
+"Transportation, Distribution & Logistics",Shipping & Receiving Clerk,Data Entry,10
+"Transportation, Distribution & Logistics",Dispatcher,Dispatching,35
+"Transportation, Distribution & Logistics",Dispatcher,Scheduling,25
+"Transportation, Distribution & Logistics",Dispatcher,Communication,20
+"Transportation, Distribution & Logistics",Dispatcher,Organization,10
+"Transportation, Distribution & Logistics",Dispatcher,Problem Solving,10
+"Transportation, Distribution & Logistics",Driver,Driving,35
+"Transportation, Distribution & Logistics",Driver,Safety Awareness,25
+"Transportation, Distribution & Logistics",Driver,Route Planning,20
+"Transportation, Distribution & Logistics",Driver,Communication,10
+"Transportation, Distribution & Logistics",Driver,Time Management,10
+"Transportation, Distribution & Logistics",Courier,Delivery Management,35
+"Transportation, Distribution & Logistics",Courier,Route Planning,25
+"Transportation, Distribution & Logistics",Courier,Communication,20
+"Transportation, Distribution & Logistics",Courier,Customer Service,10
+"Transportation, Distribution & Logistics",Courier,Time Management,10
+"Transportation, Distribution & Logistics",Inventory Clerk,Inventory Management,35
+"Transportation, Distribution & Logistics",Inventory Clerk,Data Entry,25
+"Transportation, Distribution & Logistics",Inventory Clerk,Communication,20
+"Transportation, Distribution & Logistics",Inventory Clerk,Organization,10
+"Transportation, Distribution & Logistics",Inventory Clerk,Attention to Detail,10
+"Transportation, Distribution & Logistics",Traffic Manager,Traffic Management,35
+"Transportation, Distribution & Logistics",Traffic Manager,Communication,25
+"Transportation, Distribution & Logistics",Traffic Manager,Scheduling,20
+"Transportation, Distribution & Logistics",Traffic Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Traffic Manager,Reporting,10
+"Transportation, Distribution & Logistics",Railway Operations Manager,Rail Operations,35
+"Transportation, Distribution & Logistics",Railway Operations Manager,Scheduling,25
+"Transportation, Distribution & Logistics",Railway Operations Manager,Communication,20
+"Transportation, Distribution & Logistics",Railway Operations Manager,Problem Solving,10
+"Transportation, Distribution & Logistics",Railway Operations Manager,Safety Practices,10
+"Transportation, Distribution & Logistics",Airline Operations Manager,Airline Operations,35
+"Transportation, Distribution & Logistics",Airline Operations Manager,Scheduling,25
+"Transportation, Distribution & Logistics",Airline Operations Manager,Communication,20
+"Transportation, Distribution & Logistics",Airline Operations Manager,Compliance,10
+"Transportation, Distribution & Logistics",Airline Operations Manager,Data Analysis,10
+"Transportation, Distribution & Logistics",Port Operations Manager,Port Operations,35
+"Transportation, Distribution & Logistics",Port Operations Manager,Logistics,25
+"Transportation, Distribution & Logistics",Port Operations Manager,Communication,20
+"Transportation, Distribution & Logistics",Port Operations Manager,Scheduling,10
+"Transportation, Distribution & Logistics",Port Operations Manager,Compliance,10
+"Transportation, Distribution & Logistics",Aviation Safety Inspector,Safety Inspection,35
+"Transportation, Distribution & Logistics",Aviation Safety Inspector,Compliance,25
+"Transportation, Distribution & Logistics",Aviation Safety Inspector,Communication,20
+"Transportation, Distribution & Logistics",Aviation Safety Inspector,Reporting,10
+"Transportation, Distribution & Logistics",Aviation Safety Inspector,Data Analysis,10
+"Transportation, Distribution & Logistics",Marine Engineer,Marine Engineering,35
+"Transportation, Distribution & Logistics",Marine Engineer,Maintenance,25
+"Transportation, Distribution & Logistics",Marine Engineer,Communication,20
+"Transportation, Distribution & Logistics",Marine Engineer,Safety Practices,10
+"Transportation, Distribution & Logistics",Marine Engineer,Problem Solving,10

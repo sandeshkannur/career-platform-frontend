@@ -407,7 +407,7 @@ def compute_contrib_trace_seed_only(
     qssw_rows = db.execute(
         select(
             models.QuestionStudentSkillWeight.question_id,
-            models.QuestionStudentSkillWeight.student_skill_id,
+            models.QuestionStudentSkillWeight.skill_id,
             models.QuestionStudentSkillWeight.weight,
         ).where(models.QuestionStudentSkillWeight.question_id.in_(qids))
     ).all()

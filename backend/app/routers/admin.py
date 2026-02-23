@@ -156,8 +156,15 @@ async def upload_career_clusters(
     - If cluster exists, update name.
     - Else insert.
     """
-    if file.content_type != "text/csv":
-        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+    allowed_ct = {
+        "text/csv",
+        "application/csv",
+        "application/vnd.ms-excel",
+        "application/octet-stream",
+        "text/plain",
+    }
+    if (file.content_type not in allowed_ct) and not (file.filename and file.filename.lower().endswith(".csv")):
+        raise HTTPException(status_code=400, detail="Only CSV files are accepted")
 
     text = (await file.read()).decode("utf-8-sig")
     if not text.strip():
@@ -177,23 +184,37 @@ async def upload_career_clusters(
     skipped = 0
 
     for row in reader:
-        cid = (row.get("cluster_id") or "").strip()
+        cid_raw = (row.get("cluster_id") or "").strip()
         cname = (row.get("cluster_name") or "").strip()
 
-        if not cid or not cname:
+        if not cid_raw or not cname:
             skipped += 1
             continue
 
-        existing = db.query(CareerCluster).filter_by(cluster_id=cid).first()
+        # DB column is integer PK
+        try:
+            cid = int(cid_raw)
+        except Exception:
+            skipped += 1
+            continue
+
+        try:
+            cid_int = int(cid)
+        except ValueError:
+            skipped += 1
+            continue
+
+        existing = db.query(CareerCluster).filter_by(id=cid_int).first()
         if existing:
-            if (existing.cluster_name or "").strip() != cname:
-                existing.cluster_name = cname
+            if (existing.name or "").strip() != cname:
+                existing.name = cname
                 updated += 1
             else:
                 skipped += 1
             continue
 
-        db.add(CareerCluster(cluster_id=cid, cluster_name=cname))
+        # Insert using the real model fields
+        db.add(CareerCluster(id=cid, name=cname))
         inserted += 1
 
     db.commit()
@@ -224,8 +245,8 @@ async def upload_careers(
     - Else insert.
     - cluster_id must exist.
     """
-    if file.content_type != "text/csv":
-        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+    if not (file.filename and file.filename.lower().endswith(".csv")):
+        raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
     text = (await file.read()).decode("utf-8-sig")
     if not text.strip():
@@ -245,26 +266,33 @@ async def upload_careers(
     skipped = 0
 
     for row in reader:
-        career_id = (row.get("career_id") or "").strip()
-        career_name = (row.get("career_name") or "").strip()
-        cluster_id = (row.get("cluster_id") or "").strip()
+        career_code = (row.get("career_id") or "").strip()      # CSV uses career_id; DB uses career_code
+        career_title = (row.get("career_name") or "").strip()   # DB uses title
+        cluster_id_raw = (row.get("cluster_id") or "").strip()
 
-        if not career_id or not career_name or not cluster_id:
+        if not career_code or not career_title or not cluster_id_raw:
             skipped += 1
             continue
 
-        cluster = db.query(CareerCluster).filter_by(cluster_id=cluster_id).first()
+        # cluster_id is integer FK to career_clusters.id
+        try:
+            cluster_id = int(cluster_id_raw)
+        except Exception:
+            skipped += 1
+            continue
+
+        cluster = db.query(CareerCluster).filter_by(id=cluster_id).first()
         if not cluster:
             skipped += 1
             continue
 
-        existing = db.query(Career).filter_by(career_id=career_id).first()
+        existing = db.query(Career).filter_by(career_code=career_code).first()
         if existing:
             changed = False
-            if (existing.career_name or "").strip() != career_name:
-                existing.career_name = career_name
+            if (existing.title or "").strip() != career_title:
+                existing.title = career_title
                 changed = True
-            if (existing.cluster_id or "").strip() != cluster_id:
+            if existing.cluster_id != cluster_id:
                 existing.cluster_id = cluster_id
                 changed = True
 
@@ -274,7 +302,7 @@ async def upload_careers(
                 skipped += 1
             continue
 
-        db.add(Career(career_id=career_id, career_name=career_name, cluster_id=cluster_id))
+        db.add(Career(career_code=career_code, title=career_title, cluster_id=cluster_id))
         inserted += 1
 
     db.commit()
@@ -304,8 +332,8 @@ async def upload_keyskills(
     - If exists, update name.
     - Else insert.
     """
-    if file.content_type != "text/csv":
-        raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
+    if not (file.filename and file.filename.lower().endswith(".csv")):
+        raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
     text = (await file.read()).decode("utf-8-sig")
     if not text.strip():
@@ -325,23 +353,30 @@ async def upload_keyskills(
     skipped = 0
 
     for row in reader:
-        kid = (row.get("keyskill_id") or "").strip()
+        kid_raw = (row.get("keyskill_id") or "").strip()
         kname = (row.get("keyskill_name") or "").strip()
 
-        if not kid or not kname:
+        if not kid_raw or not kname:
             skipped += 1
             continue
 
-        existing = db.query(KeySkill).filter_by(keyskill_id=kid).first()
+        # DB column is integer PK
+        try:
+            kid = int(kid_raw)
+        except Exception:
+            skipped += 1
+            continue
+
+        existing = db.query(KeySkill).filter_by(id=kid).first()
         if existing:
-            if (existing.keyskill_name or "").strip() != kname:
-                existing.keyskill_name = kname
+            if (existing.name or "").strip() != kname:
+                existing.name = kname
                 updated += 1
             else:
                 skipped += 1
             continue
 
-        db.add(KeySkill(keyskill_id=kid, keyskill_name=kname))
+        db.add(KeySkill(id=kid, name=kname))
         inserted += 1
 
     db.commit()
@@ -372,7 +407,7 @@ async def upload_career_keyskill_map(
     - Skips invalid FK rows.
     - Skips duplicates (idempotent-ish).
     """
-    if file.content_type != "text/csv":
+    if file.content_type not in ("text/csv", "application/vnd.ms-excel", "application/octet-stream"):
         raise HTTPException(status_code=400, detail="Only text/csv files are accepted")
 
     text = (await file.read()).decode("utf-8-sig")
@@ -399,17 +434,26 @@ async def upload_career_keyskill_map(
             skipped += 1
             continue
 
-        career = db.query(Career).filter_by(career_id=career_id).first()
-        keyskill = db.query(KeySkill).filter_by(keyskill_id=keyskill_id).first()
+        # career_id in CSV is actually Career.career_code (string)
+        career = db.query(Career).filter(Career.career_code == career_id).first()
+
+        # keyskill_id in CSV is numeric KeySkill.id
+        try:
+            keyskill_id_int = int(keyskill_id)
+        except ValueError:
+            skipped += 1
+            continue
+
+        keyskill = db.query(KeySkill).filter(KeySkill.id == keyskill_id_int).first()
         if not career or not keyskill:
             skipped += 1
             continue
 
-        # Insert into association table if not exists
+        # Insert into association table if not exists (use integer PKs)
         exists = db.execute(
             career_keyskill_association.select().where(
-                (career_keyskill_association.c.career_id == career_id)
-                & (career_keyskill_association.c.keyskill_id == keyskill_id)
+                (career_keyskill_association.c.career_id == career.id)
+                & (career_keyskill_association.c.keyskill_id == keyskill.id)
             )
         ).first()
 
@@ -419,7 +463,8 @@ async def upload_career_keyskill_map(
 
         db.execute(
             career_keyskill_association.insert().values(
-                career_id=career_id, keyskill_id=keyskill_id
+                career_id=career.id,
+                keyskill_id=keyskill.id,
             )
         )
         inserted += 1

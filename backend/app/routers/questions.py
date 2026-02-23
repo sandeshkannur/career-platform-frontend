@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db
+from app.deps import get_db
 from app.models import Question
 from app.services.i18n_resolver import resolve_question_text, normalize_lang
 from app.services.explanations import resolve_cms_text

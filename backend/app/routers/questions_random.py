@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from app.database import get_db
+from app.deps import get_db
 from app.schemas import RandomQuestionsResponse, RandomQuestionItemOut
 from app.models import Question
 

@@ -37,14 +37,38 @@ def _normalize_career_item(item: Any) -> Any:
         return item
 
     texts = item.get("explainability")
+
+      # Support both legacy list[str] and newer list[dict] / str / dict shapes
     if isinstance(texts, list):
-        keys: List[str] = []
-        for t in texts:
-            k = EXPLAINABILITY_TEXT_TO_KEYS.get(t)
-            if k:
-                keys.append(k)
-        if keys:
-            item["explainability_keys"] = keys
+          keys: List[str] = []
+          for t in texts:
+              if isinstance(t, str):
+                  k = EXPLAINABILITY_TEXT_TO_KEYS.get(t)
+                  if k:
+                      keys.append(k)
+              elif isinstance(t, dict):
+                  # Prefer explicit key if present
+                  k = t.get("key") or t.get("explainability_key")
+                  if not k:
+                      txt = t.get("text") or t.get("value") or ""
+                      k = EXPLAINABILITY_TEXT_TO_KEYS.get(txt)
+                  if k:
+                      keys.append(k)
+          if keys:
+              item["explainability_keys"] = keys
+
+    elif isinstance(texts, dict):
+          k = texts.get("key") or texts.get("explainability_key")
+          if not k:
+              txt = texts.get("text") or texts.get("value") or ""
+              k = EXPLAINABILITY_TEXT_TO_KEYS.get(txt)
+          if k:
+              item["explainability_keys"] = [k]
+
+    elif isinstance(texts, str):
+          k = EXPLAINABILITY_TEXT_TO_KEYS.get(texts)
+          if k:
+              item["explainability_keys"] = [k]
 
     return item
 
