@@ -28,8 +28,14 @@ def run_startup_tasks(database_url: str, skip_db_wait: str) -> None:
         print("INFO: Skipping wait_for_postgres (using SQLite or SKIP_DB_WAIT=1)")
 
     # ------------------------------------------------------------
-    # DEV TABLE CREATION (NO MIGRATIONS YET)
+    # DEV TABLE CREATION (DEV ONLY)
     # ------------------------------------------------------------
-    if skip_db_wait != "1":
-        Base.metadata.create_all(bind=engine)# Startup hooks (DB wait, dev-only create_all guard) will move here in next steps.
-# Placeholder only (no behavior change).
+    # PR-CLEAN-05:
+    # - In production, schema must be controlled via Alembic migrations.
+    # - We keep create_all() only for local/dev convenience.
+    env = (os.getenv("ENV", "dev") or "dev").strip().lower()
+
+    if env == "dev" and skip_db_wait != "1":
+        Base.metadata.create_all(bind=engine)
+    else:
+        print("INFO: Skipping Base.metadata.create_all() (ENV != dev or SKIP_DB_WAIT=1)")
