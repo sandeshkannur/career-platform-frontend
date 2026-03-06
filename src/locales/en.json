@@ -1,0 +1,241 @@
+{
+  "auth.login.title": "Sign in",
+  "auth.login.subtitle": "Continue to your student dashboard",
+  "auth.login.missingFields": "Email and password are required",
+  "auth.login.loginFailed": "Login failed",
+
+  "common.logout": "Logout",
+  "common.loading": "Loading…",
+  "common.pleaseWait": "Please wait.",
+  "common.somethingWentWrong": "Something went wrong",
+  "common.retry": "Retry",
+  "common.emptyTitle": "Nothing here yet",
+  "common.emptyDescription": "No data available.",
+
+  "pricing.whatYouGet.explainable.title": "Explainable",
+ "pricing.whatYouGet.explainable.desc": "Premium focuses on “why” — key skills and cluster drivers.",
+ "pricing.whatYouGet.complianceFirst.title": "Compliance-first",
+ "pricing.whatYouGet.complianceFirst.desc": "Guardian consent gating remains enforced for minors in protected student routes.",
+ "pricing.whatYouGet.incrementalBuild.title": "Incremental build",
+ "pricing.whatYouGet.incrementalBuild.desc": "This page is UI-only and safe to merge without backend changes.",
+
+  "auth.signup.title": "Signup",
+  "auth.signup.headline": "Create your account",
+  "auth.signup.blurb": "Signup is restricted during beta. Ask admin to add your email.",
+
+  "results.title": "Your Results",
+  "results.subtitle": "Career recommendations based on your responses",
+  "results.premium.locked": "Upgrade to view detailed insights",
+
+  "dashboard.welcome": "Home",
+  "dashboard.landing": "Public landing page",
+  "dashboard.actions.viewPricing": "View Pricing",
+  "student.assessmentIntro.title": "Assessment",
+  "student.assessmentIntro.subtitle": "Understand your strengths, preferences, and aptitude.",
+  "student.assessmentIntro.resume": "Resume",
+  "student.assessmentIntro.starting": "Starting...",
+  "student.assessmentIntro.start": "Start Assessment",
+  "student.assessmentIntro.body1": "This assessment helps generate deterministic and explainable career recommendations based on your responses.",
+  "student.assessmentIntro.contextCard.title": "Help us tailor guidance (optional, ~30 seconds)",
+  "student.assessmentIntro.contextCard.desc": "Adding a few details helps keep recommendations practical for you. You can skip this and update later anytime.",
+  "student.assessmentIntro.contextCard.addDetails": "Add details",
+  "student.assessmentIntro.contextCard.skip": "Skip for now",
+  "student.assessmentIntro.activeError": "Couldn’t check saved progress right now. You can still start or resume if available.",
+  "student.assessmentIntro.savedProgressPrefix": "Saved progress found: answered",
+  "student.assessmentIntro.savedProgressOf": "of",
+  "student.assessmentIntro.expect.title": "What to expect",
+  "student.assessmentIntro.expect.li1": "Answer honestly — there are no right or wrong answers.",
+  "student.assessmentIntro.expect.li2": "Estimated time: ~10–15 minutes (placeholder).",
+  "student.assessmentIntro.expect.li3": "You can resume later (progress saving will be wired next).",
+  "student.assessmentIntro.privacy.title": "Privacy & disclaimer",
+  "student.assessmentIntro.privacy.body": "Your responses are used only to generate your recommendations and reports. This is a guidance tool and not a guaranteed predictor of outcomes.",
+  "student.assessmentIntro.note": "Note: Start creates a real assessment id via backend. Resume uses the last saved snapshot.",
+
+  "nav.home": "Home",
+  "nav.pricing": "Pricing",
+  "nav.login": "Login",
+  "nav.signup": "Signup",
+  "nav.language": "Language",
+
+  "pricing.recommended": "Recommended",
+  "pricing.perAssessment": "per assessment",
+  "pricing.note.noPaymentWiring": "No backend payment wiring in this step — CTA routes to existing flows.",
+  "pricing.note.nextStep": "Next step (later): connect Premium CTA to real checkout/payment and route to premium report pages.",
+
+  "pricing.premium.title": "Premium",
+  "pricing.premium.subtitle": "Deeper analytics + explainability",
+  "pricing.premium.cta": "Get Premium",
+  "pricing.premium.features.1": "Cluster-level insights & key skill breakdown",
+  "pricing.premium.features.2": "Explainable career fit (why these careers)",
+  "pricing.premium.features.3": "More detailed report sections",
+  "pricing.premium.features.4": "Designed for auditability & stability",
+
+  "pricing.whatYouGet.title": "What you get",
+  "pricing.whatYouGet.deterministic.title": "Deterministic",
+  "pricing.whatYouGet.deterministic.desc": "Recommendations come from controlled mappings and scoring — not random outputs.",
+
+  "pricing.free.features.1": "Top recommended careers (basic)",
+  "pricing.free.features.2": "Core strengths summary",
+  "pricing.free.features.3": "Deterministic mapping (skills → careers)",
+  "pricing.free.features.4": "Shareable report link (UI-only for now)",
+
+  "student.portal.title": "Student Portal",
+  "student.portal.subtitle": "Clean & safe experience",
+  "student.portal.signedIn": "Signed in",
+  "student.portal.role": "Student",
+
+  "student.nav.dashboard": "Dashboard",
+  "student.nav.assessment": "Assessment",
+  "student.nav.results": "Results",
+  "student.nav.profile": "Profile",
+
+  "student.dashboard.title": "Student Dashboard",
+  "student.dashboard.welcomePrefix": "Welcome,",
+  "student.dashboard.chooseNext": "Choose what you want to do next.",
+
+  "student.dashboard.session.title": "Session",
+  "student.dashboard.session.cannotDeterminePrefix": "Could not determine",
+  "student.dashboard.session.cannotDetermineFrom": "from",
+  "student.dashboard.session.shareMePayload": "Please share your /v1/auth/me payload field name for the student id.",
+
+  "student.dashboard.loading": "Loading dashboard data…",
+  "student.dashboard.errorTitle": "Failed to load dashboard data",
+
+  "student.dashboard.kpi.account": "Account",
+  "student.dashboard.kpi.premiumEnabled": "Premium analytics enabled",
+  "student.dashboard.kpi.freeTier": "Free tier (upgrade for premium analytics)",
+
+  "student.dashboard.kpi.assessments": "Assessments",
+  "student.dashboard.kpi.total": "total",
+  "student.dashboard.kpi.lastSubmitted": "Last submitted:",
+  "student.dashboard.kpi.notYet": "Not yet",
+
+  "student.dashboard.kpi.scoring": "Scoring",
+  "student.dashboard.kpi.version": "Version:",
+  "student.dashboard.kpi.resultsHistory": "Results history:",
+  "student.dashboard.kpi.records": "record(s)",
+
+  "consent.required.title": "Guardian consent required ⚠️",
+  "consent.required.body": "Your account is marked as a minor. Please complete guardian consent verification to unlock reports and continue.",
+  "consent.verified.title": "Parental consent verified ✅",
+  "consent.verified.body": "Your guardian consent is verified. You can continue using the platform.",
+
+  "student.onboarding.required": "required",
+  "student.onboarding.optional": "optional",
+  "student.onboarding.gradeClass": "Grade / Class",
+  "student.onboarding.primaryGoal": "Primary Goal",
+  "student.onboarding.validation.prefix": "Please complete the required fields:",
+  "student.onboarding.validation.grade": "Grade",
+  "student.onboarding.validation.and": "and",
+  "student.onboarding.validation.primaryGoal": "Primary Goal",
+
+  "studentResults.title": "Your Career Results",
+  "studentResults.subtitle": "Top recommendations based on your assessment.",
+  "studentResults.languageAria": "Language",
+  "studentResults.loading": "Loading results…",
+
+  "studentResults.actions.backToDashboard": "Back to Dashboard",
+  "studentResults.actions.viewHistory": "View History",
+  "studentResults.actions.downloadReport": "Download Report",
+
+  "studentResults.context.title": "Your context (optional)",
+  "studentResults.context.helperUnknown": "Optional details that help us interpret results more fairly. You can change this anytime.",
+  "studentResults.context.helperKnown": "We use this only to adjust assumptions, not to judge you.",
+  "studentResults.context.add": "Add",
+  "studentResults.context.edit": "Edit",
+
+  "studentResults.latest.title": "Latest Assessment",
+  "studentResults.latest.subtitle": "A summary of the most recent assessment used for these results.",
+  "studentResults.latest.showingPrefix": "Showing result for",
+  "studentResults.latest.latestStrong": "your latest assessment",
+
+  "studentResults.focusThemes.title": "Focus themes",
+
+
+  "student.dashboard.card.onboarding.title": "Onboarding / Context",
+  "student.dashboard.card.onboarding.body": "Add optional context to improve recommendations.",
+  "student.dashboard.card.assessment.title": "Start / Resume Assessment",
+  "student.dashboard.card.assessment.body": "Continue your assessment journey.",
+  "student.dashboard.card.latestResults.title": "View Latest Results",
+  "student.dashboard.card.latestResults.body": "See your latest career recommendations.",
+  "student.dashboard.card.history.title": "Results History",
+  "student.dashboard.card.history.body": "View all your previous submissions.",
+  "student.dashboard.card.report.title": "Report (placeholder)",
+  "student.dashboard.card.report.body": "Downloadable report experience (coming soon).",
+  "student.dashboard.card.careerDetail.title": "Career Detail (placeholder)",
+  "student.dashboard.card.careerDetail.body": "Deep dive into a career explanation (coming soon).",
+  "student.dashboard.card.consent.title": "Consent (if minor)",
+  "student.dashboard.card.consent.body": "Verify guardian consent if required.",
+  "nav.backHome": "← Home",
+  "student.assessmentRun.progress.question": "Question",
+  "student.assessmentRun.progress.of": "of",
+
+  "student.assessmentSubmit.title": "Submit Assessment",
+  "student.assessmentSubmit.subtitle": "Review completion status before submitting.",
+  "student.assessmentSubmit.completionSummary.title": "Completion summary",
+
+  "student.resultsHistory.title": "Results History",
+  "student.resultsHistory.subtitle": "Previous assessments and recommendations.",
+  "student.resultsHistory.loading": "Loading history…",
+  "student.resultsHistory.empty": "No assessments found yet.",
+
+  "student.resultsHistory.actions.backToLatest": "Back to Latest",
+  "student.resultsHistory.actions.downloadReport": "Download Report",
+  "student.resultsHistory.actions.retry": "Retry",
+  "student.resultsHistory.actions.view": "View",
+
+  "student.resultsHistory.error.title": "Student not ready",
+
+  "student.resultsHistory.row.assessmentPrefix": "Assessment",
+  "student.resultsHistory.row.submitted": "Submitted",
+  "student.resultsHistory.row.config": "Config",
+
+  "student.resultsHistory.errors.studentProfileNotReady": "Student profile not ready.",
+  "student.resultsHistory.errors.studentNotReady": "Student not ready",
+  "student.resultsHistory.errors.couldNotLoadHistory": "Could not load history.",
+
+  "lang.enShort": "EN",
+  "lang.knShort": "KN",
+
+  "studentResults.context.supportLevel": "Support level",
+  "studentResults.context.resourceAccess": "Resource access",
+  "studentResults.context.sesBand": "SES band",
+  "student.context.loading": "Loading…",
+  "student.context.actions.backToDashboard": "Back to Dashboard",
+
+  "student.context.intro.takesAboutPrefix": "Takes about",
+  "student.context.intro.seconds": "30 seconds",
+  "student.context.intro.preferNotToSay": "Choose “Prefer not to say” anytime.",
+
+  "student.context.q.educationBoard": "Which board are you studying under?",
+  "student.context.q.supportLevel": "When you need study help, how much support is usually available?",
+  "student.context.q.resourceAccess": "How easy is it to access learning resources if needed (internet/books/coaching)?",
+  "student.context.q.sesBand": "To keep suggestions practical, which feels closest?",
+
+  "consent.page.actions.logout": "Logout",
+
+  "consent.page.minorNotice.prefix": "This student account is marked as a",
+  "consent.page.minorNotice.minorBold": "minor",
+  "consent.page.minorNotice.suffix": ". Before assessments can begin, parental or guardian consent must be verified.",
+
+  "consent.page.status.verifiedTitle": "Consent verified ✅",
+  "consent.page.status.statusTitle": "Consent Status",
+
+  "consent.page.verify.helperTitle": "Verify Consent (Helper)",
+  "consent.page.verify.tokenLabel": "Token",
+  "consent.page.verify.otpLabel": "OTP",
+  "consent.page.verify.guardianLinkTitle": "Guardian Verify Link",
+
+  "guardian.verify.title": "Guardian Consent Verification",
+  "guardian.verify.labels.guardian": "Guardian",
+  "guardian.verify.labels.otp": "OTP",
+  "guardian.verify.status.tokenPresent": "Token present ✅",
+
+  "student.careerDetail.title": "Career Details",
+  "student.careerDetail.subtitle": "Why this career matches your profile.",
+  "student.careerDetail.actions.back": "Back",
+  "student.careerDetail.actions.shortlist": "Shortlist",
+  "student.careerDetail.body.placeholder": "Career explanation, pathway, feasibility, CPS fit."
+
+
+}

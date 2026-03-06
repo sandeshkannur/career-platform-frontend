@@ -1,6 +1,8 @@
 // frontend/src/layouts/DashboardLayout.jsx
 import React, { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import LanguageSwitcher from "../ui/LanguageSwitcher";
+import { t } from "../i18n";
 
 function classNames(...xs) {
   return xs.filter(Boolean).join(" ");
@@ -36,10 +38,10 @@ export default function DashboardLayout() {
 
   const nav = useMemo(
     () => [
-      { to: "/student/dashboard", label: "Dashboard" },
-      { to: "/student/assessment", label: "Assessment" },
-      { to: "/student/results", label: "Results" },
-      { to: "/student/profile", label: "Profile" },
+      { to: "/student/dashboard", label: t("student.nav.dashboard", "Dashboard") },
+      { to: "/student/assessment", label: t("student.nav.assessment", "Assessment") },
+      { to: "/student/results", label: t("student.nav.results", "Results") },
+      { to: "/student/profile", label: t("student.nav.profile", "Profile") },
     ],
     []
   );
@@ -57,9 +59,11 @@ export default function DashboardLayout() {
             ☰
           </button>
 
-          <div className="text-sm font-semibold">Student Portal</div>
+          <div className="text-sm font-semibold">
+            {t("student.portal.title", "Student Portal")}
+          </div>
 
-          <div className="w-[42px]" />
+          <LanguageSwitcher compact />
         </div>
       </div>
 
@@ -68,9 +72,14 @@ export default function DashboardLayout() {
         {/* Desktop sidebar */}
         <aside className="hidden h-screen w-[260px] shrink-0 border-r border-[var(--border)] bg-white md:flex md:flex-col">
           <div className="px-5 py-4">
-            <div className="text-sm font-semibold">Student Portal</div>
+            <div className="text-sm font-semibold">
+              {t("student.portal.title", "Student Portal")}
+            </div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">
-              Clean & safe experience
+              {t("student.portal.subtitle", "Clean & safe experience")}
+            </div>
+            <div className="mt-3">
+              <LanguageSwitcher compact />
             </div>
           </div>
 
@@ -82,8 +91,12 @@ export default function DashboardLayout() {
 
           {/* Footer / profile stub (future: show user name + tier) */}
           <div className="border-t border-[var(--border)] px-5 py-4">
-            <div className="text-xs text-[var(--text-muted)]">Signed in</div>
-            <div className="text-sm font-medium">Student</div>
+            <div className="text-xs text-[var(--text-muted)]">
+              {t("student.portal.signedIn", "Signed in")}
+            </div>
+            <div className="text-sm font-medium">
+              {t("student.portal.role", "Student")}
+            </div>
           </div>
         </aside>
 
@@ -96,7 +109,9 @@ export default function DashboardLayout() {
             />
             <div className="absolute left-0 top-0 h-full w-[280px] bg-white shadow-xl">
               <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-                <div className="text-sm font-semibold">Student Portal</div>
+                <div className="text-sm font-semibold">
+                  {t("student.portal.title", "Student Portal")}
+                </div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
@@ -118,8 +133,12 @@ export default function DashboardLayout() {
               </nav>
 
               <div className="absolute bottom-0 w-full border-t border-[var(--border)] px-4 py-4">
-                <div className="text-xs text-[var(--text-muted)]">Signed in</div>
-                <div className="text-sm font-medium">Student</div>
+              <div className="text-xs text-[var(--text-muted)]">
+                {t("student.portal.signedIn", "Signed in")}
+              </div>
+              <div className="text-sm font-medium">
+                {t("student.portal.role", "Student")}
+              </div>
               </div>
             </div>
           </div>

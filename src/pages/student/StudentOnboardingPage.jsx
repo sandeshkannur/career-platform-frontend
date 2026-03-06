@@ -175,9 +175,13 @@ export default function StudentOnboardingPage() {
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
             {currentField.label}{" "}
             {currentField.required ? (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>(required)</span>
+              <span style={{ fontSize: 12, opacity: 0.7 }}>
+                ({t("student.onboarding.required", "required")})
+              </span>
             ) : (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>(optional)</span>
+              <span style={{ fontSize: 12, opacity: 0.7 }}>
+                ({t("student.onboarding.optional", "optional")})
+              </span>
             )}
           </div>
 
@@ -238,7 +242,10 @@ export default function StudentOnboardingPage() {
         {/* Grade */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Grade / Class <span style={{ opacity: 0.7 }}>(required)</span>
+            {t("student.onboarding.gradeClass", "Grade / Class")}{" "}
+            <span style={{ opacity: 0.7 }}>
+              ({t("student.onboarding.required", "required")})
+            </span>
           </div>
           <Input
             value={draft.grade}
@@ -250,7 +257,10 @@ export default function StudentOnboardingPage() {
         {/* Primary goal */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Primary Goal <span style={{ opacity: 0.7 }}>(required)</span>
+            {t("student.onboarding.primaryGoal", "Primary Goal")}{" "}
+            <span style={{ opacity: 0.7 }}>
+              ({t("student.onboarding.required", "required")})
+            </span>
           </div>
           <Input
             value={draft.primary_goal}
@@ -307,7 +317,10 @@ export default function StudentOnboardingPage() {
               fontSize: 13,
             }}
           >
-            Please complete the required fields: <b>Grade</b> and <b>Primary Goal</b>.
+            {t("student.onboarding.validation.prefix", "Please complete the required fields:")}{" "}
+            <b>{t("student.onboarding.validation.grade", "Grade")}</b>{" "}
+            {t("student.onboarding.validation.and", "and")}{" "}
+            <b>{t("student.onboarding.validation.primaryGoal", "Primary Goal")}</b>.
           </div>
         ) : null}
 
@@ -344,7 +357,7 @@ export default function StudentOnboardingPage() {
           ? `Hi ${sessionUser.full_name}, tell us a bit about yourself before starting the assessment.`
           : "Tell us a bit about your background and context."
       }
-      actions={<Button onClick={logout}>Logout</Button>}
+      actions={<Button onClick={logout}>{t("common.logout", "Logout")}</Button>}
     >
       {isMobile ? renderMobileStepper() : renderDesktopForm()}
     </SkeletonPage>

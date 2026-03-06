@@ -5,13 +5,14 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 // ✅ one-time redirect guard (prevents repeated redirects / race conditions)
 const AUTH_REDIRECT_FLAG = "__AUTH_REDIRECTING__";
-const LANG_STORAGE_KEY = "CP_LANG";
+const LANG_STORAGE_KEY = "CP_LANG_V2";
 const DEFAULT_LANG = "en";
 
 // Exported so UI can call it later (language dropdown/toggle)
 export function getPreferredLang() {
   const raw = (localStorage.getItem(LANG_STORAGE_KEY) || "").trim().toLowerCase();
-  return raw || DEFAULT_LANG;
+  const allowed = new Set(["en", "kn"]);
+  return allowed.has(raw) ? raw : DEFAULT_LANG;
 }
 
 export function setPreferredLang(lang) {

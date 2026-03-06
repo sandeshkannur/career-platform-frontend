@@ -4,11 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 
 
 import Button from "../../ui/Button";
+import LanguageSwitcher from "../../ui/LanguageSwitcher";
 import useContent from "../../hooks/useContent";
 
 import { getQuestionPool } from "../../api/questions";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
-import { getPreferredLang, setPreferredLang } from "../../apiClient";
+import { getActiveLang } from "../../i18n";
 import { loadAnswerQueue, replayAnswerQueueOnce } from "../../lib/replayQueue";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
@@ -43,16 +44,7 @@ export default function StudentAssessmentRunPage() {
   }, [attemptId]);
 
   const [index, setIndex] = useState(0);
-  const [lang, setLang] = useState(getPreferredLang());
-
-  const handleLangChange = (e) => {
-    const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
-
-    // Reset to first question for a predictable experience
-    setIndex(0);
-  };
+  const lang = getActiveLang();
 
   // answers: { [questionId]: { answer: string, answered_at: ISOString } }
   const [answers, setAnswers] = useState({});
@@ -304,7 +296,10 @@ export default function StudentAssessmentRunPage() {
 
     (async () => {
       try {
-        setSyncState({ status: "syncing", message: "Syncing saved answers…" });
+        setSyncState({
+          status: "syncing",
+          message: t("sync.syncing", "Syncing saved answers…"),
+        });
 
         const res = await replayAnswerQueueOnce(attemptId);
 
@@ -315,8 +310,11 @@ export default function StudentAssessmentRunPage() {
             status: "done",
             message:
               res.submitted > 0
-                ? `Synced ${res.submitted} saved answer(s).`
-                : "No saved answers to sync.",
+                ? `${t("sync.syncedPrefix", "Synced")} ${res.submitted} ${t(
+                    "sync.syncedSuffix",
+                    "saved answer(s)."
+                  )}`
+                : t("sync.noneToSync", "No saved answers to sync."),
           });
         } else {
           console.warn("[A+ auto-replay] not submitted:", res);
@@ -324,7 +322,10 @@ export default function StudentAssessmentRunPage() {
             status: "error",
             message:
               res?.message ||
-              "Could not sync saved answers automatically. You can continue normally.",
+              t(
+                  "sync.errorFallback",
+                  "Could not sync saved answers automatically. You can continue normally."
+                ),
           });
         }
       } catch (e) {
@@ -388,7 +389,13 @@ export default function StudentAssessmentRunPage() {
     ? current.choices
     : Array.isArray(current?.answers)
     ? current.answers
-    : ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+    : [
+    t("options.stronglyDisagree", "Strongly Disagree"),
+    t("options.disagree", "Disagree"),
+    t("options.neutral", "Neutral"),
+    t("options.agree", "Agree"),
+    t("options.stronglyAgree", "Strongly Agree"),
+  ];
 
   const selected = currentId ? answers[currentId]?.answer : null;
   const isLast = index === QUESTIONS.length - 1;
@@ -443,9 +450,9 @@ export default function StudentAssessmentRunPage() {
           updated_at: now,
         })
       );
-      alert("Progress saved (local draft).");
+      alert(t("alerts.saved", "Progress saved (local draft)."));
     } catch {
-      alert("Unable to save progress in this browser/session.");
+      alert(t("alerts.saveFailed", "Unable to save progress in this browser/session."));
     }
   }
 
@@ -580,15 +587,7 @@ export default function StudentAssessmentRunPage() {
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
-          <select
-            value={lang}
-            onChange={handleLangChange}
-            className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
-            aria-label="Language"
-          >
-            <option value="en">EN</option>
-            <option value="kn">KN</option>
-          </select>
+          <LanguageSwitcher compact />
           <Button variant="secondary" onClick={handleBack}>
             {t("actions.back", "Back")}
           </Button>
@@ -607,17 +606,17 @@ export default function StudentAssessmentRunPage() {
       <div className="mt-6">
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <div>
-            Question{" "}
+            {t("progress.question", "Question")}{" "}
             <span className="font-medium text-[var(--text-primary)]">
               {index + 1}
             </span>{" "}
-            of{" "}
+            {t("progress.of", "of")}{" "}
             <span className="font-medium text-[var(--text-primary)]">
               {QUESTIONS.length}
             </span>
             {attemptId ? (
               <span className="ml-2 opacity-80">
-                • Attempt ID: {attemptId}
+                • {t("progress.attemptId", "Attempt ID")}: {attemptId}
               </span>
             ) : null}
           </div>
@@ -642,8 +641,10 @@ export default function StudentAssessmentRunPage() {
 
       {/* Determinism metadata (auditable) */}
       <div className="mt-3 text-xs text-[var(--text-muted)]">
-        Deterministic selection: seed = attemptId, pick = {QUESTION_COUNT} (or
-        fewer if pool smaller)
+        {t(
+            "meta.deterministicSelection",
+            `Deterministic selection: seed = attemptId, pick = ${QUESTION_COUNT} (or fewer if pool smaller)`
+          )}
       </div>
 
       {/* Question Card */}

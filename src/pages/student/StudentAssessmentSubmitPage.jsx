@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
+import useContent from "../../hooks/useContent";
 
 import { getAssessment, postAssessmentResponses, submitAssessment } from "../../api/assessments";
 
@@ -38,6 +39,7 @@ function readDraft(storageKey) {
 export default function StudentAssessmentSubmitPage() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
+  const { t } = useContent("student.assessmentSubmit");
 
   const storageKey = useMemo(() => {
     return `${DRAFT_PREFIX_V2}:${attemptId || "unknown"}`;
@@ -179,8 +181,8 @@ export default function StudentAssessmentSubmitPage() {
 
   return (
     <SkeletonPage
-      title="Submit Assessment"
-      subtitle="Review completion status before submitting."
+      title={t("title", "Submit Assessment")}
+      subtitle={t("subtitle", "Review completion status before submitting.")}
       actions={
         <>
           <Button variant="secondary" onClick={handleBack} disabled={busy}>
@@ -201,7 +203,9 @@ export default function StudentAssessmentSubmitPage() {
         </div>
 
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>Completion summary</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+            {t("completionSummary.title", "Completion summary")}
+          </div>
           <div style={{ fontSize: 13, opacity: 0.9 }}>
             Selected questions: <b>{questionIds.length}</b> / {QUESTION_COUNT}
           </div>

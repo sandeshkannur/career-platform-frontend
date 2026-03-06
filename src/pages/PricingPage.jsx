@@ -4,6 +4,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PublicHeader from "../ui/PublicHeader";
+import { t } from "../i18n";
 
 function PriceCard({
   title,
@@ -29,14 +30,16 @@ function PriceCard({
 
         {highlight ? (
           <span className="rounded-full bg-black px-3 py-1 text-xs font-medium text-white">
-            Recommended
+            {t("pricing.recommended", "Recommended")}
           </span>
         ) : null}
       </div>
 
       <div className="mt-5">
         <div className="text-4xl font-semibold">{price}</div>
-        <div className="mt-1 text-sm text-gray-600">per assessment</div>
+        <div className="mt-1 text-sm text-gray-600">
+          {t("pricing.perAssessment", "per assessment")}
+        </div>
       </div>
 
       <ul className="mt-5 space-y-2 text-sm">
@@ -62,7 +65,10 @@ function PriceCard({
         </Link>
 
         <p className="mt-3 text-xs text-gray-500">
-          No backend payment wiring in this step — CTA routes to existing flows.
+          {t(
+            "pricing.note.noPaymentWiring",
+            "No backend payment wiring in this step — CTA routes to existing flows."
+          )}
         </p>
       </div>
     </div>
@@ -76,79 +82,105 @@ export default function PricingPage() {
 
       <div className="mx-auto max-w-5xl px-4 py-8">
         <header className="text-center">
-          <h1 className="text-3xl font-semibold">Pricing</h1>
+          <h1 className="text-3xl font-semibold">
+            {t("pricing.title", "Pricing")}
+          </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600">
-            CareerPlatform offers a deterministic, explainable assessment with a
-            Free report and an upgraded Premium report.
+            {t(
+              "pricing.subtitle",
+              "CareerPlatform offers a deterministic, explainable assessment with a Free report and an upgraded Premium report."
+            )}
           </p>
         </header>
 
         <section className="mt-10 grid gap-6 md:grid-cols-2">
           <PriceCard
-            title="Free"
-            price="£0"
-            subtitle="Great for first-time exploration"
+            title={t("pricing.free.title", "Free")}
+            price="₹0"
+            subtitle={t("pricing.free.subtitle", "Great for first-time exploration")}
             features={[
-              "Top recommended careers (basic)",
-              "Core strengths summary",
-              "Deterministic mapping (skills → careers)",
-              "Shareable report link (UI-only for now)",
-            ]}
-            ctaLabel="Start with Free"
+                  t("pricing.free.features.1", "Top recommended careers (basic)"),
+                  t("pricing.free.features.2", "Core strengths summary"),
+                  t("pricing.free.features.3", "Deterministic mapping (skills → careers)"),
+                  t("pricing.free.features.4", "Shareable report link (UI-only for now)"),
+                ]}
+            ctaLabel={t("pricing.free.cta", "Start with Free")}
             ctaTo="/login"
           />
 
           <PriceCard
-            title="Premium"
-            price="£19"
-            subtitle="Deeper analytics + explainability"
+            title={t("pricing.premium.title", "Premium")}
+            price="₹799"
+            subtitle={t("pricing.premium.subtitle", "Deeper analytics + explainability")}
             highlight
             features={[
-              "Cluster-level insights & key skill breakdown",
-              "Explainable career fit (why these careers)",
-              "More detailed report sections",
-              "Designed for auditability & stability",
+              t("pricing.premium.features.1", "Cluster-level insights & key skill breakdown"),
+              t("pricing.premium.features.2", "Explainable career fit (why these careers)"),
+              t("pricing.premium.features.3", "More detailed report sections"),
+              t("pricing.premium.features.4", "Designed for auditability & stability"),
             ]}
-            ctaLabel="Get Premium"
+            ctaLabel={t("pricing.premium.cta", "Get Premium")}
             ctaTo="/login"
           />
         </section>
 
         <section className="mt-10 rounded-2xl border border-gray-200 p-6 text-left">
-          <h2 className="text-lg font-semibold">What you get</h2>
+          <h2 className="text-lg font-semibold">
+            {t("pricing.whatYouGet.title", "What you get")}
+          </h2>
           <div className="mt-3 grid gap-4 md:grid-cols-2">
             <div className="rounded-xl bg-gray-50 p-4">
-              <div className="text-sm font-medium">Deterministic</div>
+              <div className="text-sm font-medium">
+                {t("pricing.whatYouGet.deterministic.title", "Deterministic")}
+              </div>
               <p className="mt-1 text-sm text-gray-600">
-                Recommendations come from controlled mappings and scoring — not
-                random outputs.
+                {t(
+                  "pricing.whatYouGet.deterministic.desc",
+                  "Recommendations come from controlled mappings and scoring — not random outputs."
+                )}
               </p>
             </div>
             <div className="rounded-xl bg-gray-50 p-4">
-              <div className="text-sm font-medium">Explainable</div>
+              <div className="text-sm font-medium">
+                {t("pricing.whatYouGet.explainable.title", "Explainable")}
+              </div>
               <p className="mt-1 text-sm text-gray-600">
-                Premium focuses on “why” — key skills and cluster drivers.
+                {t(
+                  "pricing.whatYouGet.explainable.desc",
+                  "Premium focuses on “why” — key skills and cluster drivers."
+                )}
               </p>
             </div>
             <div className="rounded-xl bg-gray-50 p-4">
-              <div className="text-sm font-medium">Compliance-first</div>
+              <div className="text-sm font-medium">
+                {t("pricing.whatYouGet.complianceFirst.title", "Compliance-first")}
+              </div>
               <p className="mt-1 text-sm text-gray-600">
-                Guardian consent gating remains enforced for minors in protected
-                student routes.
+                {t(
+                  "pricing.whatYouGet.complianceFirst.desc",
+                  "Guardian consent gating remains enforced for minors in protected student routes."
+                )}
               </p>
             </div>
             <div className="rounded-xl bg-gray-50 p-4">
-              <div className="text-sm font-medium">Incremental build</div>
+              <div className="text-sm font-medium">
+                {t("pricing.whatYouGet.incrementalBuild.title", "Incremental build")}
+              </div>
               <p className="mt-1 text-sm text-gray-600">
-                This page is UI-only and safe to merge without backend changes.
+                {t(
+                  "pricing.whatYouGet.incrementalBuild.desc",
+                  "This page is UI-only and safe to merge without backend changes."
+                )}
               </p>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              Next step (later): connect Premium CTA to real checkout/payment and
-              route to premium report pages.
+              {t(
+                "pricing.note.nextStep",
+                "Next step (later): connect Premium CTA to real checkout/payment and route to premium report pages."
+              )}
             </p>
           </div>
         </section>

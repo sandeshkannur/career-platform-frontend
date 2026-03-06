@@ -1,0 +1,246 @@
+{
+  "auth.login.title": "ಲಾಗಿನ್ (Login)",
+  "auth.login.subtitle": "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಮುಂದುವರಿಯಲು ಲಾಗಿನ್ ಮಾಡಿ",
+  "auth.login.missingFields": "ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+  "auth.login.loginFailed": "ಲಾಗಿನ್ ಆಗಲಿಲ್ಲ",
+
+  "common.logout": "ಲಾಗೌಟ್ (Logout)",
+  "common.loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ… (Loading…)",
+  "common.pleaseWait": "ದಯವಿಟ್ಟು ಕಾಯಿರಿ. (Please wait.)",
+  "common.somethingWentWrong": "ಏನೋ ತಪ್ಪಾಗಿದೆ (Something went wrong)",
+  "common.retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ (Retry)",
+  "common.emptyTitle": "ಇಲ್ಲಿ ಇನ್ನೂ ಏನೂ ಇಲ್ಲ (Nothing here yet)",
+  "common.emptyDescription": "ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ. (No data available.)",
+
+  "pricing.whatYouGet.explainable.title": "ವಿವರಣೀಯ (Explainable)",
+ "pricing.whatYouGet.explainable.desc": "Premium ನಲ್ಲಿ “ಯಾಕೆ” ಎಂಬ ಕಾರಣ— key skills ಮತ್ತು cluster drivers.",
+ "pricing.whatYouGet.complianceFirst.title": "ಅನುಗುಣತೆ ಮೊದಲಿಗೆ (Compliance-first)",
+ "pricing.whatYouGet.complianceFirst.desc": "Minor ವಿದ್ಯಾರ್ಥಿಗಳ protected routes ನಲ್ಲಿ guardian consent gating enforce ಆಗುತ್ತದೆ.",
+ "pricing.whatYouGet.incrementalBuild.title": "ಹಂತ ಹಂತವಾಗಿ ನಿರ್ಮಾಣ (Incremental build)",
+ "pricing.whatYouGet.incrementalBuild.desc": "ಈ ಪುಟ UI-only; backend ಬದಲಾವಣೆ ಇಲ್ಲದೇ merge ಮಾಡಲು safe.",
+
+  "auth.signup.title": "ಸೈನ್‌ಅಪ್ (Signup)",
+  "auth.signup.headline": "ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ",
+  "auth.signup.blurb": "ಬೀಟಾ ಅವಧಿಯಲ್ಲಿ ಸೈನ್‌ಅಪ್ ನಿರ್ಬಂಧಿತವಾಗಿದೆ. ನಿಮ್ಮ ಇಮೇಲ್ ಸೇರಿಸಲು ಆಡ್ಮಿನ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+
+  "results.title": "ಫಲಿತಾಂಶಗಳು (Results)",
+  "results.subtitle": "ನಿಮ್ಮ ಉತ್ತರಗಳ ಆಧಾರದ ಮೇಲೆ ವೃತ್ತಿ (Career) ಶಿಫಾರಸುಗಳು",
+  "results.premium.locked": "ವಿವರವಾದ ಮಾಹಿತಿ (Insights) ನೋಡಲು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ",
+
+  "dashboard.welcome": "ಮುಖಪುಟ (Home)",
+  "dashboard.landing": "ಸಾರ್ವಜನಿಕ ಲ್ಯಾಂಡಿಂಗ್ ಪುಟ",
+  "dashboard.actions.viewPricing": "ಬೆಲೆ (Pricing) ನೋಡಿ",
+
+  "nav.home": "ಮುಖಪುಟ (Home)",
+  "nav.pricing": "ಬೆಲೆ (Pricing)",
+  "nav.login": "ಲಾಗಿನ್ (Login)",
+  "nav.signup": "ಸೈನ್‌ಅಪ್ (Signup)",
+  "nav.language": "ಭಾಷೆ (Language)",
+
+  "student.assessmentIntro.title": "ಅಸೆಸ್ಮೆಂಟ್ (Assessment)",
+  "student.assessmentIntro.subtitle": "ನಿಮ್ಮ ಶಕ್ತಿಗಳು, ಆಸಕ್ತಿಗಳು ಮತ್ತು aptitude ಅನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ. (Understand your strengths, preferences, and aptitude.)",
+  "student.assessmentIntro.resume": "ಮುಂದುವರಿಸಿ (Resume)",
+  "student.assessmentIntro.starting": "ಪ್ರಾರಂಭವಾಗುತ್ತಿದೆ… (Starting...)",
+  "student.assessmentIntro.start": "ಅಸೆಸ್ಮೆಂಟ್ ಆರಂಭಿಸಿ (Start Assessment)",
+  "student.assessmentIntro.body1": "ಈ ಅಸೆಸ್ಮೆಂಟ್ ನಿಮ್ಮ ಉತ್ತರಗಳ ಆಧಾರದ ಮೇಲೆ deterministic ಮತ್ತು explainable career recommendations ನೀಡಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+  "student.assessmentIntro.contextCard.title": "ಮಾರ್ಗದರ್ಶನವನ್ನು ಹೊಂದಿಸಲು ಸಹಾಯ ಮಾಡಿ (optional, ~30 seconds)",
+  "student.assessmentIntro.contextCard.desc": "ಕೆಲವು ವಿವರಗಳನ್ನು ಸೇರಿಸಿದರೆ ಶಿಫಾರಸುಗಳು ನಿಮಗೆ practical ಆಗಿರುತ್ತವೆ. ಈಗ ಬಿಟ್ಟು ನಂತರ ಯಾವಾಗ ಬೇಕಾದರೂ update ಮಾಡಬಹುದು.",
+  "student.assessmentIntro.contextCard.addDetails": "ವಿವರಗಳನ್ನು ಸೇರಿಸಿ (Add details)",
+  "student.assessmentIntro.contextCard.skip": "ಈಗ ಬಿಡಿ (Skip for now)",
+  "student.assessmentIntro.activeError": "ಈಗ saved progress ಚೆಕ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ಸಾಧ್ಯವಿದ್ದರೆ Start/Resume ಮಾಡಬಹುದು.",
+  "student.assessmentIntro.savedProgressPrefix": "Saved progress ಕಂಡುಬಂದಿದೆ: answered",
+  "student.assessmentIntro.savedProgressOf": "of",
+  "student.assessmentIntro.expect.title": "ಏನು ನಿರೀಕ್ಷಿಸಬೇಕು (What to expect)",
+  "student.assessmentIntro.expect.li1": "ಪ್ರಾಮಾಣಿಕವಾಗಿ ಉತ್ತರಿಸಿ — ಸರಿಯಾದ/ತಪ್ಪಾದ ಉತ್ತರಗಳಿಲ್ಲ.",
+  "student.assessmentIntro.expect.li2": "ಅಂದಾಜು ಸಮಯ: ~10–15 ನಿಮಿಷ (placeholder).",
+  "student.assessmentIntro.expect.li3": "ನಂತರ resume ಮಾಡಬಹುದು (progress saving ಮುಂದಿನ ಹಂತದಲ್ಲಿ).",
+  "student.assessmentIntro.privacy.title": "ಗೌಪ್ಯತೆ & ಸೂಚನೆ (Privacy & disclaimer)",
+  "student.assessmentIntro.privacy.body": "ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಕೇವಲ ಶಿಫಾರಸುಗಳು ಮತ್ತು ವರದಿಗಳಿಗಾಗಿ ಬಳಸಲಾಗುತ್ತದೆ. ಇದು ಮಾರ್ಗದರ್ಶನ ಸಾಧನ; ಫಲಿತಾಂಶಗಳ ಖಾತರಿ ಅಲ್ಲ.",
+  "student.assessmentIntro.note": "Note: Start backend ಮೂಲಕ assessment id ರಚಿಸುತ್ತದೆ. Resume last saved snapshot ಅನ್ನು ಬಳಸುತ್ತದೆ.",
+
+  "pricing.recommended": "ಶಿಫಾರಸು (Recommended)",
+  "pricing.perAssessment": "ಪ್ರತಿ ಅಸೆಸ್ಮೆಂಟ್‌ಗೆ (per assessment)",
+  "pricing.note.noPaymentWiring": "ಈ ಹಂತದಲ್ಲಿ backend payment wiring ಇಲ್ಲ — CTA ಇರುವುದು existing flows ಗೆ ಹೋಗುತ್ತದೆ.",
+  "pricing.note.nextStep": "ಮುಂದಿನ ಹಂತ (later): Premium CTA ಯನ್ನು real checkout/payment ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ ಮತ್ತು premium report pages ಗೆ route ಮಾಡಿ.",
+
+  "pricing.premium.title": "ಪ್ರೀಮಿಯಮ್ (Premium)",
+  "pricing.premium.subtitle": "ಆಳವಾದ ಅನಾಲಿಟಿಕ್ಸ್ + ವಿವರಣೆ (Deeper analytics + explainability)",
+  "pricing.premium.cta": "ಪ್ರೀಮಿಯಮ್ ಪಡೆಯಿರಿ (Get Premium)",
+  "pricing.premium.features.1": "Cluster-level insights & key skill breakdown",
+  "pricing.premium.features.2": "Explainable career fit (why these careers)",
+  "pricing.premium.features.3": "More detailed report sections",
+  "pricing.premium.features.4": "Designed for auditability & stability",
+
+  "pricing.whatYouGet.title": "ನೀವು ಪಡೆಯುವುದೇನು (What you get)",
+  "pricing.whatYouGet.deterministic.title": "ನಿಶ್ಚಿತ (Deterministic)",
+  "pricing.whatYouGet.deterministic.desc": "ಶಿಫಾರಸುಗಳು controlled mappings ಮತ್ತು scoring ನಿಂದ ಬರುತ್ತವೆ — random outputs ಅಲ್ಲ.",
+
+
+  "pricing.free.features.1": "Top recommended careers (basic)",
+  "pricing.free.features.2": "Core strengths summary",
+  "pricing.free.features.3": "Deterministic mapping (skills → careers)",
+  "pricing.free.features.4": "Shareable report link (UI-only for now)",
+
+  "student.portal.title": "ವಿದ್ಯಾರ್ಥಿ ಪೋರ್ಟಲ್ (Student Portal)",
+  "student.portal.subtitle": "ಸರಳ ಮತ್ತು ಸುರಕ್ಷಿತ ಅನುಭವ",
+  "student.portal.signedIn": "ಲಾಗಿನ್ ಆಗಿದ್ದೀರಿ",
+  "student.portal.role": "ವಿದ್ಯಾರ್ಥಿ (Student)",
+
+  "student.nav.dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (Dashboard)",
+  "student.nav.assessment": "ಮೌಲ್ಯಮಾಪನ (Assessment)",
+  "student.nav.results": "ಫಲಿತಾಂಶಗಳು (Results)",
+  "student.nav.profile": "ಪ್ರೊಫೈಲ್ (Profile)",
+
+  "student.dashboard.title": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (Dashboard)",
+  "student.dashboard.welcomePrefix": "ಸ್ವಾಗತ,",
+  "student.dashboard.chooseNext": "ಮುಂದೆ ಏನು ಮಾಡಬೇಕು ಎಂದು ಆಯ್ಕೆ ಮಾಡಿ.",
+
+  "student.dashboard.session.title": "ಸೆಷನ್ (Session)",
+  "student.dashboard.session.cannotDeterminePrefix": "ಹುಡುಕಲಾಗಲಿಲ್ಲ (Could not determine)",
+  "student.dashboard.session.cannotDetermineFrom": "ಇಂದ (from)",
+  "student.dashboard.session.shareMePayload": "ದಯವಿಟ್ಟು ನಿಮ್ಮ /v1/auth/me payload ನಲ್ಲಿ student id ಯಾವ field ನಲ್ಲಿ ಇದೆ ಎಂದು ತಿಳಿಸಿ.",
+
+  "student.dashboard.loading": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಡೇಟಾ ಲೋಡ್ ಆಗುತ್ತಿದೆ… (Loading dashboard data…)",
+  "student.dashboard.errorTitle": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಡೇಟಾ ಲೋಡ್ ಆಗಲಿಲ್ಲ (Failed to load dashboard data)",
+
+  "student.dashboard.kpi.account": "ಖಾತೆ (Account)",
+  "student.dashboard.kpi.premiumEnabled": "ಪ್ರೀಮಿಯಮ್ ಅನಾಲಿಟಿಕ್ಸ್ ಸಕ್ರಿಯ (Premium analytics enabled)",
+  "student.dashboard.kpi.freeTier": "ಫ್ರೀ ಟಿಯರ್ (Free tier) — ಪ್ರೀಮಿಯಮ್ ಅನಾಲಿಟಿಕ್ಸ್‌ಗಾಗಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ",
+
+  "student.dashboard.kpi.assessments": "ಮೌಲ್ಯಮಾಪನಗಳು (Assessments)",
+  "student.dashboard.kpi.total": "ಒಟ್ಟು (total)",
+  "student.dashboard.kpi.lastSubmitted": "ಕೊನೆಯ ಸಲ್ಲಿಕೆ (Last submitted):",
+  "student.dashboard.kpi.notYet": "ಇನ್ನೂ ಇಲ್ಲ (Not yet)",
+
+  "student.dashboard.kpi.scoring": "ಸ್ಕೋರಿಂಗ್ (Scoring)",
+  "student.dashboard.kpi.version": "ಆವೃತ್ತಿ (Version):",
+  "student.dashboard.kpi.resultsHistory": "ಫಲಿತಾಂಶ ಇತಿಹಾಸ (Results history):",
+  "student.dashboard.kpi.records": "ರೆಕಾರ್ಡ್(ಗಳು) (record(s))",
+
+  "consent.required.title": "ಗಾರ್ಡಿಯನ್ ಅನುಮತಿ ಅಗತ್ಯವಿದೆ ⚠️",
+  "consent.required.body": "ನಿಮ್ಮ ಖಾತೆ ಮೈನರ್ ಆಗಿದೆ. ವರದಿ ನೋಡಲು ಮತ್ತು ಮುಂದುವರಿಸಲು ಗಾರ್ಡಿಯನ್ ಅನುಮತಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.",
+  "consent.verified.title": "ಗಾರ್ಡಿಯನ್ ಅನುಮತಿ ದೃಢವಾಗಿದೆ ✅",
+  "consent.verified.body": "ನಿಮ್ಮ ಗಾರ್ಡಿಯನ್ ಅನುಮತಿ ದೃಢವಾಗಿದೆ. ನೀವು ವೇದಿಕೆಯನ್ನು ಮುಂದುವರಿಸಬಹುದು.",
+
+  "student.onboarding.required": "ಅಗತ್ಯ (required)",
+  "student.onboarding.optional": "ಐಚ್ಛಿಕ (optional)",
+  "student.onboarding.gradeClass": "ತರಗತಿ (Grade / Class)",
+  "student.onboarding.primaryGoal": "ಮುಖ್ಯ ಗುರಿ (Primary Goal)",
+  "student.onboarding.validation.prefix": "ದಯವಿಟ್ಟು ಅಗತ್ಯ ಫೀಲ್ಡ್‌ಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ (Please complete the required fields):",
+  "student.onboarding.validation.grade": "ತರಗತಿ (Grade)",
+  "student.onboarding.validation.and": "ಮತ್ತು (and)",
+  "student.onboarding.validation.primaryGoal": "ಮುಖ್ಯ ಗುರಿ (Primary Goal)",
+
+  "studentResults.title": "ನಿಮ್ಮ ವೃತ್ತಿ ಫಲಿತಾಂಶಗಳು",
+  "studentResults.subtitle": "ನಿಮ್ಮ ಮೌಲ್ಯಮಾಪನದ ಆಧಾರದ ಮೇಲೆ ಪ್ರಮುಖ ಶಿಫಾರಸುಗಳು.",
+  "studentResults.languageAria": "ಭಾಷೆ",
+  "studentResults.loading": "ಫಲಿತಾಂಶಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ…",
+
+  "studentResults.actions.backToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂದಿರುಗಿ",
+  "studentResults.actions.viewHistory": "ಇತಿಹಾಸ ನೋಡಿ",
+  "studentResults.actions.downloadReport": "ವರದಿ ಡೌನ್‌ಲೋಡ್",
+
+
+  "studentResults.latest.title": "ಇತ್ತೀಚಿನ ಮೌಲ್ಯಮಾಪನ",
+  "studentResults.latest.subtitle": "ಈ ಫಲಿತಾಂಶಗಳಿಗೆ ಬಳಸಿದ ಇತ್ತೀಚಿನ ಮೌಲ್ಯಮಾಪನದ ಸಂಕ್ಷಿಪ್ತ.",
+  "studentResults.latest.showingPrefix": "ಫಲಿತಾಂಶವನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+  "studentResults.latest.latestStrong": "ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಮೌಲ್ಯಮಾಪನ",
+
+  "studentResults.focusThemes.title": "ಫೋಕಸ್ ಥೀಮ್ಸ್",
+
+  "student.dashboard.card.onboarding.title": "ಆನ್‌ಬೋರ್ಡಿಂಗ್ / ಕಾಂಟೆಕ್ಸ್ಟ್ (Onboarding / Context)",
+  "student.dashboard.card.onboarding.body": "ಉತ್ತಮ ಶಿಫಾರಸುಗಳಿಗೆ ಹೆಚ್ಚುವರಿ ಮಾಹಿತಿ ಸೇರಿಸಿ.",
+  "student.dashboard.card.assessment.title": "ಮೌಲ್ಯಮಾಪನ ಆರಂಭಿಸಿ / ಮುಂದುವರಿಸಿ (Start / Resume Assessment)",
+  "student.dashboard.card.assessment.body": "ನಿಮ್ಮ ಮೌಲ್ಯಮಾಪನವನ್ನು ಮುಂದುವರಿಸಿ.",
+  "student.dashboard.card.latestResults.title": "ಇತ್ತೀಚಿನ ಫಲಿತಾಂಶಗಳು (Latest Results)",
+  "student.dashboard.card.latestResults.body": "ನಿಮ್ಮ ಇತ್ತೀಚಿನ ವೃತ್ತಿ ಶಿಫಾರಸುಗಳನ್ನು ನೋಡಿ.",
+  "student.dashboard.card.history.title": "ಫಲಿತಾಂಶಗಳ ಇತಿಹಾಸ (Results History)",
+  "student.dashboard.card.history.body": "ನಿಮ್ಮ ಹಿಂದಿನ ಸಲ್ಲಿಕೆಗಳನ್ನು ನೋಡಿ.",
+  "student.dashboard.card.report.title": "ರಿಪೋರ್ಟ್ (Report) (coming soon)",
+  "student.dashboard.card.report.body": "ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದಾದ ರಿಪೋರ್ಟ್ (ಶೀಘ್ರದಲ್ಲೇ).",
+  "student.dashboard.card.careerDetail.title": "ವೃತ್ತಿ ವಿವರ (Career Detail) (coming soon)",
+  "student.dashboard.card.careerDetail.body": "ವೃತ್ತಿಯ ವಿವರವಾದ ವಿವರಣೆ (ಶೀಘ್ರದಲ್ಲೇ).",
+  "student.dashboard.card.consent.title": "ಅನುಮತಿ (Consent) (if minor)",
+  "student.dashboard.card.consent.body": "ಅಗತ್ಯವಿದ್ದರೆ ಗಾರ್ಡಿಯನ್ ಅನುಮತಿಯನ್ನು ದೃಢಪಡಿಸಿ.",
+
+  "nav.backHome": "← ಮುಖಪುಟ (Home)",
+  "student.assessmentRun.progress.question": "ಪ್ರಶ್ನೆ (Question)",
+  "student.assessmentRun.progress.of": "ಒಳಗೆ (of)",
+
+  "student.assessmentSubmit.title": "ಸಲ್ಲಿಸಿ (Submit Assessment)",
+  "student.assessmentSubmit.subtitle": "ಸಲ್ಲಿಸುವ ಮೊದಲು completion status ಪರಿಶೀಲಿಸಿ. (Review completion status before submitting.)",
+  "student.assessmentSubmit.completionSummary.title": "ಪೂರ್ಣಗೊಳಿಸುವ ಸಾರಾಂಶ (Completion summary)",
+
+  "student.resultsHistory.title": "ಫಲಿತಾಂಶ ಇತಿಹಾಸ (Results History)",
+  "student.resultsHistory.subtitle": "ಹಿಂದಿನ ಅಸೆಸ್ಮೆಂಟ್‌ಗಳು ಮತ್ತು ಶಿಫಾರಸುಗಳು (Previous assessments and recommendations).",
+  "student.resultsHistory.loading": "ಇತಿಹಾಸ ಲೋಡ್ ಆಗುತ್ತಿದೆ… (Loading history…)",
+  "student.resultsHistory.empty": "ಇನ್ನೂ ಯಾವುದೇ ಅಸೆಸ್ಮೆಂಟ್‌ಗಳು ಇಲ್ಲ. (No assessments found yet.)",
+
+  "student.resultsHistory.actions.backToLatest": "ಇತ್ತೀಚಿನ ಫಲಿತಾಂಶಕ್ಕೆ (Back to Latest)",
+  "student.resultsHistory.actions.downloadReport": "ರಿಪೋರ್ಟ್ ಡೌನ್‌ಲೋಡ್ (Download Report)",
+  "student.resultsHistory.actions.retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ (Retry)",
+  "student.resultsHistory.actions.view": "ನೋಡಿ (View)",
+
+  "student.resultsHistory.error.title": "ವಿದ್ಯಾರ್ಥಿ ಸಿದ್ಧವಾಗಿಲ್ಲ (Student not ready)",
+
+  "student.resultsHistory.row.assessmentPrefix": "ಅಸೆಸ್ಮೆಂಟ್ (Assessment)",
+  "student.resultsHistory.row.submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ (Submitted)",
+  "student.resultsHistory.row.config": "ಕಾನ್ಫಿಗ್ (Config)",
+
+  "student.resultsHistory.errors.studentProfileNotReady": "ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. (Student profile not ready.)",
+  "student.resultsHistory.errors.studentNotReady": "ವಿದ್ಯಾರ್ಥಿ ಸಿದ್ಧವಾಗಿಲ್ಲ (Student not ready)",
+  "student.resultsHistory.errors.couldNotLoadHistory": "ಇತಿಹಾಸ ಲೋಡ್ ಆಗಲಿಲ್ಲ. (Could not load history.)",
+
+  "lang.enShort": "EN",
+  "lang.knShort": "KN",
+
+  "studentResults.context.supportLevel": "ಬೆಂಬಲ ಮಟ್ಟ (Support level)",
+  "studentResults.context.resourceAccess": "ಸಂಪನ್ಮೂಲ ಪ್ರವೇಶ (Resource access)",
+  "studentResults.context.sesBand": "SES ಬ್ಯಾಂಡ್ (SES band)",
+
+  "studentResults.context.title": "ನಿಮ್ಮ ಹಿನ್ನೆಲೆ (ಐಚ್ಛಿಕ)",
+  "studentResults.context.helperUnknown": "ಫಲಿತಾಂಶಗಳನ್ನು ಇನ್ನಷ್ಟು ನ್ಯಾಯವಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಹಾಯ ಮಾಡುವ ಐಚ್ಛಿಕ ವಿವರಗಳು. ನೀವು ಇದನ್ನು ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಾಯಿಸಬಹುದು.",
+  "studentResults.context.helperKnown": "ನಾವು ಇದನ್ನು ನಿರ್ಣಯಿಸಲು ಅಲ್ಲ — ಅಂದಾಜುಗಳನ್ನು ಹೊಂದಿಸಲು ಮಾತ್ರ ಬಳಸುತ್ತೇವೆ.",
+  "studentResults.context.add": "ಸೇರಿಸಿ",
+  "studentResults.context.edit": "ತಿದ್ದು",
+  "studentResults.context.educationBoard": "ಶಿಕ್ಷಣ ಮಂಡಳಿ",
+
+  "student.context.loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ… (Loading…)",
+  "student.context.actions.backToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂದಿರುಗಿ (Back to Dashboard)",
+
+  "student.context.intro.takesAboutPrefix": "ಸುಮಾರು (Takes about)",
+  "student.context.intro.seconds": "30 ಸೆಕೆಂಡುಗಳು (30 seconds)",
+  "student.context.intro.preferNotToSay": "ಯಾವಾಗ ಬೇಕಾದರೂ “Prefer not to say” ಆಯ್ಕೆಮಾಡಬಹುದು.",
+
+  "student.context.q.educationBoard": "ನೀವು ಯಾವ ಶಿಕ್ಷಣ ಮಂಡಳಿಯಲ್ಲಿ ಓದುತ್ತಿದ್ದೀರಿ? (Which board are you studying under?)",
+  "student.context.q.supportLevel": "ಓದಲು ಸಹಾಯ ಬೇಕಾದಾಗ ಸಾಮಾನ್ಯವಾಗಿ ಎಷ್ಟು ಬೆಂಬಲ ಲಭ್ಯವಿರುತ್ತದೆ? (support availability)",
+  "student.context.q.resourceAccess": "ಅಗತ್ಯವಿದ್ದರೆ learning resources (internet/books/coaching) ಪಡೆಯುವುದು ಎಷ್ಟು ಸುಲಭ? (How easy is it to access learning resources?)",
+  "student.context.q.sesBand": "ಸಲಹೆಗಳನ್ನು practical ಆಗಿರಿಸಲು, ಯಾವುದು ನಿಮಗೆ ಹತ್ತಿರವಾಗಿದೆ? (which feels closest?)",
+
+  "consent.page.actions.logout": "ಲಾಗೌಟ್ (Logout)",
+
+  "consent.page.minorNotice.prefix": "ಈ ವಿದ್ಯಾರ್ಥಿ ಖಾತೆ",
+  "consent.page.minorNotice.minorBold": "ಮೈನರ್ (minor)",
+  "consent.page.minorNotice.suffix": " ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ. ಅಸೆಸ್ಮೆಂಟ್ ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಗಾರ್ಡಿಯನ್ ಅನುಮತಿ ದೃಢವಾಗಿರಬೇಕು. (consent required)",
+
+  "consent.page.status.verifiedTitle": "ಅನುಮತಿ ದೃಢವಾಗಿದೆ ✅ (Consent verified)",
+  "consent.page.status.statusTitle": "ಅನುಮತಿ ಸ್ಥಿತಿ (Consent Status)",
+
+  "consent.page.verify.helperTitle": "ಅನುಮತಿ ದೃಢೀಕರಿಸಿ (Helper) (Verify Consent)",
+  "consent.page.verify.tokenLabel": "ಟೋಕನ್ (Token)",
+  "consent.page.verify.otpLabel": "OTP",
+  "consent.page.verify.guardianLinkTitle": "ಗಾರ್ಡಿಯನ್ ವೆರಿಫೈ ಲಿಂಕ್ (Guardian Verify Link)",
+
+  "guardian.verify.title": "ಗಾರ್ಡಿಯನ್ ಅನುಮತಿ ದೃಢೀಕರಣ (Guardian Consent Verification)",
+  "guardian.verify.labels.guardian": "ಗಾರ್ಡಿಯನ್ (Guardian)",
+  "guardian.verify.labels.otp": "OTP",
+  "guardian.verify.status.tokenPresent": "ಟೋಕನ್ ಇದೆ ✅ (Token present)",
+
+  "student.careerDetail.title": "ವೃತ್ತಿ ವಿವರಗಳು (Career Details)",
+  "student.careerDetail.subtitle": "ಈ ವೃತ್ತಿ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ಗೆ ಯಾಕೆ ಹೊಂದುತ್ತದೆ (Why this career matches your profile).",
+  "student.careerDetail.actions.back": "ಹಿಂದೆ (Back)",
+  "student.careerDetail.actions.shortlist": "ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ (Shortlist)",
+  "student.careerDetail.body.placeholder": "Career explanation, pathway, feasibility, CPS fit. (Placeholder)"
+
+
+}
