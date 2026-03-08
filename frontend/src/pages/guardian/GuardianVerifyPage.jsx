@@ -1,6 +1,7 @@
 // src/pages/guardian/GuardianVerifyPage.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import useContent from "../../hooks/useContent";
 
 /**
  * Best-effort decode JWT payload (for display only).
@@ -35,6 +36,7 @@ function buildApiUrl(path) {
 export default function GuardianVerifyPage() {
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token") || "";
+  const { t } = useContent("guardian.verify");
 
   // ✅ NEW: allow token to be pasted manually (prevents URL truncation issues)
   const [token, setToken] = useState(tokenFromUrl);
@@ -119,13 +121,17 @@ export default function GuardianVerifyPage() {
 
   return (
     <div style={{ maxWidth: 620, margin: "40px auto", padding: 16 }}>
-      <h1 style={{ fontSize: 22, marginBottom: 8 }}>Guardian Consent Verification</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 8 }}>
+        {t("title", "Guardian Consent Verification")}
+      </h1>
       <p style={{ marginTop: 0, opacity: 0.85 }}>
         Enter the OTP you received to verify consent for the student.
       </p>
 
       <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, opacity: 0.8 }}>Guardian</div>
+        <div style={{ fontSize: 13, opacity: 0.8 }}>
+          {t("labels.guardian", "Guardian")}
+        </div>
         <div style={{ fontWeight: 600 }}>{guardianEmail}</div>
 
         <div style={{ fontSize: 13, opacity: 0.8, marginTop: 12 }}>
@@ -133,7 +139,7 @@ export default function GuardianVerifyPage() {
         </div>
         <div style={{ fontSize: 13, marginTop: 6 }}>
           {tokenLooksValid ? (
-            <span>Token present ✅</span>
+            <span>{t("status.tokenPresent", "Token present ✅")}</span>
           ) : (
             <span style={{ color: "#b23" }}>
               Token missing or incomplete ❌ (paste token below)
@@ -162,7 +168,9 @@ export default function GuardianVerifyPage() {
       </div>
 
       <form onSubmit={onSubmit}>
-        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>OTP</label>
+        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
+          {t("labels.otp", "OTP")}
+        </label>
         <input
           value={otp}
           onChange={(e) => setOtp(e.target.value)}

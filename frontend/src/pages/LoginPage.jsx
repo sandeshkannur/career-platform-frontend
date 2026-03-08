@@ -8,6 +8,7 @@ import Card from "../ui/Card";
 import { useSession } from "../hooks/useSession";
 import AuthHeader from "../ui/AuthHeader";
 import useContent from "../hooks/useContent";
+import LanguageSwitcher from "../ui/LanguageSwitcher";
 
 export default function LoginPage() {
   const { login } = useSession();
@@ -40,6 +41,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <Page maxWidth="920px">
+        {/* Top-right language toggle */}
+        <div className="flex items-center justify-end pt-6">
+          <LanguageSwitcher />
+        </div>
+
         <div className="mx-auto grid min-h-screen items-center gap-10 py-10 md:grid-cols-[1fr_420px]">
           <div className="hidden md:block">
             <AuthHeader variant="minimal" />

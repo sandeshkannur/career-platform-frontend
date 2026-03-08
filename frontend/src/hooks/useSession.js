@@ -124,7 +124,7 @@ export function useSession() {
       throw new Error("Email/username and password are required.");
     }
 
-    const data = await apiPost("/v1/auth/login", { email, password });
+    const data = await apiPost("/v1/auth/login-json", { email, password });
     setToken(data.access_token);
 
     // Token changed => invalidate cache explicitly

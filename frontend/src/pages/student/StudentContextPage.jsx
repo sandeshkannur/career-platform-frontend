@@ -5,6 +5,7 @@ import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { apiGet, apiPut  } from "../../apiClient";
 import { useSession } from "../../hooks/useSession";
+import useContent from "../../hooks/useContent";
 
 /**
  * StudentContextPage
@@ -15,6 +16,7 @@ import { useSession } from "../../hooks/useSession";
 export default function StudentContextPage() {
   const navigate = useNavigate();
   const { sessionUser } = useSession();
+  const { t } = useContent("student.context");
 
   // We pin student_id from the student_profile (now present after student row creation).
   const studentId = useMemo(() => {
@@ -152,23 +154,29 @@ function ChipGroup({ value, onChange, options }) {
     >
       <div className="card">
         {loading ? (
-          <p>Loading…</p>
+          <p>{t("loading", "Loading…")}</p>
         ) : error ? (
           <div className="text-sm">
             <p className="text-red-600">{error}</p>
             <div className="mt-3 flex gap-2">
-              <Button onClick={() => navigate("/student/dashboard")}>Back to Dashboard</Button>
+              <Button onClick={() => navigate("/student/dashboard")}>
+                {t("actions.backToDashboard", "Back to Dashboard")}
+              </Button>
             </div>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted mb-4">
-              Takes about <strong>30 seconds</strong>. Choose “Prefer not to say” anytime.
+              {t("intro.takesAboutPrefix", "Takes about")}{" "}
+              <strong>{t("intro.seconds", "30 seconds")}</strong>.{" "}
+              {t("intro.preferNotToSay", "Choose “Prefer not to say” anytime.")}
             </p>
 
             <div className="flex flex-col space-y-8">
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">Which board are you studying under?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">
+                  {t("q.educationBoard", "Which board are you studying under?")}
+                </label>
 
                 <div className="mt-4"></div>
                 <ChipGroup
@@ -187,7 +195,10 @@ function ChipGroup({ value, onChange, options }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">When you need study help, how much support is usually available?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">{t(
+                            "q.supportLevel",
+                            "When you need study help, how much support is usually available?"
+                          )}</label>
                 <ChipGroup
                     value={form.support_level}
                     onChange={(val) => setField("support_level", val)}
@@ -201,7 +212,10 @@ function ChipGroup({ value, onChange, options }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">How easy is it to access learning resources if needed (internet/books/coaching)?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">{t(
+                                          "q.resourceAccess",
+                                          "How easy is it to access learning resources if needed (internet/books/coaching)?"
+                                        )}</label>
                 <div className="mt-4">
                     <ChipGroup
                         value={form.resource_access}
@@ -217,7 +231,7 @@ function ChipGroup({ value, onChange, options }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">To keep suggestions practical, which feels closest?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">{t("q.sesBand", "To keep suggestions practical, which feels closest?")}</label>
                 <div className="mt-4">
                     <ChipGroup
                         value={form.ses_band}
