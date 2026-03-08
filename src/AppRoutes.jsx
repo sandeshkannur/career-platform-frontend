@@ -87,6 +87,7 @@ export default function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
         <Route path="/guardian/verify" element={<GuardianVerifyPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
