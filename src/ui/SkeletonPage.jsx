@@ -2,7 +2,6 @@
 import Page from "./Page";
 import Card from "./Card";
 import Button from "./Button";
-import { t } from "../i18n";
 
 export default function SkeletonPage({
   title,
@@ -13,8 +12,8 @@ export default function SkeletonPage({
   error = "",
   onRetry = null,
   empty = false,
-  emptyTitle = t("common.emptyTitle", "Nothing here yet"),
-  emptyDescription = t("common.emptyDescription", "No data available."),
+  emptyTitle = "Nothing here yet",
+  emptyDescription = "No data available.",
   emptyActions = null,
   footer = null,
   maxWidth = "1200px",
@@ -35,16 +34,16 @@ export default function SkeletonPage({
 
         {loading ? (
           <div style={styles.stateWrap}>
-           <p style={styles.stateTitle}>{t("common.loading", "Loading…")}</p>
-           <p style={styles.stateText}>{t("common.pleaseWait", "Please wait.")}</p>
+            <p style={styles.stateTitle}>Loading…</p>
+            <p style={styles.stateText}>Please wait.</p>
           </div>
         ) : error ? (
           <div style={styles.stateWrap}>
-            <p style={styles.stateTitle}>{t("common.somethingWentWrong", "Something went wrong")}</p>
+            <p style={styles.stateTitle}>Something went wrong</p>
             <p style={styles.stateText}>{error}</p>
             {onRetry ? (
               <div style={{ marginTop: 12 }}>
-                <Button onClick={onRetry}>{t("common.retry", "Retry")}</Button>
+                <Button onClick={onRetry}>Retry</Button>
               </div>
             ) : null}
           </div>

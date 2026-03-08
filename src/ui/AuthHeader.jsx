@@ -1,6 +1,5 @@
 // src/ui/AuthHeader.jsx
 import { Link, useLocation } from "react-router-dom";
-import { t } from "../i18n";
 
 function NavLink({ to, children }) {
   const { pathname } = useLocation();
@@ -35,7 +34,7 @@ export default function AuthHeader({ variant = "full" }) {
           to="/pricing"
           className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--text)] no-underline hover:opacity-90"
         >
-          {t("nav.pricing", "Pricing")}
+          Pricing
         </Link>
       </div>
     );
@@ -58,8 +57,8 @@ export default function AuthHeader({ variant = "full" }) {
         </Link>
 
         <div style={{ display: "flex", gap: 14, marginLeft: 12 }}>
-          <NavLink to="/login">{t("nav.login", "Login")}</NavLink>
-          <NavLink to="/signup">{t("nav.signup", "Signup")}</NavLink>
+          <NavLink to="/login">Login</NavLink>
+          <NavLink to="/signup">Signup</NavLink>
         </div>
 
         <div style={{ marginLeft: "auto" }}>
@@ -74,7 +73,7 @@ export default function AuthHeader({ variant = "full" }) {
               fontWeight: 600,
             }}
           >
-            {t("nav.pricing", "Pricing")}
+            Pricing
           </Link>
         </div>
       </div>

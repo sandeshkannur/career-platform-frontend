@@ -5,7 +5,6 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useSession } from "../hooks/useSession";
 import { useNavigate } from "react-router-dom";
-import useContent from "../hooks/useContent";
 
 import { requestConsent, getConsentStatus, verifyConsent } from "../api/consent";
 
@@ -14,7 +13,6 @@ const DEV_BYPASS_KEY = "__DEV_BYPASS_CONSENT__";
 export default function StudentConsentPage() {
   const { logout, sessionUser, refreshSession } = useSession();
   const navigate = useNavigate();
-  const { t } = useContent("consent.page");
 
   // DEV guard (Vite)
   const DEV_ONLY = !import.meta.env.PROD;
@@ -205,16 +203,15 @@ export default function StudentConsentPage() {
     <SkeletonPage
       title="Parental Consent Required"
       subtitle="You must complete guardian consent before continuing."
-      actions={<Button onClick={logout}>{t("actions.logout", "Logout")}</Button>}
+      actions={<Button onClick={logout}>Logout</Button>}
     >
       <p>
         Student email: <b>{sessionUser?.email}</b>
       </p>
 
       <p style={{ marginTop: 12 }}>
-        {t("minorNotice.prefix", "This student account is marked as a")}{" "}
-        <b>{t("minorNotice.minorBold", "minor")}</b>
-        {t("minorNotice.suffix", ". Before assessments can begin, parental or guardian consent must be verified.")}
+        This student account is marked as a <b>minor</b>. Before assessments can
+        begin, parental or guardian consent must be verified.
       </p>
 
       {/* Verified banner (UX polish) */}
@@ -228,9 +225,7 @@ export default function StudentConsentPage() {
             borderRadius: 8,
           }}
         >
-          <div style={{ fontWeight: 800 }}>
-            {t("status.verifiedTitle", "Consent verified ✅")}
-          </div>
+          <div style={{ fontWeight: 800 }}>Consent verified ✅</div>
           <div style={{ marginTop: 6, fontSize: 14, color: "#2b6b3f" }}>
             You may continue to the dashboard.
           </div>
@@ -245,9 +240,7 @@ export default function StudentConsentPage() {
       {/* Status panel */}
       <div style={{ marginTop: 14, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 800 }}>
-            {t("status.statusTitle", "Consent Status")}
-          </div>
+          <div style={{ fontWeight: 800 }}>Consent Status</div>
           <Button variant="secondary" onClick={refreshStatus} disabled={statusLoading}>
             {statusLoading ? "Refreshing…" : "Refresh"}
           </Button>
@@ -307,15 +300,11 @@ export default function StudentConsentPage() {
       {/* Optional student-side verify helper */}
       {showVerifyPanel ? (
         <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>
-            {t("verify.helperTitle", "Verify Consent (Helper)")}
-          </div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>Verify Consent (Helper)</div>
 
           <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
-                {t("verify.tokenLabel", "Token")}
-              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Token</div>
               <Input
                 value={verifyToken}
                 onChange={(e) => setVerifyToken(e.target.value)}
@@ -324,9 +313,7 @@ export default function StudentConsentPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
-                {t("verify.otpLabel", "OTP")}
-              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>OTP</div>
               <Input
                 value={verifyOtp}
                 onChange={(e) => setVerifyOtp(e.target.value)}
@@ -368,9 +355,7 @@ export default function StudentConsentPage() {
           {/* Guardian Verify Link helper (DEV/TEST convenience) */}
           {guardianVerifyUrl ? (
             <div style={{ marginTop: 10, fontSize: 14 }}>
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>
-                {t("verify.guardianLinkTitle", "Guardian Verify Link")}
-              </div>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>Guardian Verify Link</div>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                 <a href={guardianVerifyUrl} target="_blank" rel="noreferrer">

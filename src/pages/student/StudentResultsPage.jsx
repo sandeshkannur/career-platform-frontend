@@ -8,7 +8,6 @@ import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
 
 import { getResultsBlocksV1 } from "../../content/resultsBlocks.v1";
 import resultsNotReady_v1 from "../../content/resultsNotReady.v1";
-import { t } from "../../i18n";
 
 function PencilIcon({ size = 14 }) {
   return (
@@ -452,8 +451,8 @@ export default function StudentResultsPage() {
   }, [ctx]);
   return (
     <SkeletonPage
-      title={t("studentResults.title", "Your Career Results")}
-      subtitle={t("studentResults.subtitle", "Top recommendations based on your assessment.")}
+      title="Your Career Results"
+      subtitle="Top recommendations based on your assessment."
     >
       <div className="cp-results">
         <div className="cp-resultsActions">
@@ -468,25 +467,25 @@ export default function StudentResultsPage() {
               fontSize: 13,
               background: "white",
             }}
-            aria-label={t("studentResults.languageAria", "Language")}
+            aria-label="Language"
           >
-            <option value="en">{t("lang.enShort", "EN")}</option>
-            <option value="kn">{t("lang.knShort", "KN")}</option>
+            <option value="en">EN</option>
+            <option value="kn">KN</option>
           </select>
           <Button variant="secondary" onClick={() => navigate("/student/dashboard")}>
-            {t("studentResults.actions.backToDashboard", "Back to Dashboard")}
+            Back to Dashboard
           </Button>
 
           <Button onClick={() => navigate("/student/results/history")}>
-            {t("studentResults.actions.viewHistory", "View History")}
+            View History
           </Button>
 
           <Button variant="secondary" disabled>
-            {t("studentResults.actions.downloadReport", "Download Report")}
+            Download Report
           </Button>
         </div>
 
-        {loading && <p>{t("studentResults.loading", "Loading results…")}</p>}
+        {loading && <p>Loading results…</p>}
 
         {!loading && error && <ResultsNotReadyView content={resultsNotReady_v1} />}
 
@@ -496,23 +495,15 @@ export default function StudentResultsPage() {
             <div className="results-section">
               <div className="results-section__titleRow">
                 <div>
-                  <div className="results-section__title">
-                    {t("studentResults.context.title", "Your context (optional)")}
-                  </div>
+                  <div className="results-section__title">Your context (optional)</div>
 
                   {isContextUnknown ? (
                     <div className="text-muted results-section__sub">
-                      {t(
-                        "studentResults.context.helperUnknown",
-                        "Optional details that help us interpret results more fairly. You can change this anytime."
-                      )}
+                      Optional details that help us interpret results more fairly. You can change this anytime.
                     </div>
                   ) : (
                     <div className="text-muted results-section__sub">
-                      {t(
-                        "studentResults.context.helperKnown",
-                        "We use this only to adjust assumptions, not to judge you."
-                      )}
+                      We use this only to adjust assumptions, not to judge you.
                     </div>
                   )}
                 </div>
@@ -520,9 +511,7 @@ export default function StudentResultsPage() {
                 <Button variant="secondary" onClick={() => navigate("/student/context")}>
                   <span className="cp-inlineIcon">
                     <PencilIcon />
-                     {isContextUnknown
-                       ? t("studentResults.context.add", "Add")
-                       : t("studentResults.context.edit", "Edit")}
+                    {isContextUnknown ? "Add" : "Edit"}
                   </span>
                 </Button>
               </div>
@@ -530,30 +519,22 @@ export default function StudentResultsPage() {
               <div className="card cp-sectionCard">
                 <div className="cp-contextGrid">
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">
-                      {t("studentResults.context.educationBoard", "Education board")}
-                    </div>
+                    <div className="cp-miniLabel text-muted">Education board</div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.education_board)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">
-                      {t("studentResults.context.supportLevel", "Support level")}
-                    </div>
+                    <div className="cp-miniLabel text-muted">Support level</div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.support_level)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">
-                      {t("studentResults.context.resourceAccess", "Resource access")}
-                    </div>
+                    <div className="cp-miniLabel text-muted">Resource access</div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.resource_access)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">
-                      {t("studentResults.context.sesBand", "SES band")}
-                    </div>
+                    <div className="cp-miniLabel text-muted">SES band</div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.ses_band)}</div>
                   </div>
                 </div>
@@ -602,14 +583,9 @@ export default function StudentResultsPage() {
             <div className="results-section">
               <div className="results-section__titleRow">
                 <div>
-                  <div className="results-section__title">
-                    {t("studentResults.latest.title", "Latest Assessment")}
-                  </div>
+                  <div className="results-section__title">Latest Assessment</div>
                   <div className="text-muted results-section__sub">
-                    {t(
-                      "studentResults.latest.subtitle",
-                      "A summary of the most recent assessment used for these results."
-                    )}
+                    A summary of the most recent assessment used for these results.
                   </div>
                 </div>
               </div>
@@ -622,10 +598,7 @@ export default function StudentResultsPage() {
                 {selectedResult ? (
                   <>
                     <p>
-                      {t("studentResults.latest.showingPrefix", "Showing result for")}{" "}
-                      <strong>
-                        {t("studentResults.latest.latestStrong", "your latest assessment")}
-                      </strong>
+                      Showing result for <strong>your latest assessment</strong>
                     </p>
 
                     <p>
@@ -724,9 +697,7 @@ export default function StudentResultsPage() {
 
                             <div className="cp-insights2">
                               <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.focusThemes.title", "Focus themes")}
-                                </div>
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>Focus themes</div>
                                 {themesBody}
                                 {explainError ? (
                                   <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>

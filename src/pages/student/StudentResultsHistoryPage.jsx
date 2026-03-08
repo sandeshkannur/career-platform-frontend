@@ -4,12 +4,10 @@ import { apiGet } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
-import useContent from "../../hooks/useContent";
 
 export default function StudentResultsHistoryPage() {
   const navigate = useNavigate();
   const { sessionUser } = useSession();
-  const { t } = useContent("student.resultsHistory");
 
   // Backend-authoritative student identity:
   // Resolve student_id via /v1/students/students/me (NOT via auth/me student_profile).
@@ -28,14 +26,14 @@ export default function StudentResultsHistoryPage() {
       setStudentId(meStudent?.id ?? null);
     } catch (e) {
       setStudentId(null);
-      setError(e?.message || t("errors.studentProfileNotReady", "Student profile not ready."));
+      setError(e?.message || "Student profile not ready.");
       setLoading(false);
     }
   }
 
   async function loadHistory() {
     if (!studentId) {
-      setError(t("errors.studentNotReady", "Student not ready"));
+      setError("Student not ready");
       setLoading(false);
       return;
     }
@@ -48,7 +46,7 @@ export default function StudentResultsHistoryPage() {
       const res = await apiGet(`/v1/students/${studentId}/assessments`);
       setItems(Array.isArray(res?.assessments) ? res.assessments : []);
     } catch (e) {
-      setError(e?.message || t("errors.couldNotLoadHistory", "Could not load history."));
+      setError(e?.message || "Could not load history.");
     } finally {
       setLoading(false);
     }
@@ -65,57 +63,47 @@ export default function StudentResultsHistoryPage() {
   }, [studentId]);
 
   return (
-    <SkeletonPage
-      title={t("title", "Results History")}
-      subtitle={t("subtitle", "Previous assessments and recommendations.")}
-    >
+    <SkeletonPage title="Results History" subtitle="Previous assessments and recommendations.">
       <div className="flex gap-2 justify-end">
         <Button onClick={() => navigate("/student/results/latest")}>
-          {t("actions.backToLatest", "Back to Latest")}
+          Back to Latest
         </Button>
         <Button variant="secondary" disabled>
-          {t("actions.downloadReport", "Download Report")}
+          Download Report
         </Button>
       </div>
 
       {loading ? (
-        <p>{t("loading", "Loading history…")}</p>
+        <p>Loading history…</p>
       ) : error ? (
         <div className="card">
-          <h3>{t("error.title", "Student not ready")}</h3>
+          <h3>Student not ready</h3>
           <p>{error}</p>
           <Button onClick={() => {
             setLoading(true);
             setError("");
             resolveStudentId();
           }}>
-            {t("actions.retry", "Retry")}
+            Retry
           </Button>
         </div>
       ) : (
         <div className="card">
           {items.length === 0 ? (
-            <p>{t("empty", "No assessments found yet.")}</p>
+            <p>No assessments found yet.</p>
           ) : (
             <div className="space-y-2">
               {items.map((a) => (
                 <div key={a.assessment_id} className="card">
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <div className="font-semibold">
-                        {t("row.assessmentPrefix", "Assessment")} #{a.assessment_id}
-                      </div>
+                      <div className="font-semibold">Assessment #{a.assessment_id}</div>
                       <div className="text-sm text-muted">
-                        <div className="text-sm text-muted">
-                          {t("row.submitted", "Submitted")}:{" "}
-                          {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "—"}
-                        </div>
+                        Submitted:{" "}
                         {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "—"}
                       </div>
                       <div className="text-sm text-muted">
-                        <div className="text-sm text-muted">
-                        {t("row.config", "Config")}: {a.scoring_config_version ?? "—"}
-                      </div>
+                        Config: {a.scoring_config_version ?? "—"}
                       </div>
                     </div>
 
@@ -124,7 +112,7 @@ export default function StudentResultsHistoryPage() {
                         navigate(`/student/results/latest?assessmentId=${a.assessment_id}`)
                       }
                     >
-                      {t("actions.view", "View")}
+                      View
                     </Button>
                   </div>
                 </div>
