@@ -14,19 +14,53 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [dob, setDob] = useState("");
+  const [grade, setGrade] = useState("");
+  const [guardianEmail, setGuardianEmail] = useState("");
 
   const canSubmit = useMemo(() => {
     return (
       String(fullName).trim().length >= 2 &&
       String(email).includes("@") &&
-      String(password).length >= 8
+      String(password).length >= 8 &&
+      String(dob).trim().length > 0 &&
+      String(grade).trim().length > 0
     );
-  }, [fullName, email, password]);
+  }, [fullName, email, password, dob, grade]);
 
-  function onSubmit(e) {
-    e.preventDefault();
+async function onSubmit(e) {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("https://api.mapyourcareer.in/v1/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        full_name: fullName,
+        email: email,
+        password: password,
+        dob: dob,
+        grade: parseInt(grade),
+        guardian_email: guardianEmail || null
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || "Signup failed");
+      return;
+    }
+
+    alert("Signup successful. Please login.");
     navigate("/login", { replace: true });
+
+  } catch (err) {
+    console.error(err);
+    alert("Network error during signup");
   }
+}
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -39,7 +73,7 @@ export default function SignupPage() {
                 {t("headline", "Create your account")}
               </h1>
               <p className="text-sm text-[var(--text-muted)]">
-                {t("blurb", "Signup is UI-only for now. Backend wiring will come later.")}
+                {t("blurb", "Create your account to get started.")}
               </p>
             </div>
           </div>
@@ -102,6 +136,49 @@ export default function SignupPage() {
                     />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text)]">
+                    {t("dobLabel", "Date of Birth")}
+                  </label>
+                  <div className="mt-2">
+                    <Input
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      type="date"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text)]">
+                    {t("gradeLabel", "Grade")}
+                  </label>
+                  <div className="mt-2">
+                    <Input
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      type="number"
+                      min="1"
+                      max="12"
+                      placeholder={t("gradePlaceholder", "Enter your grade")}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text)]">
+                    {t("guardianEmailLabel", "Guardian Email")}
+                  </label>
+                  <div className="mt-2">
+                    <Input
+                      value={guardianEmail}
+                      onChange={(e) => setGuardianEmail(e.target.value)}
+                      type="email"
+                      placeholder={t("guardianEmailPlaceholder", "parent@example.com")}
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
 
                 <Button type="submit" disabled={!canSubmit} style={{ width: "100%" }}>
                   {t("submit", "Create account")}
@@ -115,7 +192,7 @@ export default function SignupPage() {
                 </div>
 
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                  {t("note", "Note: Signup is UI-only in this step. We will wire the backend later.")}
+                  {t("note", "Use your details to create a student account. Guardian email is required for minors.")}
                 </div>
               </form>
             </Card>
