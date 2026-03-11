@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import Button from "../ui/Button";
 import { useSession } from "../hooks/useSession";
+import useContent from "../hooks/useContent";
 
 import {
   getStudentDashboard,
@@ -14,6 +15,7 @@ import {
 export default function StudentDashboardPage() {
   const navigate = useNavigate();
   const { logout, sessionUser } = useSession();
+  const { t } = useContent("student.dashboard");
 
   // IMPORTANT: We need a stable studentId. Adjust only if your /v1/auth/me payload uses a different field.
   const studentId = useMemo(() => {
@@ -69,7 +71,7 @@ export default function StudentDashboardPage() {
           e?.message ||
           e?.detail ||
           e?.response?.data?.detail ||
-          "Failed to load dashboard data.";
+          t("student.dashboard.errorTitle", "Failed to load dashboard data");
 
         setError({ status, message, raw: e });
       } finally {
@@ -88,26 +90,32 @@ export default function StudentDashboardPage() {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold">Student Dashboard</h1>
+          <h1 className="text-xl font-semibold">
+            {t("student.dashboard.title", "Student Dashboard")}
+          </h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             {sessionUser?.full_name
-              ? `Welcome, ${sessionUser.full_name}. Choose what you want to do next.`
-              : "Choose what you want to do next."}
+              ? `${t("student.dashboard.welcomePrefix", "Welcome,")} ${sessionUser.full_name}. ${t("student.dashboard.chooseNext", "Choose what you want to do next.")}`
+              : t("student.dashboard.chooseNext", "Choose what you want to do next.")}
           </p>
         </div>
 
         <div className="shrink-0">
-          <Button onClick={logout}>Logout</Button>
+          <Button onClick={logout}>{t("common.logout", "Logout")}</Button>
         </div>
       </div>
 
       {/* Step 1: Consent Required Indicator (READ-ONLY) */}
       {showConsentRequired && (
         <div className="mt-5 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-4">
-          <div className="text-sm font-semibold">Guardian consent required ⚠️</div>
+          <div className="text-sm font-semibold">
+            {t("consent.required.title", "Guardian consent required ⚠️")}
+          </div>
           <div className="mt-1 text-sm text-[var(--text-muted)]">
-            Your account is marked as a minor. Please complete guardian consent
-            verification to unlock reports and continue.
+            {t(
+              "consent.required.body",
+              "Your account is marked as a minor. Please complete guardian consent verification to unlock reports and continue."
+            )}
           </div>
         </div>
       )}
@@ -115,9 +123,14 @@ export default function StudentDashboardPage() {
       {/* Step 1: Consent Verified Indicator (READ-ONLY) */}
       {showConsentVerified && (
         <div className="mt-5 rounded-xl border border-[#cfe9d6] bg-[#f3fff6] p-4">
-          <div className="text-sm font-semibold">Parental consent verified ✅</div>
+          <div className="text-sm font-semibold">
+            {t("consent.verified.title", "Parental consent verified ✅")}
+          </div>
           <div className="mt-1 text-sm text-[var(--text-muted)]">
-            Your guardian consent is verified. You can continue using the platform.
+            {t(
+              "consent.verified.body",
+              "Your guardian consent is verified. You can continue using the platform."
+            )}
           </div>
         </div>
       )}
@@ -126,27 +139,32 @@ export default function StudentDashboardPage() {
       <div className="mt-6">
         {!studentId && (
           <div className="rounded-xl border border-[var(--border)] bg-white p-4">
-            <div className="text-sm font-semibold">Session</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.session.title", "Session")}
+            </div>
             <div className="mt-2 text-sm text-[var(--text-muted)]">
-              Could not determine <code>studentId</code> from{" "}
+              {t("student.dashboard.session.cannotDeterminePrefix", "Could not determine")}{" "}
+              <code>studentId</code> {t("student.dashboard.session.cannotDetermineFrom", "from")}{" "}
               <code>sessionUser</code>.
               <br />
-              Please share your <code>/v1/auth/me</code> payload field name for the
-              student id.
+              {t(
+                "student.dashboard.session.shareMePayload",
+                "Please share your /v1/auth/me payload field name for the student id."
+              )}
             </div>
           </div>
         )}
 
         {studentId && loading && (
           <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
-            Loading dashboard data…
+            {t("student.dashboard.loading", "Loading dashboard data…")}
           </div>
         )}
 
         {studentId && error && (
           <div className="rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
             <div className="text-sm font-semibold">
-              Failed to load dashboard data
+              {t("student.dashboard.errorTitle", "Failed to load dashboard data")}
               {error.status ? ` (HTTP ${error.status})` : ""}
             </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
@@ -154,7 +172,7 @@ export default function StudentDashboardPage() {
             </div>
             <div className="mt-3">
               <Button variant="secondary" onClick={() => window.location.reload()}>
-                Retry
+                {t("common.retry", "Retry")}
               </Button>
             </div>
           </div>
@@ -163,9 +181,9 @@ export default function StudentDashboardPage() {
         {studentId && !loading && !error && (dashboard || assessments || results) && (
           <details className="rounded-xl border border-[var(--border)] bg-white">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold">
-              Backend Data (temporary debug view)
+              {t("student.dashboard.debug.title", "Backend Data (temporary debug view)")}
               <span className="ml-2 text-xs font-normal text-[var(--text-muted)]">
-                (click to expand)
+                {t("student.dashboard.debug.expandHint", "(click to expand)")}
               </span>
             </summary>
 
@@ -192,9 +210,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/onboarding")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Onboarding / Context</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.onboarding.title", "Onboarding / Context")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              Add optional context to improve recommendations.
+              {t(
+                "student.dashboard.card.onboarding.body",
+                "Add optional context to improve recommendations."
+              )}
             </div>
           </button>
 
@@ -203,9 +226,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/assessment")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Start / Resume Assessment</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.assessment.title", "Start / Resume Assessment")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              Continue your assessment journey.
+              {t(
+                "student.dashboard.card.assessment.body",
+                "Continue your assessment journey."
+              )}
             </div>
           </button>
 
@@ -214,9 +242,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/results/latest")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">View Latest Results</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.latestResults.title", "View Latest Results")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              See your latest career recommendations.
+              {t(
+                "student.dashboard.card.latestResults.body",
+                "See your latest career recommendations."
+              )}
             </div>
           </button>
 
@@ -225,9 +258,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/results/history")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Results History</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.history.title", "Results History")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              View all your previous submissions.
+              {t(
+                "student.dashboard.card.history.body",
+                "View all your previous submissions."
+              )}
             </div>
           </button>
 
@@ -239,9 +277,14 @@ export default function StudentDashboardPage() {
             }}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Report (placeholder)</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.report.title", "Report (placeholder)")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              Downloadable report experience (coming soon).
+              {t(
+                "student.dashboard.card.report.body",
+                "Downloadable report experience (coming soon)."
+              )}
             </div>
           </button>
 
@@ -250,9 +293,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/careers/1")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Career Detail (placeholder)</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.careerDetail.title", "Career Detail (placeholder)")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              Deep dive into a career explanation (coming soon).
+              {t(
+                "student.dashboard.card.careerDetail.body",
+                "Deep dive into a career explanation (coming soon)."
+              )}
             </div>
           </button>
 
@@ -261,9 +309,14 @@ export default function StudentDashboardPage() {
             onClick={() => navigate("/student/consent")}
             className="rounded-xl border border-[var(--border)] bg-white p-4 text-left transition hover:shadow-sm"
           >
-            <div className="text-sm font-semibold">Consent (if minor)</div>
+            <div className="text-sm font-semibold">
+              {t("student.dashboard.card.consent.title", "Consent (if minor)")}
+            </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
-              Verify guardian consent if required.
+              {t(
+                "student.dashboard.card.consent.body",
+                "Verify guardian consent if required."
+              )}
             </div>
           </button>
         </div>
@@ -273,7 +326,7 @@ export default function StudentDashboardPage() {
             to="/"
             className="text-sm text-[var(--brand-primary)] hover:underline"
           >
-            ← Home
+            {t("nav.backHome", "← Home")}
           </Link>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { apiGet, getPreferredLang, setPreferredLang } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
+import useContent from "../../hooks/useContent";
 import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
 
 import { getResultsBlocksV1 } from "../../content/resultsBlocks.v1";
@@ -92,10 +93,11 @@ function ResultsNotReadyView({ content }) {
     </div>
   );
 }
-function TopCareerCard({ career, fitBandsCopy, idx }) {
+function TopCareerCard({ career, fitBandsCopy, idx, t }) {
   const band = fitBandsCopy?.[career?.fit_band_key] || null;
 
-  const bandLabel = band?.label || career?.fit_band_key || "Fit band";
+  const bandLabel =
+    band?.label || career?.fit_band_key || t("studentResults.fitBandFallback", "Fit band");
   const bandDesc = band?.desc || "";
 
   const title =
@@ -121,7 +123,7 @@ function TopCareerCard({ career, fitBandsCopy, idx }) {
 
         <div
           className="top-career-card__bandPill"
-          aria-label={`Fit band: ${bandLabel}`}
+          aria-label={`${t("studentResults.fitBandAriaPrefix", "Fit band:")} ${bandLabel}`}
           title={bandDesc || bandLabel}
         >
           {bandLabel}
@@ -146,6 +148,7 @@ export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { sessionUser } = useSession();
+  const { t } = useContent("studentResults");
 
   const canSeeScores =
     sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
@@ -225,7 +228,7 @@ export default function StudentResultsPage() {
   useEffect(() => {
     async function load() {
       if (!studentId) {
-        setError("Student not ready");
+        setError(t("studentResults.errors.studentNotReady", "Student not ready"));
         setLoading(false);
         return;
       }
@@ -238,7 +241,10 @@ export default function StudentResultsPage() {
       } catch (e) {
         setError(
           e?.message ||
-            "Results not ready. Please try again after submitting assessment."
+            t(
+              "studentResults.errors.resultsNotReady",
+              "Results not ready. Please try again after submitting assessment."
+            )
         );
       } finally {
         setLoading(false);
@@ -334,7 +340,10 @@ export default function StudentResultsPage() {
 
         setExplainRes({ facets, aqs });
       } catch (e) {
-        setExplainError(e?.message || "Could not load insights yet.");
+        setExplainError(
+          e?.message ||
+            t("studentResults.errors.insightsNotReady", "Could not load insights yet.")
+        );
         setExplainRes({ facets: [], aqs: [] });
       } finally {
         setExplainLoading(false);
@@ -416,7 +425,13 @@ export default function StudentResultsPage() {
 
         setDeepCopy(map);
       } catch (e) {
-        setDeepError(e?.message || "Could not load deep insights yet.");
+        setDeepError(
+          e?.message ||
+            t(
+              "studentResults.errors.deepInsightsNotReady",
+              "Could not load deep insights yet."
+            )
+        );
         setDeepRes(null);
         setDeepCopy({});
       } finally {
@@ -426,7 +441,7 @@ export default function StudentResultsPage() {
 
     loadDeepInsights();
   }, [isPaidOrPremium, hasPremiumSignals, studentId, lang, selectedResult?.results_payload_version]);
-  const ComingSoon = ({ text = "Insights coming soon." }) => (
+  const ComingSoon = ({ text = t("studentResults.comingSoon", "Insights coming soon.") }) => (
     <div className="text-muted" style={{ fontSize: 13 }}>
       {text}
     </div>
@@ -441,7 +456,9 @@ export default function StudentResultsPage() {
 
   function labelOrNotShared(v) {
     const val = (v ?? "unknown").toString().trim();
-    return !val || val.toLowerCase() === "unknown" ? "Not shared yet" : val;
+    return !val || val.toLowerCase() === "unknown"
+      ? t("studentResults.notSharedYet", "Not shared yet")
+      : val;
   }
 
   const isContextUnknown = useMemo(() => {
@@ -451,8 +468,8 @@ export default function StudentResultsPage() {
   }, [ctx]);
   return (
     <SkeletonPage
-      title="Your Career Results"
-      subtitle="Top recommendations based on your assessment."
+      title={t("studentResults.title", "Your Career Results")}
+      subtitle={t("studentResults.subtitle", "Top recommendations based on your assessment.")}
     >
       <div className="cp-results">
         <div className="cp-resultsActions">
@@ -467,25 +484,25 @@ export default function StudentResultsPage() {
               fontSize: 13,
               background: "white",
             }}
-            aria-label="Language"
+            aria-label={t("studentResults.languageAria", "Language")}
           >
-            <option value="en">EN</option>
-            <option value="kn">KN</option>
+            <option value="en">{t("studentResults.language.enShort", "EN")}</option>
+            <option value="kn">{t("studentResults.language.knShort", "KN")}</option>
           </select>
           <Button variant="secondary" onClick={() => navigate("/student/dashboard")}>
-            Back to Dashboard
+            {t("studentResults.actions.backToDashboard", "Back to Dashboard")}
           </Button>
 
           <Button onClick={() => navigate("/student/results/history")}>
-            View History
+            {t("studentResults.actions.viewHistory", "View History")}
           </Button>
 
           <Button variant="secondary" disabled>
-            Download Report
+            {t("studentResults.actions.downloadReport", "Download Report")}
           </Button>
         </div>
 
-        {loading && <p>Loading results…</p>}
+        {loading && <p>{t("studentResults.loading", "Loading results…")}</p>}
 
         {!loading && error && <ResultsNotReadyView content={resultsNotReady_v1} />}
 
@@ -495,15 +512,23 @@ export default function StudentResultsPage() {
             <div className="results-section">
               <div className="results-section__titleRow">
                 <div>
-                  <div className="results-section__title">Your context (optional)</div>
+                  <div className="results-section__title">
+                    {t("studentResults.context.title", "Your context (optional)")}
+                  </div>
 
                   {isContextUnknown ? (
                     <div className="text-muted results-section__sub">
-                      Optional details that help us interpret results more fairly. You can change this anytime.
+                      {t(
+                        "studentResults.context.helperUnknown",
+                        "Optional details that help us interpret results more fairly. You can change this anytime."
+                      )}
                     </div>
                   ) : (
                     <div className="text-muted results-section__sub">
-                      We use this only to adjust assumptions, not to judge you.
+                      {t(
+                        "studentResults.context.helperKnown",
+                        "We use this only to adjust assumptions, not to judge you."
+                      )}
                     </div>
                   )}
                 </div>
@@ -511,7 +536,9 @@ export default function StudentResultsPage() {
                 <Button variant="secondary" onClick={() => navigate("/student/context")}>
                   <span className="cp-inlineIcon">
                     <PencilIcon />
-                    {isContextUnknown ? "Add" : "Edit"}
+                    {isContextUnknown
+                      ? t("studentResults.context.add", "Add")
+                      : t("studentResults.context.edit", "Edit")}
                   </span>
                 </Button>
               </div>
@@ -519,22 +546,30 @@ export default function StudentResultsPage() {
               <div className="card cp-sectionCard">
                 <div className="cp-contextGrid">
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">Education board</div>
+                    <div className="cp-miniLabel text-muted">
+                      {t("studentResults.context.educationBoard", "Education board")}
+                    </div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.education_board)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">Support level</div>
+                    <div className="cp-miniLabel text-muted">
+                      {t("studentResults.context.supportLevel", "Support level")}
+                    </div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.support_level)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">Resource access</div>
+                    <div className="cp-miniLabel text-muted">
+                      {t("studentResults.context.resourceAccess", "Resource access")}
+                    </div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.resource_access)}</div>
                   </div>
 
                   <div className="cp-miniCard">
-                    <div className="cp-miniLabel text-muted">SES band</div>
+                    <div className="cp-miniLabel text-muted">
+                      {t("studentResults.context.sesBand", "SES band")}
+                    </div>
                     <div className="cp-miniValue">{labelOrNotShared(ctx?.ses_band)}</div>
                   </div>
                 </div>
@@ -569,7 +604,7 @@ export default function StudentResultsPage() {
                           }}
                           className="cp-linkButton"
                         >
-                          Context
+                          {t("studentResults.context.linkLabel", "Context")}
                         </span>
                         .
                       </div>
@@ -583,30 +618,38 @@ export default function StudentResultsPage() {
             <div className="results-section">
               <div className="results-section__titleRow">
                 <div>
-                  <div className="results-section__title">Latest Assessment</div>
+                  <div className="results-section__title">
+                    {t("studentResults.latest.title", "Latest Assessment")}
+                  </div>
                   <div className="text-muted results-section__sub">
-                    A summary of the most recent assessment used for these results.
+                    {t(
+                      "studentResults.latest.subtitle",
+                      "A summary of the most recent assessment used for these results."
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="card" style={{ padding: 12 }}>
                 <p>
-                  You have completed <strong>{data?.total_results ?? 0}</strong> assessment(s).
+                  {t("studentResults.latest.completedPrefix", "You have completed")}{" "}
+                  <strong>{data?.total_results ?? 0}</strong>{" "}
+                  {t("studentResults.latest.assessmentCountSuffix", "assessment(s).")}
                 </p>
 
                 {selectedResult ? (
                   <>
                     <p>
-                      Showing result for <strong>your latest assessment</strong>
+                      {t("studentResults.latest.showingPrefix", "Showing result for")}{" "}
+                      <strong>{t("studentResults.latest.latestStrong", "your latest assessment")}</strong>
                     </p>
 
                     <p>
-                      Generated on{" "}
+                      {t("studentResults.latest.generatedOnPrefix", "Generated on")}{" "}
                       <strong>
                         {selectedResult.generated_at
                           ? new Date(selectedResult.generated_at).toLocaleString()
-                          : "Just now"}
+                          : t("studentResults.latest.justNow", "Just now")}
                       </strong>
                     </p>
 
@@ -625,7 +668,7 @@ export default function StudentResultsPage() {
                         if (!items || items.length === 0) {
                           return (
                             <div className="text-muted" style={{ padding: 12 }}>
-                              No recommendations available yet.
+                              {t("studentResults.noRecommendations", "No recommendations available yet.")}
                             </div>
                           );
                         }
@@ -638,6 +681,7 @@ export default function StudentResultsPage() {
                                 career={c}
                                 fitBandsCopy={fitBandsCopy}
                                 idx={idx}
+                                t={t}
                               />
                             ))}
                           </div>
@@ -659,7 +703,7 @@ export default function StudentResultsPage() {
 
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
-                            Loading qualities…
+                            {t("studentResults.loadingQualities", "Loading qualities…")}
                           </div>
                         ) : resolvedAqs.length > 0 ? (
                           <ul style={{ marginTop: 10, paddingLeft: 18 }}>
@@ -675,7 +719,7 @@ export default function StudentResultsPage() {
 
                         const themesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
-                            Loading themes…
+                            {t("studentResults.loadingThemes", "Loading themes…")}
                           </div>
                         ) : resolvedFacets.length > 0 ? (
                           <ul style={{ marginTop: 10, paddingLeft: 18 }}>
@@ -692,12 +736,14 @@ export default function StudentResultsPage() {
                         return (
                           <div style={{ marginTop: 14 }}>
                             <div className="text-muted" style={{ fontSize: 12, marginBottom: 8 }}>
-                              Premium insights
+                              {t("studentResults.premiumInsights.title", "Premium insights")}
                             </div>
 
                             <div className="cp-insights2">
                               <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>Focus themes</div>
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  {t("studentResults.focusThemes.title", "Focus themes")}
+                                </div>
                                 {themesBody}
                                 {explainError ? (
                                   <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
@@ -708,19 +754,22 @@ export default function StudentResultsPage() {
 
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  Associated qualities
+                                  {t("studentResults.associatedQualities.title", "Associated qualities")}
                                 </div>
 
                                 {explainLoading || resolvedAqs.length > 0 ? (
                                   <details>
                                     <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-                                      View qualities
+                                      {t("studentResults.associatedQualities.view", "View qualities")}
                                     </summary>
 
                                     {qualitiesBody}
 
                                     <div className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
-                                      Premium will include deeper “why this fits you” stories and guided next steps.
+                                      {t(
+                                        "studentResults.premiumInsights.note",
+                                        "Premium will include deeper “why this fits you” stories and guided next steps."
+                                      )}
                                     </div>
                                   </details>
                                 ) : (
@@ -732,12 +781,12 @@ export default function StudentResultsPage() {
                             <div className="cp-insightsStack">
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  Cluster signals
+                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
                                 </div>
 
                                 {deepLoading ? (
                                   <div className="text-muted" style={{ fontSize: 13 }}>
-                                    Loading cluster signals…
+                                    {t("studentResults.clusterSignals.loading", "Loading cluster signals…")}
                                   </div>
                                 ) : Array.isArray(deepRes?.cluster_insights) &&
                                   deepRes.cluster_insights.length > 0 ? (
@@ -769,7 +818,7 @@ export default function StudentResultsPage() {
                                           }}
                                         >
                                           <div style={{ fontWeight: 700 }}>
-                                            {cl?.cluster_title || "Cluster"}
+                                            {cl?.cluster_title || t("studentResults.clusterSignals.fallbackTitle", "Cluster")}
                                           </div>
 
                                           {resolved.length > 0 ? (
@@ -796,12 +845,12 @@ export default function StudentResultsPage() {
 
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  Why these careers fit you
+                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
                                 </div>
 
                                 {deepLoading ? (
                                   <div className="text-muted" style={{ fontSize: 13 }}>
-                                    Loading deep insights…
+                                    {t("studentResults.whyFit.loading", "Loading deep insights…")}
                                   </div>
                                 ) : Array.isArray(deepRes?.career_insights) &&
                                   deepRes.career_insights.length > 0 ? (
@@ -832,7 +881,7 @@ export default function StudentResultsPage() {
                                           }}
                                         >
                                           <div style={{ fontWeight: 700 }}>
-                                            {ci?.career_title || "Career"}
+                                            {ci?.career_title || t("studentResults.whyFit.fallbackTitle", "Career")}
                                           </div>
                                           <div style={{ marginTop: 6 }}>
                                             {whyText && whyText.trim().length > 0 ? (
@@ -846,7 +895,7 @@ export default function StudentResultsPage() {
                                             className="text-muted"
                                             style={{ fontSize: 13, marginTop: 4 }}
                                           >
-                                            {whyText || "Insights coming soon."}
+                                            {whyText || t("studentResults.comingSoon", "Insights coming soon.")}
                                           </div>
                                         </div>
                                       );
@@ -865,12 +914,12 @@ export default function StudentResultsPage() {
 
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  Guided next steps
+                                  {t("studentResults.guidedNextSteps.title", "Guided next steps")}
                                 </div>
 
                                 {deepLoading ? (
                                   <div className="text-muted" style={{ fontSize: 13 }}>
-                                    Loading next steps…
+                                    {t("studentResults.guidedNextSteps.loading", "Loading next steps…")}
                                   </div>
                                 ) : Array.isArray(deepRes?.next_steps?.keys) &&
                                   deepRes.next_steps.keys.length > 0 ? (
@@ -881,7 +930,7 @@ export default function StudentResultsPage() {
 
                                       return (
                                         <li key={`${k}-${idx}`} style={{ marginBottom: 8 }}>
-                                          {txt || "Next step coming soon."}
+                                          {txt || t("studentResults.guidedNextSteps.fallback", "Next step coming soon.")}
                                         </li>
                                       );
                                     })}
@@ -902,7 +951,10 @@ export default function StudentResultsPage() {
                             <div>
                               <div className="results-section__title">{rec.title}</div>
                               <div className="text-muted results-section__sub">
-                                Your top matches are shown using student-safe fit bands (no scores).
+                                {t(
+                                  "studentResults.topMatches.subtitle",
+                                  "Your top matches are shown using student-safe fit bands (no scores)."
+                                )}
                               </div>
                             </div>
                           </div>
@@ -910,7 +962,7 @@ export default function StudentResultsPage() {
                           <div className="card" style={{ padding: 16 }}>
                             <div style={{ marginBottom: 14 }}>
                               <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
-                                Recommended stream
+                                {t("studentResults.recommendedStream", "Recommended stream")}
                               </div>
                               <div style={{ fontWeight: 700 }}>
                                 {selectedResult.recommended_stream || "—"}

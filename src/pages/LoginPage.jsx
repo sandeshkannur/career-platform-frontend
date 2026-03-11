@@ -23,7 +23,7 @@ export default function LoginPage() {
     setError("");
 
     if (!email || !password) {
-      setError(t("missingFields", "Email and password are required"));
+      setError(t("auth.login.missingFields", "Email and password are required"));
       return;
     }
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
     try {
       await login(email, password, redirectTo);
     } catch (err) {
-      setError(err?.message || t("loginFailed", "Login failed"));
+      setError(err?.message || t("auth.login.loginFailed", "Login failed"));
     }
   }
 
@@ -45,10 +45,10 @@ export default function LoginPage() {
             <AuthHeader variant="minimal" />
             <div className="mt-6 space-y-2">
               <h1 className="text-2xl font-semibold text-[var(--text)]">
-                {t("headline", "Welcome back")}
+                {t("auth.login.headline", "Welcome back")}
               </h1>
               <p className="text-sm text-[var(--text-muted)]">
-                {t("blurb", "Sign in to continue your assessment journey.")}
+                {t("auth.login.blurb", "Sign in to continue your assessment journey.")}
               </p>
             </div>
           </div>
@@ -61,23 +61,23 @@ export default function LoginPage() {
             <Card>
               <div className="space-y-1">
                 <h1 className="m-0 text-xl font-semibold text-[var(--text)]">
-                  {t("title", "Login")}
+                  {t("auth.login.title", "Login")}
                 </h1>
                 <p className="text-sm text-[var(--text-muted)]">
-                  {t("subtitle", "Sign in to continue")}
+                  {t("auth.login.subtitle", "Sign in to continue")}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-5 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("emailLabel", "Email")}
+                    {t("auth.login.emailLabel", "Email")}
                   </label>
                   <div className="mt-2">
                     <Input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("emailPlaceholder", "you@example.com")}
+                      placeholder={t("auth.login.emailPlaceholder", "you@example.com")}
                       autoComplete="email"
                     />
                   </div>
@@ -85,14 +85,14 @@ export default function LoginPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("passwordLabel", "Password")}
+                    {t("auth.login.passwordLabel", "Password")}
                   </label>
                   <div className="mt-2">
                     <Input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t("passwordPlaceholder", "••••••••")}
+                      placeholder={t("auth.login.passwordPlaceholder", "••••••••")}
                       autoComplete="current-password"
                     />
                   </div>
@@ -105,19 +105,19 @@ export default function LoginPage() {
                 ) : null}
 
                 <Button type="submit" style={{ width: "100%" }}>
-                  {t("submit", "Login")}
+                  {t("auth.login.submit", "Login")}
                 </Button>
 
                 <div className="text-sm text-[var(--text-muted)]">
-                  {t("noAccount", "Don’t have an account?")}{" "}
+                  {t("auth.login.noAccount", "Don’t have an account?")}{" "}
                   <Link className="text-[var(--brand)] hover:underline" to="/signup">
-                    {t("createOne", "Create one")}
+                    {t("auth.login.createOne", "Create one")}
                   </Link>
                 </div>
 
                 <div className="pt-2">
                   <Link className="text-sm text-[var(--text-muted)] hover:underline" to="/">
-                    {t("backHome", "← Back to Home")}
+                    {t("nav.backHome", "← Back to Home")}
                   </Link>
                 </div>
               </form>

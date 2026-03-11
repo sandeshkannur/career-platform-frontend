@@ -1,6 +1,7 @@
 // src/ui/PublicHeader.jsx
 import { Link, useLocation } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useContent } from "../locales/LanguageProvider";
 
 function NavLink({ to, children }) {
   const { pathname } = useLocation();
@@ -23,6 +24,8 @@ function NavLink({ to, children }) {
 }
 
 export default function PublicHeader() {
+  const { t } = useContent();
+
   return (
     <div
       style={{
@@ -45,8 +48,8 @@ export default function PublicHeader() {
         </Link>
 
         <div style={{ display: "flex", gap: 14, marginLeft: 12 }}>
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/pricing">Pricing</NavLink>
+          <NavLink to="/">{t("nav.home", "Home")}</NavLink>
+          <NavLink to="/pricing">{t("nav.pricing", "Pricing")}</NavLink>
         </div>
 
         <div
@@ -70,7 +73,7 @@ export default function PublicHeader() {
               fontWeight: 600,
             }}
           >
-            Login
+            {t("nav.login", "Login")}
           </Link>
         </div>
       </div>

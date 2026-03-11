@@ -1,6 +1,7 @@
 import React from "react";
+import { useContent } from "../locales/LanguageProvider";
 
-export default class ErrorBoundary extends React.Component {
+class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { error: null };
@@ -18,13 +19,13 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.error) {
       return (
         <div style={{ padding: 24 }}>
-          <h2>Something crashed</h2>
+          <h2>{this.props.t?.("errorBoundary.title", "Something crashed") || "Something crashed"}</h2>
           <pre style={{ whiteSpace: "pre-wrap", color: "crimson" }}>
             {String(this.state.error?.message || this.state.error)}
           </pre>
-          <p>Open DevTools Console for full stack trace.</p>
+          <p>{this.props.t?.("errorBoundary.consoleHint", "Open DevTools Console for full stack trace.") || "Open DevTools Console for full stack trace."}</p>
           <p>
-            <a href="/dev/reset">Reset session</a>
+            <a href="/dev/reset">{this.props.t?.("errorBoundary.resetSession", "Reset session") || "Reset session"}</a>
           </p>
         </div>
       );
@@ -33,3 +34,13 @@ export default class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+export function ErrorBoundaryWithContent(props) {
+  const { t } = useContent();
+
+  return <ErrorBoundary {...props} t={t} />;
+}
+
+
+export default ErrorBoundaryWithContent;
+

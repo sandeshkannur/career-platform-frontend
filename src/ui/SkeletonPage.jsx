@@ -2,6 +2,7 @@
 import Page from "./Page";
 import Card from "./Card";
 import Button from "./Button";
+import { useContent } from "../locales/LanguageProvider";
 
 export default function SkeletonPage({
   title,
@@ -12,12 +13,14 @@ export default function SkeletonPage({
   error = "",
   onRetry = null,
   empty = false,
-  emptyTitle = "Nothing here yet",
-  emptyDescription = "No data available.",
+  emptyTitle,
+  emptyDescription,
   emptyActions = null,
   footer = null,
   maxWidth = "1200px",
 }) {
+  const { t } = useContent();
+
   return (
     <Page maxWidth={maxWidth}>
       <Card>
@@ -34,23 +37,35 @@ export default function SkeletonPage({
 
         {loading ? (
           <div style={styles.stateWrap}>
-            <p style={styles.stateTitle}>Loading…</p>
-            <p style={styles.stateText}>Please wait.</p>
+            <p style={styles.stateTitle}>
+              {t("common.skeletonpage.loading", "Loading…")}
+            </p>
+            <p style={styles.stateText}>
+              {t("common.skeletonpage.pleaseWait", "Please wait.")}
+            </p>
           </div>
         ) : error ? (
           <div style={styles.stateWrap}>
-            <p style={styles.stateTitle}>Something went wrong</p>
+            <p style={styles.stateTitle}>
+              {t("common.skeletonpage.somethingWentWrong", "Something went wrong")}
+            </p>
             <p style={styles.stateText}>{error}</p>
             {onRetry ? (
               <div style={{ marginTop: 12 }}>
-                <Button onClick={onRetry}>Retry</Button>
+                <Button onClick={onRetry}>
+                  {t("common.skeletonpage.retry", "Retry")}
+                </Button>
               </div>
             ) : null}
           </div>
         ) : empty ? (
           <div style={styles.stateWrap}>
-            <p style={styles.stateTitle}>{emptyTitle}</p>
-            <p style={styles.stateText}>{emptyDescription}</p>
+            <p style={styles.stateTitle}>
+              {emptyTitle || t("common.emptyTitle", "Nothing here yet")}
+            </p>
+            <p style={styles.stateText}>
+              {emptyDescription || t("common.emptyDescription", "No data available.")}
+            </p>
             {emptyActions ? <div style={{ marginTop: 12 }}>{emptyActions}</div> : null}
           </div>
         ) : (

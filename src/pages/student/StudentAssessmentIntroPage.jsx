@@ -7,6 +7,7 @@ import Button from "../../ui/Button";
 
 import { getActiveAssessment, startAssessment } from "../../api/assessments";
 import { getPreferredLang, setPreferredLang } from "../../apiClient";
+import { useContent } from "../../locales/LanguageProvider";
 /**
  * Assessment UX — Step 2 (wired)
  * - Start calls backend to create an assessment run
@@ -50,6 +51,7 @@ function writeLastRunSnapshot(snapshot) {
 
 export default function StudentAssessmentIntroPage() {
   const navigate = useNavigate();
+  const { t } = useContent();
   const [busy, setBusy] = useState(false);
   const [lang, setLang] = useState(getPreferredLang());
 
@@ -78,7 +80,7 @@ export default function StudentAssessmentIntroPage() {
     // World-class behaviour:
     // /active is best-effort only. Do NOT block Start/Resume.
     if (!isLikelyCompletedFlow()) {
-      setActiveError("Couldn’t check saved progress right now.");
+      setActiveError(t("student.assessmentIntro.activeErrorShort", "Couldn’t check saved progress right now."));
     }
     console.warn("[StudentAssessmentIntroPage] /active check skipped:", e);
     } finally {
@@ -138,13 +140,13 @@ export default function StudentAssessmentIntroPage() {
 
   return (
     <SkeletonPage
-      title="Assessment"
-      subtitle="Understand your strengths, preferences, and aptitude."
+      title={t("student.assessmentIntro.title", "Assessment")}
+      subtitle={t("student.assessmentIntro.subtitle", "Understand your strengths, preferences, and aptitude.")}
       actions={
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <label style={{ fontSize: 12, opacity: 0.8 }} htmlFor="cp-lang">
-              Language
+              {t("student.assessmentIntro.language", "Language")}
             </label>
             <select
               id="cp-lang"
@@ -159,77 +161,80 @@ export default function StudentAssessmentIntroPage() {
                 background: "white",
               }}
             >
-              <option value="en">English</option>
-              <option value="kn">Kannada</option>
+              <option value="en">{t("student.assessmentIntro.language.en", "English")}</option>
+              <option value="kn">{t("student.assessmentIntro.language.kn", "Kannada")}</option>
             </select>
           </div>
 
           <Button variant="secondary" disabled={busy || activeLoading} onClick={handleResume}>
-            Resume
+            {t("student.assessmentIntro.resume", "Resume")}
           </Button>
           <Button disabled={busy || activeLoading} onClick={handleStart}>
-            {busy ? "Starting..." : "Start Assessment"}
+            {busy
+              ? t("student.assessmentIntro.starting", "Starting...")
+              : t("student.assessmentIntro.start", "Start Assessment")}
           </Button>
         </>
       }
     >
       <div style={{ maxWidth: 720, display: "grid", gap: 14 }}>
         <p style={{ marginTop: 0 }}>
-          This assessment helps generate <b>deterministic</b> and <b>explainable</b>{" "}
-          career recommendations based on your responses.
+          {t("student.assessmentIntro.body1", "This assessment helps generate deterministic and explainable career recommendations based on your responses.")}
         </p>
-                <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>
-            Help us tailor guidance (optional, ~30 seconds)
+            {t("student.assessmentIntro.contextCard.title", "Help us tailor guidance (optional, ~30 seconds)")}
           </div>
 
           <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4, marginBottom: 10 }}>
-            Adding a few details helps keep recommendations practical for you.
-            You can skip this and update later anytime.
+            {t("student.assessmentIntro.contextCard.desc", "Adding a few details helps keep recommendations practical for you. You can skip this and update later anytime.")}
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Button type="button" onClick={() => navigate("/student/context")}>
-              Add details
+              {t("student.assessmentIntro.contextCard.addDetails", "Add details")}
             </Button>
             <Button type="button" onClick={() => {}} style={{ opacity: 0.8 }}>
-              Skip for now
+              {t("student.assessmentIntro.contextCard.skip", "Skip for now")}
             </Button>
           </div>
         </div>
         {activeError ? (
           <div style={{ fontSize: 12, opacity: 0.7 }}>
-            Couldn’t check saved progress right now. You can still start or resume if available.
+            {t("student.assessmentIntro.activeError", "Couldn’t check saved progress right now. You can still start or resume if available.")}
           </div>
         ) : null}
 
         {activeState?.active && activeState?.assessment_id && !activeState?.is_complete ? (
           <div style={{ fontSize: 12, opacity: 0.75 }}>
-            Saved progress found: answered <b>{activeState.answered_count}</b> of{" "}
+            {t("student.assessmentIntro.savedProgressPrefix", "Saved progress found: answered")}{" "}
+            <b>{activeState.answered_count}</b> {t("student.assessmentIntro.savedProgressOf", "of")}{" "}
             <b>{activeState.total_questions}</b>.
           </div>
         ) : null}
 
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>What to expect</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+            {t("student.assessmentIntro.expect.title", "What to expect")}
+          </div>
           <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 6 }}>
-            <li>Answer honestly — there are no right or wrong answers.</li>
-            <li>Estimated time: ~10–15 minutes (placeholder).</li>
-            <li>You can resume later (progress saving will be wired next).</li>
+            <li>{t("student.assessmentIntro.expect.li1", "Answer honestly — there are no right or wrong answers.")}</li>
+            <li>{t("student.assessmentIntro.expect.li2", "Estimated time: ~10–15 minutes (placeholder).")}</li>
+            <li>{t("student.assessmentIntro.expect.li3", "You can resume later (progress saving will be wired next).")}</li>
           </ul>
         </div>
 
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>Privacy & disclaimer</div>
+          <div style={{ fontWeight: 800, marginBottom: 6 }}>
+            {t("student.assessmentIntro.privacy.title", "Privacy & disclaimer")}
+          </div>
           <div style={{ fontSize: 13, opacity: 0.9 }}>
-            Your responses are used only to generate your recommendations and reports.
-            This is a guidance tool and not a guaranteed predictor of outcomes.
+            {t("student.assessmentIntro.privacy.body", "Your responses are used only to generate your recommendations and reports. This is a guidance tool and not a guaranteed predictor of outcomes.")}
           </div>
         </div>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Note: Start creates a real assessment id via backend. Resume uses the last saved
-          snapshot.
+          {t("student.assessmentIntro.note", "Note: Start creates a real assessment id via backend. Resume uses the last saved snapshot.")}
         </div>
       </div>
     </SkeletonPage>

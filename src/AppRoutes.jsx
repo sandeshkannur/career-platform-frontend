@@ -1,6 +1,7 @@
 // src/AppRoutes.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import { useContent } from "./locales/LanguageProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingScreen from "./components/LoadingScreen";
 import GuardianVerifyPage from "./pages/guardian/GuardianVerifyPage";
@@ -61,10 +62,12 @@ const StudentProfilePage = lazy(() => import("./pages/student/StudentProfilePage
    Fallback
    ====================== */
 function NotFound() {
+  const { t } = useContent();
+
   return (
     <div style={{ padding: 24 }}>
       <h2>404</h2>
-      <p>Page not found. (NOTFOUND_FROM_APPROUTES)</p>
+      <p>{t("appRoutes.notFound.message", "Page not found.")}</p>
     </div>
   );
 }
@@ -73,12 +76,14 @@ function NotFound() {
    Routes
    ====================== */
 export default function AppRoutes() {
+  const { t } = useContent();
+
   return (
-    <Suspense fallback={<LoadingScreen label="Loading page…" />}>
+    <Suspense fallback={<LoadingScreen label={t("appRoutes.loadingPage", "Loading page…")} />}>
       <Routes>
         <Route
           path="/__routes_probe"
-          element={<div style={{ padding: 24 }}>ROUTES PROBE OK</div>}
+          element={<div style={{ padding: 24 }}>{t("appRoutes.probes.routes", "ROUTES PROBE OK")}</div>}
         />
 
         {/* ======================
@@ -163,7 +168,7 @@ export default function AppRoutes() {
 
           <Route path="dashboard" element={<StudentDashboardPage />} />
 
-          <Route path="__probe2" element={<div style={{ padding: 24 }}>STUDENT PROBE2 OK</div>} />
+          <Route path="__probe2" element={<div style={{ padding: 24 }}>{t("appRoutes.probes.student", "STUDENT PROBE2 OK")}</div>} />
 
           <Route path="consent" element={<StudentConsentPage />} />
           <Route path="onboarding" element={<StudentOnboardingPage />} />

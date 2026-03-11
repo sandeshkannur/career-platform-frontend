@@ -1,0 +1,57 @@
+Career Platform Locale Guide
+============================
+
+Files
+-----
+en.master.json = canonical source of truth for all translation keys
+en.json        = runtime English locale used by frontend
+kn.json        = Kannada locale
+<new>.json     = new target language locale
+
+Rules
+-----
+1. Add all new keys to en.master.json first
+2. Then copy the same keys into en.json
+3. Then propagate to kn.json and any future locale files
+4. Never use generic keys like:
+   - title
+   - subtitle
+   - submit
+   - label
+5. Always use namespaced keys like:
+   - auth.login.title
+   - auth.signup.submit
+   - student.profile.title
+   - student.assessmentRun.actions.next
+
+Naming Convention
+-----------------
+<namespace>.<page>.<element>.<property>
+
+Examples
+--------
+auth.login.title
+auth.login.subtitle
+auth.signup.fullNameLabel
+student.dashboard.card.report.title
+student.assessmentRun.actions.submit
+student.profile.comingSoonBody
+pricing.premium.title
+guardian.verify.title
+consent.page.verify.tokenLabel
+
+Guardrails
+----------
+- Never translate keys
+- Never rename keys in only one locale
+- Keep all locale files structurally aligned
+- Keep UTF-8 without BOM
+- Keep brand/proper nouns in English where required
+
+Workflow for new language
+-------------------------
+1. Copy en.master.json to <lang>.json
+2. Translate only values
+3. Do not change keys
+4. Run translation auditor
+5. Fix missing keys and hardcoded text before merge

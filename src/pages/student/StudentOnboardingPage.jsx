@@ -6,6 +6,7 @@ import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
 import { useSession } from "../../hooks/useSession";
+import { useContent } from "../../locales/LanguageProvider";
 
 const DRAFT_KEY = "__STUDENT_ONBOARDING_DRAFT_V1__";
 const MOBILE_BREAKPOINT_PX = 640;
@@ -18,47 +19,49 @@ const DEFAULT_DRAFT = {
   constraints: "",
 };
 
-const FIELDS = [
+const getFields = (t) => [
   {
     key: "grade",
-    label: "Grade / Class",
+    label: t("student.onboarding.gradeClass", "Grade / Class"),
     required: true,
-    placeholder: "e.g. 9",
-    help: "Used to tailor recommendations to your academic stage.",
+    placeholder: t("student.onboarding.placeholder.grade", "e.g. 9"),
+    help: t("student.onboarding.help.grade", "Used to tailor recommendations to your academic stage."),
   },
   {
     key: "primary_goal",
-    label: "Primary Goal",
+    label: t("student.onboarding.primaryGoal", "Primary Goal"),
     required: true,
-    placeholder: "e.g. choose a stream, explore careers, plan higher studies",
-    help: "Tell us what outcome you want from this assessment.",
+    placeholder: t("student.onboarding.placeholder.primaryGoal", "e.g. choose a stream, explore careers, plan higher studies"),
+    help: t("student.onboarding.help.primaryGoal", "Tell us what outcome you want from this assessment."),
   },
   {
     key: "interests",
-    label: "Interests",
+    label: t("student.onboarding.interests", "Interests"),
     required: false,
-    placeholder: "e.g. coding, biology, art, public speaking",
-    help: "Optional — helps personalize the report later.",
+    placeholder: t("student.onboarding.placeholder.interests", "e.g. coding, biology, art, public speaking"),
+    help: t("student.onboarding.help.interests", "Optional — helps personalize the report later."),
   },
   {
     key: "preferred_countries",
-    label: "Preferred Countries",
+    label: t("student.onboarding.preferredCountries", "Preferred Countries"),
     required: false,
-    placeholder: "e.g. India, UK, US",
-    help: "Optional — relevant for education/career pathways.",
+    placeholder: t("student.onboarding.placeholder.preferredCountries", "e.g. India, UK, US"),
+    help: t("student.onboarding.help.preferredCountries", "Optional — relevant for education/career pathways."),
   },
   {
     key: "constraints",
-    label: "Constraints",
+    label: t("student.onboarding.constraints", "Constraints"),
     required: false,
-    placeholder: "e.g. budget, location, academics",
-    help: "Optional — helps keep recommendations realistic.",
+    placeholder: t("student.onboarding.placeholder.constraints", "e.g. budget, location, academics"),
+    help: t("student.onboarding.help.constraints", "Optional — helps keep recommendations realistic."),
   },
 ];
 
 export default function StudentOnboardingPage() {
   const navigate = useNavigate();
   const { logout, sessionUser } = useSession();
+  const { t } = useContent();
+  const FIELDS = useMemo(() => getFields(t), [t]);
 
   const [draft, setDraft] = useState(DEFAULT_DRAFT);
   const [touched, setTouched] = useState(false);
@@ -168,16 +171,20 @@ export default function StudentOnboardingPage() {
     return (
       <div style={{ maxWidth: 520, display: "grid", gap: 14 }}>
         <div style={{ fontSize: 12, opacity: 0.75 }}>
-          Step {step + 1} of {FIELDS.length}
+          {t("student.onboarding.stepPrefix", "Step")} {step + 1} {t("student.onboarding.stepOf", "of")} {FIELDS.length}
         </div>
 
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
             {currentField.label}{" "}
             {currentField.required ? (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>(required)</span>
+              <span style={{ fontSize: 12, opacity: 0.7 }}>
+                ({t("student.onboarding.required", "required")})
+              </span>
             ) : (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>(optional)</span>
+              <span style={{ fontSize: 12, opacity: 0.7 }}>
+                ({t("student.onboarding.optional", "optional")})
+              </span>
             )}
           </div>
 
@@ -205,27 +212,29 @@ export default function StudentOnboardingPage() {
                 fontSize: 13,
               }}
             >
-              Please complete this required field to continue.
+              {t("student.onboarding.validation.requiredField", "Please complete this required field to continue.")}
             </div>
           ) : null}
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Button variant="secondary" onClick={goBack}>
-            Back
+            {t("student.onboarding.actions.back", "Back")}
           </Button>
 
           <Button onClick={goNext} disabled={!stepIsValid}>
-            {step < FIELDS.length - 1 ? "Next" : "Save & Continue"}
+            {step < FIELDS.length - 1
+              ? t("student.onboarding.actions.next", "Next")
+              : t("student.onboarding.actions.saveContinue", "Save & Continue")}
           </Button>
 
           <Button variant="secondary" onClick={handleClearDraft}>
-            Clear Draft
+            {t("student.onboarding.actions.clearDraft", "Clear Draft")}
           </Button>
         </div>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Draft is stored locally (sessionStorage). Backend save will be added later.
+          {t("student.onboarding.draftStored", "Draft is stored locally (sessionStorage). Backend save will be added later.")}
         </div>
       </div>
     );
@@ -238,60 +247,66 @@ export default function StudentOnboardingPage() {
         {/* Grade */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Grade / Class <span style={{ opacity: 0.7 }}>(required)</span>
+            {t("student.onboarding.gradeClass", "Grade / Class")}{" "}
+            <span style={{ opacity: 0.7 }}>
+              ({t("student.onboarding.required", "required")})
+            </span>
           </div>
           <Input
             value={draft.grade}
             onChange={updateField("grade")}
-            placeholder="e.g. 9"
+            placeholder={t("student.onboarding.placeholder.grade", "e.g. 9")}
           />
         </div>
 
         {/* Primary goal */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Primary Goal <span style={{ opacity: 0.7 }}>(required)</span>
+            {t("student.onboarding.primaryGoal", "Primary Goal")}{" "}
+            <span style={{ opacity: 0.7 }}>
+              ({t("student.onboarding.required", "required")})
+            </span>
           </div>
           <Input
             value={draft.primary_goal}
             onChange={updateField("primary_goal")}
-            placeholder="e.g. choose a stream, explore careers, plan higher studies"
+            placeholder={t("student.onboarding.placeholder.primaryGoal", "e.g. choose a stream, explore careers, plan higher studies")}
           />
         </div>
 
         {/* Interests */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Interests (optional)
+            {t("student.onboarding.interests", "Interests")} ({t("student.onboarding.optional", "optional")})
           </div>
           <Input
             value={draft.interests}
             onChange={updateField("interests")}
-            placeholder="e.g. coding, biology, art, public speaking"
+            placeholder={t("student.onboarding.placeholder.interests", "e.g. coding, biology, art, public speaking")}
           />
         </div>
 
         {/* Preferred countries */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Preferred Countries (optional)
+            {t("student.onboarding.preferredCountries", "Preferred Countries")} ({t("student.onboarding.optional", "optional")})
           </div>
           <Input
             value={draft.preferred_countries}
             onChange={updateField("preferred_countries")}
-            placeholder="e.g. India, UK, US"
+            placeholder={t("student.onboarding.placeholder.preferredCountries", "e.g. India, UK, US")}
           />
         </div>
 
         {/* Constraints */}
         <div>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            Constraints (optional)
+            {t("student.onboarding.constraints", "Constraints")} ({t("student.onboarding.optional", "optional")})
           </div>
           <Input
             value={draft.constraints}
             onChange={updateField("constraints")}
-            placeholder="e.g. budget, location, academics"
+            placeholder={t("student.onboarding.placeholder.constraints", "e.g. budget, location, academics")}
           />
         </div>
 
@@ -307,30 +322,33 @@ export default function StudentOnboardingPage() {
               fontSize: 13,
             }}
           >
-            Please complete the required fields: <b>Grade</b> and <b>Primary Goal</b>.
+            {t("student.onboarding.validation.prefix", "Please complete the required fields:")}{" "}
+            <b>{t("student.onboarding.validation.grade", "Grade")}</b>{" "}
+            {t("student.onboarding.validation.and", "and")}{" "}
+            <b>{t("student.onboarding.validation.primaryGoal", "Primary Goal")}</b>.
           </div>
         ) : null}
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Button onClick={handleContinue} disabled={!isValid}>
-            Save & Continue
+            {t("student.onboarding.actions.saveContinue", "Save & Continue")}
           </Button>
 
           <Button
             variant="secondary"
             onClick={() => navigate("/student/dashboard")}
           >
-            Back to Dashboard
+            {t("student.onboarding.actions.backToDashboard", "Back to Dashboard")}
           </Button>
 
           <Button variant="secondary" onClick={handleClearDraft}>
-            Clear Draft
+            {t("student.onboarding.actions.clearDraft", "Clear Draft")}
           </Button>
         </div>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Draft is stored locally (sessionStorage). Backend save will be added later.
+          {t("student.onboarding.draftStored", "Draft is stored locally (sessionStorage). Backend save will be added later.")}
         </div>
       </div>
     );
@@ -338,13 +356,13 @@ export default function StudentOnboardingPage() {
 
   return (
     <SkeletonPage
-      title="Student Onboarding"
+      title={t("student.onboarding.title", "Student Onboarding")}
       subtitle={
         sessionUser?.full_name
-          ? `Hi ${sessionUser.full_name}, tell us a bit about yourself before starting the assessment.`
-          : "Tell us a bit about your background and context."
+          ? t("student.onboarding.subtitleNamed", "Hi {{name}}, tell us a bit about yourself before starting the assessment.", { name: sessionUser.full_name })
+          : t("student.onboarding.subtitleDefault", "Tell us a bit about your background and context.")
       }
-      actions={<Button onClick={logout}>Logout</Button>}
+      actions={<Button onClick={logout}>{t("student.onboarding.actions.logout", "Logout")}</Button>}
     >
       {isMobile ? renderMobileStepper() : renderDesktopForm()}
     </SkeletonPage>

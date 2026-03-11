@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env
+translation-audit-output/
+*.backup.*
+*_corrupted.json
+*.ps1

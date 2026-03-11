@@ -49,16 +49,16 @@ async function onSubmit(e) {
 
     if (!res.ok) {
       const err = await res.json();
-      alert(err.detail || "Signup failed");
+      alert(err.detail || t("auth.signup.alert.failed", "Signup failed"));
       return;
     }
 
-    alert("Signup successful. Please login.");
+    alert(t("auth.signup.alert.success", "Signup successful. Please login."));
     navigate("/login", { replace: true });
 
   } catch (err) {
     console.error(err);
-    alert("Network error during signup");
+    alert(t("auth.signup.alert.networkError", "Network error during signup"));
   }
 }
 
@@ -70,10 +70,10 @@ async function onSubmit(e) {
             <AuthHeader variant="minimal" />
             <div className="mt-6 space-y-2">
               <h1 className="text-2xl font-semibold text-[var(--text)]">
-                {t("headline", "Create your account")}
+                {t("auth.signup.headline", "Create your account")}
               </h1>
               <p className="text-sm text-[var(--text-muted)]">
-                {t("blurb", "Create your account to get started.")}
+                {t("auth.signup.blurb", "Create your account to get started.")}
               </p>
             </div>
           </div>
@@ -86,23 +86,23 @@ async function onSubmit(e) {
             <Card>
               <div className="space-y-1">
                 <h1 className="m-0 text-xl font-semibold text-[var(--text)]">
-                  {t("title", "Signup")}
+                  {t("auth.signup.title", "Signup")}
                 </h1>
                 <p className="text-sm text-[var(--text-muted)]">
-                  {t("subtitle", "Create an account to continue.")}
+                  {t("auth.signup.subtitle", "Create an account to continue.")}
                 </p>
               </div>
 
               <form onSubmit={onSubmit} className="mt-5 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("fullNameLabel", "Full name")}
+                    {t("auth.signup.fullNameLabel", "Full name")}
                   </label>
                   <div className="mt-2">
                     <Input
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder={t("fullNamePlaceholder", "Your name")}
+                      placeholder={t("auth.signup.fullNamePlaceholder", "Your name")}
                       autoComplete="name"
                     />
                   </div>
@@ -110,13 +110,13 @@ async function onSubmit(e) {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("emailLabel", "Email")}
+                    {t("auth.signup.emailLabel", "Email")}
                   </label>
                   <div className="mt-2">
                     <Input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("emailPlaceholder", "you@example.com")}
+                      placeholder={t("auth.signup.emailPlaceholder", "you@example.com")}
                       autoComplete="email"
                     />
                   </div>
@@ -124,13 +124,13 @@ async function onSubmit(e) {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("passwordLabel", "Password")}
+                    {t("auth.signup.passwordLabel", "Password")}
                   </label>
                   <div className="mt-2">
                     <Input
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t("passwordPlaceholder", "Min 8 characters")}
+                      placeholder={t("auth.signup.passwordPlaceholder", "Min 8 characters")}
                       type="password"
                       autoComplete="new-password"
                     />
@@ -138,7 +138,7 @@ async function onSubmit(e) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("dobLabel", "Date of Birth")}
+                    {t("auth.signup.dobLabel", "Date of Birth")}
                   </label>
                   <div className="mt-2">
                     <Input
@@ -151,7 +151,7 @@ async function onSubmit(e) {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("gradeLabel", "Grade")}
+                    {t("auth.signup.gradeLabel", "Grade")}
                   </label>
                   <div className="mt-2">
                     <Input
@@ -160,39 +160,39 @@ async function onSubmit(e) {
                       type="number"
                       min="1"
                       max="12"
-                      placeholder={t("gradePlaceholder", "Enter your grade")}
+                      placeholder={t("auth.signup.gradePlaceholder", "Enter your grade")}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)]">
-                    {t("guardianEmailLabel", "Guardian Email")}
+                    {t("auth.signup.guardianEmailLabel", "Guardian Email")}
                   </label>
                   <div className="mt-2">
                     <Input
                       value={guardianEmail}
                       onChange={(e) => setGuardianEmail(e.target.value)}
                       type="email"
-                      placeholder={t("guardianEmailPlaceholder", "parent@example.com")}
+                      placeholder={t("auth.signup.guardianEmailPlaceholder", "parent@example.com")}
                       autoComplete="email"
                     />
                   </div>
                 </div>
 
                 <Button type="submit" disabled={!canSubmit} style={{ width: "100%" }}>
-                  {t("submit", "Create account")}
+                  {t("auth.signup.submit", "Create account")}
                 </Button>
 
                 <div className="text-sm text-[var(--text-muted)]">
-                  {t("alreadyHave", "Already have an account?")}{" "}
+                  {t("auth.signup.alreadyHave", "Already have an account?")}{" "}
                   <Link className="text-[var(--brand)] hover:underline" to="/login">
-                    {t("loginLink", "Login")}
+                    {t("auth.signup.loginLink", "Login")}
                   </Link>
                 </div>
 
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                  {t("note", "Use your details to create a student account. Guardian email is required for minors.")}
+                  {t("auth.signup.note", "Use your details to create a student account. Guardian email is required for minors.")}
                 </div>
               </form>
             </Card>

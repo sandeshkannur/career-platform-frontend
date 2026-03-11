@@ -1,5 +1,7 @@
 // src/ui/AuthHeader.jsx
 import { Link, useLocation } from "react-router-dom";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useContent } from "../locales/LanguageProvider";
 
 function NavLink({ to, children }) {
   const { pathname } = useLocation();
@@ -22,20 +24,24 @@ function NavLink({ to, children }) {
 }
 
 export default function AuthHeader({ variant = "full" }) {
-  
-    if (variant === "minimal") {
+  const { t } = useContent();
+
+  if (variant === "minimal") {
     return (
       <div className="flex items-center justify-between py-3">
         <Link to="/" className="text-[var(--text)] no-underline">
           <span className="text-sm font-semibold">CareerPlatform</span>
         </Link>
 
-        <Link
-          to="/pricing"
-          className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--text)] no-underline hover:opacity-90"
-        >
-          Pricing
-        </Link>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher compact />
+          <Link
+            to="/pricing"
+            className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--text)] no-underline hover:opacity-90"
+          >
+            {t("nav.pricing", "Pricing")}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -57,11 +63,12 @@ export default function AuthHeader({ variant = "full" }) {
         </Link>
 
         <div style={{ display: "flex", gap: 14, marginLeft: 12 }}>
-          <NavLink to="/login">Login</NavLink>
-          <NavLink to="/signup">Signup</NavLink>
+          <NavLink to="/login">{t("nav.login", "Login")}</NavLink>
+          <NavLink to="/signup">{t("nav.signup", "Signup")}</NavLink>
         </div>
 
-        <div style={{ marginLeft: "auto" }}>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <LanguageSwitcher compact />
           <Link
             to="/pricing"
             style={{
@@ -73,7 +80,7 @@ export default function AuthHeader({ variant = "full" }) {
               fontWeight: 600,
             }}
           >
-            Pricing
+            {t("nav.pricing", "Pricing")}
           </Link>
         </div>
       </div>

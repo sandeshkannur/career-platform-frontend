@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useSession } from "../hooks/useSession";
 import { useNavigate } from "react-router-dom";
+import { useContent } from "../locales/LanguageProvider";
 
 import { requestConsent, getConsentStatus, verifyConsent } from "../api/consent";
 
@@ -13,6 +14,7 @@ const DEV_BYPASS_KEY = "__DEV_BYPASS_CONSENT__";
 export default function StudentConsentPage() {
   const { logout, sessionUser, refreshSession } = useSession();
   const navigate = useNavigate();
+  const { t } = useContent();
 
   // DEV guard (Vite)
   const DEV_ONLY = !import.meta.env.PROD;
@@ -201,17 +203,18 @@ export default function StudentConsentPage() {
 
   return (
     <SkeletonPage
-      title="Parental Consent Required"
-      subtitle="You must complete guardian consent before continuing."
-      actions={<Button onClick={logout}>Logout</Button>}
+      title={t("consent.required.title", "Guardian consent required ⚠️")}
+      subtitle={t("consent.required.body", "Your account is marked as a minor. Please complete guardian consent verification to unlock reports and continue.")}
+      actions={<Button onClick={logout}>{t("consent.page.actions.logout", "Logout")}</Button>}
     >
       <p>
-        Student email: <b>{sessionUser?.email}</b>
+        {t("consent.page.studentEmail", "Student email:")} <b>{sessionUser?.email}</b>
       </p>
 
       <p style={{ marginTop: 12 }}>
-        This student account is marked as a <b>minor</b>. Before assessments can
-        begin, parental or guardian consent must be verified.
+        {t("consent.page.minorNotice.prefix", "This student account is marked as a")}{" "}
+        <b>{t("consent.page.minorNotice.minorBold", "minor")}</b>
+        {t("consent.page.minorNotice.suffix", ". Before assessments can begin, parental or guardian consent must be verified.")}
       </p>
 
       {/* Verified banner (UX polish) */}
@@ -225,13 +228,15 @@ export default function StudentConsentPage() {
             borderRadius: 8,
           }}
         >
-          <div style={{ fontWeight: 800 }}>Consent verified ✅</div>
+          <div style={{ fontWeight: 800 }}>
+            {t("consent.verified.title", "Parental consent verified ✅")}
+          </div>
           <div style={{ marginTop: 6, fontSize: 14, color: "#2b6b3f" }}>
-            You may continue to the dashboard.
+            {t("consent.page.verifiedContinue", "You may continue to the dashboard.")}
           </div>
           <div style={{ marginTop: 10 }}>
             <Button onClick={() => navigate("/student/dashboard", { replace: true })}>
-              Go to Dashboard
+              {t("consent.page.actions.goToDashboard", "Go to Dashboard")}
             </Button>
           </div>
         </div>
@@ -240,15 +245,19 @@ export default function StudentConsentPage() {
       {/* Status panel */}
       <div style={{ marginTop: 14, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 800 }}>Consent Status</div>
+          <div style={{ fontWeight: 800 }}>
+            {t("consent.page.status.statusTitle", "Consent Status")}
+          </div>
           <Button variant="secondary" onClick={refreshStatus} disabled={statusLoading}>
-            {statusLoading ? "Refreshing…" : "Refresh"}
+            {statusLoading
+              ? t("consent.page.status.refreshing", "Refreshing…")
+              : t("consent.page.status.refresh", "Refresh")}
           </Button>
         </div>
 
         <div style={{ marginTop: 8, fontSize: 14, color: "#555" }}>
-          Guardian email on file:{" "}
-          <b>{guardianEmail ? guardianEmail : "— missing —"}</b>
+          {t("consent.page.status.guardianEmail", "Guardian email on file:")}{" "}
+          <b>{guardianEmail ? guardianEmail : t("consent.page.status.missing", "— missing —")}</b>
         </div>
 
         {error ? (
@@ -262,7 +271,7 @@ export default function StudentConsentPage() {
             }}
           >
             <div style={{ fontWeight: 800 }}>
-              Error{error.status ? ` (HTTP ${error.status})` : ""}
+              {t("consent.page.error.title", "Error")}{error.status ? ` (HTTP ${error.status})` : ""}
             </div>
             <div style={{ fontSize: 14 }}>{error.message}</div>
           </div>
@@ -274,7 +283,9 @@ export default function StudentConsentPage() {
           </pre>
         ) : (
           <div style={{ marginTop: 10, color: "#777" }}>
-            {statusLoading ? "Loading…" : "No status loaded yet."}
+            {statusLoading
+              ? t("consent.page.status.loading", "Loading…")
+              : t("consent.page.status.empty", "No status loaded yet.")}
           </div>
         )}
       </div>
@@ -285,7 +296,9 @@ export default function StudentConsentPage() {
           onClick={handleRequestConsent}
           disabled={requestLoading || !guardianEmail || consentVerified}
         >
-          {requestLoading ? "Sending…" : "Send Consent Request"}
+          {requestLoading
+            ? t("consent.page.actions.sending", "Sending…")
+            : t("consent.page.actions.sendConsentRequest", "Send Consent Request")}
         </Button>
 
         <Button
@@ -293,49 +306,57 @@ export default function StudentConsentPage() {
           onClick={() => setShowVerifyPanel((v) => !v)}
           disabled={consentVerified}
         >
-          Verify OTP / Token
+          {t("consent.page.actions.verifyOtpToken", "Verify OTP / Token")}
         </Button>
       </div>
 
       {/* Optional student-side verify helper */}
       {showVerifyPanel ? (
         <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>Verify Consent (Helper)</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+            {t("consent.page.verify.helperTitle", "Verify Consent (Helper)")}
+          </div>
 
           <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Token</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                {t("consent.page.verify.tokenLabel", "Token")}
+              </div>
               <Input
                 value={verifyToken}
                 onChange={(e) => setVerifyToken(e.target.value)}
-                placeholder="Paste consent token"
+                placeholder={t("consent.page.verify.tokenPlaceholder", "Paste consent token")}
               />
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>OTP</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                {t("consent.page.verify.otpLabel", "OTP")}
+              </div>
               <Input
                 value={verifyOtp}
                 onChange={(e) => setVerifyOtp(e.target.value)}
-                placeholder="Enter OTP"
+                placeholder={t("consent.page.verify.otpPlaceholder", "Enter OTP")}
               />
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Button onClick={handleVerifyConsent} disabled={verifyLoading}>
-                {verifyLoading ? "Verifying…" : "Verify"}
+                {verifyLoading
+                  ? t("consent.page.actions.verifying", "Verifying…")
+                  : t("consent.page.actions.verify", "Verify")}
               </Button>
               <Button
                 variant="secondary"
                 onClick={() => setShowVerifyPanel(false)}
                 disabled={verifyLoading}
               >
-                Close
+                {t("consent.page.actions.close", "Close")}
               </Button>
             </div>
 
             <div style={{ fontSize: 12, color: "#666" }}>
-              Note: Primary flow is the public guardian page. This helper is for DEV/testing only.
+              {t("consent.page.verify.helperNote", "Note: Primary flow is the public guardian page. This helper is for DEV/testing only.")}
             </div>
           </div>
         </div>
@@ -345,7 +366,7 @@ export default function StudentConsentPage() {
       {DEV_ONLY && requestData ? (
         <div style={{ marginTop: 14, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>
-            Consent Request Response (temporary debug)
+            {t("consent.page.debug.responseTitle", "Consent Request Response (temporary debug)")}
           </div>
 
           <pre style={{ margin: 0, padding: 10, overflowX: "auto" }}>
@@ -355,27 +376,29 @@ export default function StudentConsentPage() {
           {/* Guardian Verify Link helper (DEV/TEST convenience) */}
           {guardianVerifyUrl ? (
             <div style={{ marginTop: 10, fontSize: 14 }}>
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>Guardian Verify Link</div>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                {t("consent.page.debug.guardianVerifyLink", "Guardian Verify Link")}
+              </div>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                 <a href={guardianVerifyUrl} target="_blank" rel="noreferrer">
-                  Open guardian verification page
+                  {t("consent.page.debug.openGuardianVerificationPage", "Open guardian verification page")}
                 </a>
 
                 <Button
                   variant="secondary"
                   onClick={async () => {
                     await navigator.clipboard.writeText(guardianVerifyUrl);
-                    alert("Guardian link copied to clipboard");
+                    alert(t("consent.page.debug.guardianLinkCopied", "Guardian link copied to clipboard"));
                   }}
                 >
-                  Copy link
+                  {t("consent.page.debug.copyLink", "Copy link")}
                 </Button>
               </div>
 
               {requestData?.dev?.otp ? (
                 <div style={{ marginTop: 8 }}>
-                  OTP (DEV): <b>{requestData.dev.otp}</b>
+                  {t("consent.page.debug.otpDev", "OTP (DEV):")} <b>{requestData.dev.otp}</b>
                 </div>
               ) : null}
             </div>
@@ -392,9 +415,11 @@ export default function StudentConsentPage() {
             borderTop: "1px dashed #ddd",
           }}
         >
-          <p style={{ margin: 0, fontWeight: 700 }}>DEV ONLY</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>
+            {t("consent.page.dev.devOnly", "DEV ONLY")}
+          </p>
           <p style={{ margin: "6px 0 0", color: "#666" }}>
-            Temporary bypass to continue development without OTP flow. Remove later.
+            {t("consent.page.dev.bypassNote", "Temporary bypass to continue development without OTP flow. Remove later.")}
           </p>
 
           <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -402,25 +427,29 @@ export default function StudentConsentPage() {
               <Input
                 value={devCode}
                 onChange={(e) => setDevCode(e.target.value)}
-                placeholder='Type "DEV"'
+                placeholder={t("consent.page.dev.placeholder", 'Type "DEV"')}
               />
             </div>
 
-            <Button onClick={enableDevBypass}>Enable Dev Bypass & Continue</Button>
+            <Button onClick={enableDevBypass}>
+              {t("consent.page.dev.enableBypass", "Enable Dev Bypass & Continue")}
+            </Button>
 
             {devBypassOn ? (
               <Button variant="secondary" onClick={disableDevBypass}>
-                Disable Bypass
+                {t("consent.page.dev.disableBypass", "Disable Bypass")}
               </Button>
             ) : null}
           </div>
 
           {devBypassOn ? (
             <p style={{ marginTop: 10, color: "green" }}>
-              Dev bypass is ON ✅ (sessionStorage)
+              {t("consent.page.dev.bypassOn", "Dev bypass is ON ✅ (sessionStorage)")}
             </p>
           ) : (
-            <p style={{ marginTop: 10, color: "#999" }}>Dev bypass is OFF</p>
+            <p style={{ marginTop: 10, color: "#999" }}>
+              {t("consent.page.dev.bypassOff", "Dev bypass is OFF")}
+            </p>
           )}
         </div>
       ) : null}

@@ -1,10 +1,12 @@
 // src/pages/student/StudentReportPage.jsx
+// src/pages/student/StudentReportPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { getStudentReport } from "../../api/reports";
+import { useContent } from "../../locales/LanguageProvider";
 
 function downloadJson(filename, data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -22,12 +24,14 @@ function downloadJson(filename, data) {
 
 export default function StudentReportPage() {
   const params = useParams();
+  const { t } = useContent();
+
   const studentId = useMemo(() => {
-  // Route is /student/reports/:reportId (which is actually student_id)
-  const raw = params.reportId;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
-	}, [params.reportId]);
+    // Route is /student/reports/:reportId (which is actually student_id)
+    const raw = params.reportId;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }, [params.reportId]);
 
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
@@ -73,7 +77,7 @@ export default function StudentReportPage() {
           e?.message ||
           e?.detail ||
           e?.response?.data?.detail ||
-          "Failed to load report.";
+          t("student.report.error.defaultMessage", "Failed to load report.");
 
         setError({ status, message, raw: e });
       } finally {
@@ -85,14 +89,14 @@ export default function StudentReportPage() {
     return () => {
       cancelled = true;
     };
-  }, [studentId]);
+  }, [studentId, t]);
 
   const canDownloadJson = !!report && !loading;
 
   return (
     <SkeletonPage
-      title="Assessment Report"
-      subtitle="Report derived from your latest analytics snapshot."
+      title={t("student.report.title", "Assessment Report")}
+      subtitle={t("student.report.subtitle", "Report derived from your latest analytics snapshot.")}
       actions={
         <>
           <Button
@@ -103,36 +107,35 @@ export default function StudentReportPage() {
               downloadJson(`student-report-${studentId}.json`, report);
             }}
           >
-            Download JSON
+            {t("student.report.actions.downloadJson", "Download JSON")}
           </Button>
 
           {/* PDF is explicitly out-of-scope now */}
-          <Button disabled title="PDF generation is planned later">
-            Download PDF
+          <Button disabled title={t("student.report.actions.pdfPlannedTitle", "PDF generation is planned later")}>
+            {t("student.report.actions.downloadPdf", "Download PDF")}
           </Button>
         </>
       }
     >
       {!studentId && (
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          Invalid student id in route.
+          {t("student.report.invalidStudentId", "Invalid student id in route.")}
         </div>
       )}
 
       {studentId && loading && (
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          Loading report…
+          {t("student.report.loading", "Loading report…")}
         </div>
       )}
 
       {studentId && notReady && !loading && (
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Report not ready yet
+            {t("student.report.notReady.title", "Report not ready yet")}
           </div>
           <div style={{ fontSize: 14 }}>
-            Complete an assessment (or refresh after analytics are generated),
-            then come back here.
+            {t("student.report.notReady.body", "Complete an assessment (or refresh after analytics are generated), then come back here.")}
           </div>
         </div>
       )}
@@ -147,10 +150,10 @@ export default function StudentReportPage() {
           }}
         >
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Unsupported report version
+            {t("student.report.unsupported.title", "Unsupported report version")}
           </div>
           <div style={{ fontSize: 14 }}>
-            Your backend report/scoring version is not supported by this UI.
+            {t("student.report.unsupported.body", "Your backend report/scoring version is not supported by this UI.")}
           </div>
         </div>
       )}
@@ -165,12 +168,13 @@ export default function StudentReportPage() {
           }}
         >
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Failed to load report{error.status ? ` (HTTP ${error.status})` : ""}
+            {t("student.report.error.title", "Failed to load report")}
+            {error.status ? ` (HTTP ${error.status})` : ""}
           </div>
           <div style={{ fontSize: 14 }}>{error.message}</div>
           <div style={{ marginTop: 10 }}>
             <Button variant="secondary" onClick={() => window.location.reload()}>
-              Retry
+              {t("student.report.actions.retry", "Retry")}
             </Button>
           </div>
         </div>
@@ -179,7 +183,7 @@ export default function StudentReportPage() {
       {studentId && report && !loading && (
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 700, marginBottom: 8 }}>
-            Report JSON (temporary preview)
+            {t("student.report.previewTitle", "Report JSON (temporary preview)")}
           </div>
           <pre style={{ margin: 0, padding: 10, overflowX: "auto" }}>
             {JSON.stringify(report, null, 2)}

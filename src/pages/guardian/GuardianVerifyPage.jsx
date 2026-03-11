@@ -1,6 +1,7 @@
 // src/pages/guardian/GuardianVerifyPage.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useContent } from "../../locales/LanguageProvider";
 
 /**
  * Best-effort decode JWT payload (for display only).
@@ -34,6 +35,7 @@ function buildApiUrl(path) {
 
 export default function GuardianVerifyPage() {
   const [searchParams] = useSearchParams();
+  const { t } = useContent();
   const tokenFromUrl = searchParams.get("token") || "";
 
   // ✅ NEW: allow token to be pasted manually (prevents URL truncation issues)
@@ -50,7 +52,7 @@ export default function GuardianVerifyPage() {
     decoded?.guardian_email ||
     decoded?.guardianEmail ||
     decoded?.email ||
-    "(will confirm after verification)";
+    t("guardian.verify.guardianFallback", "(will confirm after verification)");
 
   const [otp, setOtp] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -71,13 +73,16 @@ export default function GuardianVerifyPage() {
     if (!tokenLooksValid) {
       setStatus("error");
       setMessage(
-        "Token looks missing or incomplete. Please paste the full token (it may have been truncated in the URL)."
+        t(
+          "guardian.verify.messages.tokenIncomplete",
+          "Token looks missing or incomplete. Please paste the full token (it may have been truncated in the URL)."
+        )
       );
       return;
     }
     if (!otp.trim()) {
       setStatus("error");
-      setMessage("Please enter the OTP.");
+      setMessage(t("guardian.verify.messages.enterOtp", "Please enter the OTP."));
       return;
     }
 
@@ -96,7 +101,10 @@ export default function GuardianVerifyPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const errMsg = data?.detail || data?.message || "Verification failed.";
+        const errMsg =
+          data?.detail ||
+          data?.message ||
+          t("guardian.verify.messages.verificationFailed", "Verification failed.");
         setStatus("error");
         setMessage(errMsg);
         return;
@@ -104,14 +112,25 @@ export default function GuardianVerifyPage() {
 
       if (data?.verified === true || data?.status === "verified") {
         setStatus("success");
-        setMessage("Consent verified successfully. You may now close this tab.");
+        setMessage(
+          t(
+            "guardian.verify.messages.successCloseTab",
+            "Consent verified successfully. You may now close this tab."
+          )
+        );
       } else {
         setStatus("error");
-        setMessage(data?.message || "Verification rejected.");
+        setMessage(
+          data?.message ||
+            t("guardian.verify.messages.verificationRejected", "Verification rejected.")
+        );
       }
     } catch (err) {
       setStatus("error");
-      setMessage(err?.message || "Network error. Please try again.");
+      setMessage(
+        err?.message ||
+          t("guardian.verify.messages.networkError", "Network error. Please try again.")
+      );
     } finally {
       setSubmitting(false);
     }
@@ -119,35 +138,48 @@ export default function GuardianVerifyPage() {
 
   return (
     <div style={{ maxWidth: 620, margin: "40px auto", padding: 16 }}>
-      <h1 style={{ fontSize: 22, marginBottom: 8 }}>Guardian Consent Verification</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 8 }}>
+        {t("guardian.verify.title", "Guardian Consent Verification")}
+      </h1>
       <p style={{ marginTop: 0, opacity: 0.85 }}>
-        Enter the OTP you received to verify consent for the student.
+        {t(
+          "guardian.verify.subtitle",
+          "Enter the OTP you received to verify consent for the student."
+        )}
       </p>
 
       <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, opacity: 0.8 }}>Guardian</div>
+        <div style={{ fontSize: 13, opacity: 0.8 }}>
+          {t("guardian.verify.labels.guardian", "Guardian")}
+        </div>
         <div style={{ fontWeight: 600 }}>{guardianEmail}</div>
 
         <div style={{ fontSize: 13, opacity: 0.8, marginTop: 12 }}>
-          Verification link
+          {t("guardian.verify.labels.verificationLink", "Verification link")}
         </div>
         <div style={{ fontSize: 13, marginTop: 6 }}>
           {tokenLooksValid ? (
-            <span>Token present ✅</span>
+            <span>{t("guardian.verify.status.tokenPresent", "Token present ✅")}</span>
           ) : (
             <span style={{ color: "#b23" }}>
-              Token missing or incomplete ❌ (paste token below)
+              {t(
+                "guardian.verify.status.tokenMissing",
+                "Token missing or incomplete ❌ (paste token below)"
+              )}
             </span>
           )}
         </div>
 
         <div style={{ fontSize: 13, opacity: 0.8, marginTop: 12 }}>
-          Token (paste full token if needed)
+          {t("guardian.verify.labels.tokenFull", "Token (paste full token if needed)")}
         </div>
         <textarea
           value={token}
           onChange={(e) => setToken(e.target.value)}
-          placeholder="Paste the full consent token here (if the URL token is missing/truncated)"
+          placeholder={t(
+            "guardian.verify.placeholders.tokenFull",
+            "Paste the full consent token here (if the URL token is missing/truncated)"
+          )}
           rows={4}
           style={{
             width: "100%",
@@ -162,11 +194,13 @@ export default function GuardianVerifyPage() {
       </div>
 
       <form onSubmit={onSubmit}>
-        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>OTP</label>
+        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
+          {t("guardian.verify.labels.otp", "OTP")}
+        </label>
         <input
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          placeholder="Enter OTP"
+          placeholder={t("guardian.verify.placeholders.otp", "Enter OTP")}
           style={{
             width: "100%",
             padding: "10px 12px",
@@ -187,7 +221,9 @@ export default function GuardianVerifyPage() {
             cursor: submitting ? "not-allowed" : "pointer",
           }}
         >
-          {submitting ? "Verifying..." : "Verify Consent"}
+          {submitting
+            ? t("guardian.verify.actions.verifying", "Verifying...")
+            : t("guardian.verify.actions.verifyConsent", "Verify Consent")}
         </button>
       </form>
 
@@ -195,7 +231,7 @@ export default function GuardianVerifyPage() {
         <div style={{ marginTop: 16, padding: 12, borderRadius: 8, border: "1px solid #cfe9cf" }}>
           ✅ {message}
           <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-            You can safely close this tab/window now.
+            {t("guardian.verify.success.closeWindow", "You can safely close this tab/window now.")}
           </div>
         </div>
       )}
@@ -204,7 +240,10 @@ export default function GuardianVerifyPage() {
         <div style={{ marginTop: 16, padding: 12, borderRadius: 8, border: "1px solid #f3c2c2" }}>
           ❌ {message}
           <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-            Tip: If you copied a long link, the token might be truncated. Paste the full token above and try again.
+            {t(
+              "guardian.verify.error.tipLongLink",
+              "Tip: If you copied a long link, the token might be truncated. Paste the full token above and try again."
+            )}
           </div>
         </div>
       )}

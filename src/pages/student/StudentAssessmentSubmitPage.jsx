@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
+import { useContent } from "../../locales/LanguageProvider";
 
 import { getAssessment, postAssessmentResponses, submitAssessment } from "../../api/assessments";
 
@@ -38,6 +39,7 @@ function readDraft(storageKey) {
 export default function StudentAssessmentSubmitPage() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
+  const { t } = useContent();
 
   const storageKey = useMemo(() => {
     return `${DRAFT_PREFIX_V2}:${attemptId || "unknown"}`;
@@ -65,7 +67,11 @@ export default function StudentAssessmentSubmitPage() {
       } catch (e) {
         // Don't hard fail here; draft may still exist
         if (!cancelled) {
-          setError(e?.detail || e?.message || "Failed to load assessment from server.");
+          setError(
+            e?.detail ||
+              e?.message ||
+              t("student.assessmentSubmit.errors.loadAssessment", "Failed to load assessment from server.")
+          );
         }
       }
     }
@@ -106,25 +112,38 @@ export default function StudentAssessmentSubmitPage() {
     setError(null);
 
     if (!attemptId) {
-      setError("Missing attempt id. Please restart the assessment.");
+      setError(t("student.assessmentSubmit.errors.missingAttemptId", "Missing attempt id. Please restart the assessment."));
       return;
     }
 
     if (!draft) {
-      setError("No saved draft found for this assessment. Please return and answer the questions.");
+      setError(
+        t(
+          "student.assessmentSubmit.errors.noDraft",
+          "No saved draft found for this assessment. Please return and answer the questions."
+        )
+      );
       return;
     }
 
     if (questionIds.length !== QUESTION_COUNT) {
       setError(
-        `Invalid question set. Expected ${QUESTION_COUNT} questions but found ${questionIds.length}. Please return to the assessment run.`
+        t(
+          "student.assessmentSubmit.errors.invalidQuestionSet",
+          "Invalid question set. Expected {{expected}} questions but found {{found}}. Please return to the assessment run.",
+          { expected: QUESTION_COUNT, found: questionIds.length }
+        )
       );
       return;
     }
 
     if (answeredCount !== QUESTION_COUNT) {
       setError(
-        `Assessment incomplete. Answered ${answeredCount}/${QUESTION_COUNT}. Please return and complete all questions.`
+        t(
+          "student.assessmentSubmit.errors.incomplete",
+          "Assessment incomplete. Answered {{answered}}/{{total}}. Please return and complete all questions.",
+          { answered: answeredCount, total: QUESTION_COUNT }
+        )
       );
       return;
     }
@@ -142,7 +161,11 @@ export default function StudentAssessmentSubmitPage() {
     const invalid = responses.find((r) => !r.answer);
     if (invalid) {
       setError(
-        `Invalid answer value for question_id=${invalid.question_id}. Please go back and reselect the option.`
+        t(
+          "student.assessmentSubmit.errors.invalidAnswer",
+          "Invalid answer value for question_id={{questionId}}. Please go back and reselect the option.",
+          { questionId: invalid.question_id }
+        )
       );
       return;
     }
@@ -165,7 +188,11 @@ export default function StudentAssessmentSubmitPage() {
       // Navigate to latest results page (PR6 will render backend results)
       navigate("/student/results/latest", { replace: true });
     } catch (e) {
-      setError(e?.detail || e?.message || "Submit failed. Please try again.");
+      setError(
+        e?.detail ||
+          e?.message ||
+          t("student.assessmentSubmit.errors.submitFailed", "Submit failed. Please try again.")
+      );
     } finally {
       setBusy(false);
     }
@@ -179,37 +206,44 @@ export default function StudentAssessmentSubmitPage() {
 
   return (
     <SkeletonPage
-      title="Submit Assessment"
-      subtitle="Review completion status before submitting."
+      title={t("student.assessmentSubmit.title", "Submit Assessment")}
+      subtitle={t("student.assessmentSubmit.subtitle", "Review completion status before submitting.")}
       actions={
         <>
           <Button variant="secondary" onClick={handleBack} disabled={busy}>
-            Back
+            {t("student.assessmentSubmit.actions.back", "Back")}
           </Button>
           <Button onClick={handleConfirmSubmit} disabled={!canSubmit}>
-            {busy ? "Submitting..." : "Confirm & Submit"}
+            {busy
+              ? t("student.assessmentSubmit.actions.submitting", "Submitting...")
+              : t("student.assessmentSubmit.actions.confirmSubmit", "Confirm & Submit")}
           </Button>
         </>
       }
       empty={invalidDraft}
-      emptyTitle="Nothing to submit yet"
-      emptyDescription="Return to the assessment run and complete all questions before submitting."
+      emptyTitle={t("student.assessmentSubmit.emptyTitle", "Nothing to submit yet")}
+      emptyDescription={t(
+        "student.assessmentSubmit.emptyDescription",
+        "Return to the assessment run and complete all questions before submitting."
+      )}
     >
       <div style={{ maxWidth: 720, display: "grid", gap: 14 }}>
         <div style={{ fontSize: 13, opacity: 0.85 }}>
-          Attempt ID: <b>{attemptId || "unknown"}</b>
+          {t("student.assessmentSubmit.attemptId", "Attempt ID")}: <b>{attemptId || t("student.assessmentSubmit.unknown", "unknown")}</b>
         </div>
 
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>Completion summary</div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>
-            Selected questions: <b>{questionIds.length}</b> / {QUESTION_COUNT}
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+            {t("student.assessmentSubmit.summary.title", "Completion summary")}
           </div>
           <div style={{ fontSize: 13, opacity: 0.9 }}>
-            Answered: <b>{answeredCount}</b> / {QUESTION_COUNT}
+            {t("student.assessmentSubmit.summary.selectedQuestions", "Selected questions")}: <b>{questionIds.length}</b> / {QUESTION_COUNT}
+          </div>
+          <div style={{ fontSize: 13, opacity: 0.9 }}>
+            {t("student.assessmentSubmit.summary.answered", "Answered")}: <b>{answeredCount}</b> / {QUESTION_COUNT}
             {missingCount ? (
               <span style={{ marginLeft: 8, opacity: 0.8 }}>
-                (missing {missingCount})
+                ({t("student.assessmentSubmit.summary.missing", "missing")} {missingCount})
               </span>
             ) : null}
           </div>
@@ -231,8 +265,11 @@ export default function StudentAssessmentSubmitPage() {
         ) : null}
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Note: Submitting sends exactly {QUESTION_COUNT} responses to the backend for scoring.
-          Scoring remains backend-owned.
+          {t(
+            "student.assessmentSubmit.note",
+            "Note: Submitting sends exactly {{count}} responses to the backend for scoring. Scoring remains backend-owned.",
+            { count: QUESTION_COUNT }
+          )}
         </div>
       </div>
     </SkeletonPage>

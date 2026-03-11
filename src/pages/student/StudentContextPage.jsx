@@ -5,6 +5,7 @@ import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { apiGet, apiPut  } from "../../apiClient";
 import { useSession } from "../../hooks/useSession";
+import { useContent } from "../../locales/LanguageProvider";
 
 /**
  * StudentContextPage
@@ -15,6 +16,7 @@ import { useSession } from "../../hooks/useSession";
 export default function StudentContextPage() {
   const navigate = useNavigate();
   const { sessionUser } = useSession();
+  const { t } = useContent();
 
   // We pin student_id from the student_profile (now present after student row creation).
   const studentId = useMemo(() => {
@@ -46,7 +48,12 @@ export default function StudentContextPage() {
 
         // If student not ready, send them back
         if (!studentId) {
-          setError("Student profile not ready yet. Please return to Dashboard.");
+          setError(
+            t(
+              "student.context.errors.profileNotReadyReturn",
+              "Student profile not ready yet. Please return to Dashboard."
+            )
+          );
           return;
         }
 
@@ -61,7 +68,13 @@ export default function StudentContextPage() {
         // we could prefill by reading it. If no read endpoint exists, we skip.
         // (Keeping minimal: do not add new backend endpoints.)
       } catch (e) {
-        setError(e?.message || "Could not load your assessment state. Please try again.");
+        setError(
+          e?.message ||
+            t(
+              "student.context.errors.loadState",
+              "Could not load your assessment state. Please try again."
+            )
+        );
       } finally {
         if (alive) setLoading(false);
       }
@@ -79,11 +92,18 @@ export default function StudentContextPage() {
 
   async function onSave() {
     if (!studentId) {
-      setError("Student profile not ready yet.");
+      setError(
+        t("student.context.errors.profileNotReady", "Student profile not ready yet.")
+      );
       return;
     }
     if (!activeAssessmentId) {
-      setError("No active assessment found. Start an assessment first.");
+      setError(
+        t(
+          "student.context.errors.noActiveAssessment",
+          "No active assessment found. Start an assessment first."
+        )
+      );
       return;
     }
 
@@ -110,7 +130,10 @@ export default function StudentContextPage() {
     } catch (e) {
       setError(
         e?.message ||
-          "We couldn't save these details right now. You can continue the assessment and try again later."
+          t(
+            "student.context.errors.saveFailed",
+            "We couldn't save these details right now. You can continue the assessment and try again later."
+          )
       );
     } finally {
       setSaving(false);
@@ -147,86 +170,110 @@ function ChipGroup({ value, onChange, options }) {
 
   return (
     <SkeletonPage
-      title="Quick check-in (optional)"
-      subtitle="These details help us keep recommendations practical for you. You can skip and update later."
+      title={t("student.context.title", "Quick check-in (optional)")}
+      subtitle={t(
+        "student.context.subtitle",
+        "These details help us keep recommendations practical for you. You can skip and update later."
+      )}
     >
       <div className="card">
         {loading ? (
-          <p>Loading…</p>
+          <p>{t("student.context.loading", "Loading…")}</p>
         ) : error ? (
           <div className="text-sm">
             <p className="text-red-600">{error}</p>
             <div className="mt-3 flex gap-2">
-              <Button onClick={() => navigate("/student/dashboard")}>Back to Dashboard</Button>
+              <Button onClick={() => navigate("/student/dashboard")}>
+                {t("student.context.actions.backToDashboard", "Back to Dashboard")}
+              </Button>
             </div>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted mb-4">
-              Takes about <strong>30 seconds</strong>. Choose “Prefer not to say” anytime.
+              {t("student.context.intro.takesAboutPrefix", "Takes about")}{" "}
+              <strong>{t("student.context.intro.seconds", "30 seconds")}</strong>
+              . {t("student.context.intro.preferNotToSay", "Choose “Prefer not to say” anytime.")}
             </p>
 
             <div className="flex flex-col space-y-8">
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">Which board are you studying under?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">
+                  {t("student.context.q.educationBoard", "Which board are you studying under?")}
+                </label>
 
                 <div className="mt-4"></div>
                 <ChipGroup
                     value={form.education_board}
                     onChange={(val) => setField("education_board", val)}
                     options={[
-                        { value: "cbse", label: "CBSE" },
-                        { value: "icse", label: "ICSE" },
-                        { value: "state", label: "State Board" },
-                        { value: "ib", label: "IB" },
-                        { value: "cambridge", label: "Cambridge / IGCSE" },
-                        { value: "other", label: "Other" },
-                        { value: "unknown", label: "Prefer not to say" },
+                        { value: "cbse", label: t("student.context.options.educationBoard.cbse", "CBSE") },
+                        { value: "icse", label: t("student.context.options.educationBoard.icse", "ICSE") },
+                        { value: "state", label: t("student.context.options.educationBoard.state", "State Board") },
+                        { value: "ib", label: t("student.context.options.educationBoard.ib", "IB") },
+                        { value: "cambridge", label: t("student.context.options.educationBoard.cambridge", "Cambridge / IGCSE") },
+                        { value: "other", label: t("student.context.options.common.other", "Other") },
+                        { value: "unknown", label: t("student.context.options.common.preferNotToSay", "Prefer not to say") },
                     ]}
                     />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">When you need study help, how much support is usually available?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">
+                  {t(
+                    "student.context.q.supportLevel",
+                    "When you need study help, how much support is usually available?"
+                  )}
+                </label>
                 <ChipGroup
                     value={form.support_level}
                     onChange={(val) => setField("support_level", val)}
                     options={[
-                        { value: "low", label: "Mostly self-supported" },
-                        { value: "medium", label: "Some guidance available" },
-                        { value: "high", label: "Strong support available" },
-                        { value: "unknown", label: "Prefer not to say" },
+                        { value: "low", label: t("student.context.options.supportLevel.low", "Mostly self-supported") },
+                        { value: "medium", label: t("student.context.options.supportLevel.medium", "Some guidance available") },
+                        { value: "high", label: t("student.context.options.supportLevel.high", "Strong support available") },
+                        { value: "unknown", label: t("student.context.options.common.preferNotToSay", "Prefer not to say") },
                     ]}
                     />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">How easy is it to access learning resources if needed (internet/books/coaching)?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">
+                  {t(
+                    "student.context.q.resourceAccess",
+                    "How easy is it to access learning resources if needed (internet/books/coaching)?"
+                  )}
+                </label>
                 <div className="mt-4">
                     <ChipGroup
                         value={form.resource_access}
                         onChange={(val) => setField("resource_access", val)}
                         options={[
-                        { value: "limited", label: "Limited" },
-                        { value: "moderate", label: "Moderate" },
-                        { value: "good", label: "Good" },
-                        { value: "unknown", label: "Prefer not to say" },
+                        { value: "limited", label: t("student.context.options.resourceAccess.limited", "Limited") },
+                        { value: "moderate", label: t("student.context.options.resourceAccess.moderate", "Moderate") },
+                        { value: "good", label: t("student.context.options.resourceAccess.good", "Good") },
+                        { value: "unknown", label: t("student.context.options.common.preferNotToSay", "Prefer not to say") },
                         ]}
                     />
                     </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-3 leading-relaxed">To keep suggestions practical, which feels closest?</label>
+                <label className="block text-sm font-semibold mb-3 leading-relaxed">
+                  {t(
+                    "student.context.q.sesBand",
+                    "To keep suggestions practical, which feels closest?"
+                  )}
+                </label>
                 <div className="mt-4">
                     <ChipGroup
                         value={form.ses_band}
                         onChange={(val) => setField("ses_band", val)}
                         options={[
-                        { value: "careful", label: "Careful with expenses" },
-                        { value: "some", label: "Can manage some extra learning costs" },
-                        { value: "not_barrier", label: "Costs usually not a big barrier" },
-                        { value: "unknown", label: "Prefer not to say" },
+                        { value: "careful", label: t("student.context.options.sesBand.careful", "Careful with expenses") },
+                        { value: "some", label: t("student.context.options.sesBand.some", "Can manage some extra learning costs") },
+                        { value: "not_barrier", label: t("student.context.options.sesBand.notBarrier", "Costs usually not a big barrier") },
+                        { value: "unknown", label: t("student.context.options.common.preferNotToSay", "Prefer not to say") },
                         ]}
                     />
                     </div>
@@ -235,10 +282,12 @@ function ChipGroup({ value, onChange, options }) {
 
             <div className="mt-5 flex gap-2 justify-end">
               <Button variant="secondary" onClick={() => navigate("/student/assessment")}>
-                Skip for now
+                {t("student.context.actions.skipForNow", "Skip for now")}
               </Button>
               <Button onClick={onSave} disabled={saving}>
-                {saving ? "Saving…" : "Save"}
+                {saving
+                  ? t("student.context.actions.saving", "Saving…")
+                  : t("student.context.actions.save", "Save")}
               </Button>
             </div>
           </>

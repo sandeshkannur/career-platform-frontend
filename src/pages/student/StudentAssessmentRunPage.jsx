@@ -1,4 +1,4 @@
-﻿// src/pages/student/StudentAssessmentRunPage.jsx
+// src/pages/student/StudentAssessmentRunPage.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -304,7 +304,10 @@ export default function StudentAssessmentRunPage() {
 
     (async () => {
       try {
-        setSyncState({ status: "syncing", message: "Syncing saved answers…" });
+        setSyncState({
+          status: "syncing",
+          message: t("student.assessmentRun.sync.syncing", "Syncing saved answers…"),
+        });
 
         const res = await replayAnswerQueueOnce(attemptId);
 
@@ -315,8 +318,12 @@ export default function StudentAssessmentRunPage() {
             status: "done",
             message:
               res.submitted > 0
-                ? `Synced ${res.submitted} saved answer(s).`
-                : "No saved answers to sync.",
+                ? t(
+                    "student.assessmentRun.sync.syncedCount",
+                    "Synced {{count}} saved answer(s).",
+                    { count: res.submitted }
+                  )
+                : t("student.assessmentRun.sync.none", "No saved answers to sync."),
           });
         } else {
           console.warn("[A+ auto-replay] not submitted:", res);
@@ -324,15 +331,20 @@ export default function StudentAssessmentRunPage() {
             status: "error",
             message:
               res?.message ||
-              "Could not sync saved answers automatically. You can continue normally.",
+              t(
+                "student.assessmentRun.sync.failed",
+                "Could not sync saved answers automatically. You can continue normally."
+              ),
           });
         }
       } catch (e) {
         console.warn("[A+ auto-replay] error:", e);
         setSyncState({
           status: "error",
-          message:
-            "Could not sync saved answers automatically. You can continue normally.",
+          message: t(
+            "student.assessmentRun.sync.failed",
+            "Could not sync saved answers automatically. You can continue normally."
+          ),
         });
       }
     })();
@@ -443,9 +455,14 @@ export default function StudentAssessmentRunPage() {
           updated_at: now,
         })
       );
-      alert("Progress saved (local draft).");
+      alert(t("student.assessmentRun.alerts.saved", "Progress saved (local draft)."));
     } catch {
-      alert("Unable to save progress in this browser/session.");
+      alert(
+        t(
+          "student.assessmentRun.alerts.saveFailed",
+          "Unable to save progress in this browser/session."
+        )
+      );
     }
   }
 
@@ -473,10 +490,10 @@ export default function StudentAssessmentRunPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-xl font-semibold">
-              {t("title", "Assessment")}
+              {t("student.assessmentRun.title", "Assessment")}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {t("loading.subtitle", "Loading your assessment…")}
+              {t("student.assessmentRun.loading.subtitle", "Loading your assessment…")}
             </p>
           </div>
 
@@ -485,13 +502,13 @@ export default function StudentAssessmentRunPage() {
               variant="secondary"
               onClick={() => navigate("/student/assessment")}
             >
-              {t("actions.back", "Back")}
+              {t("student.assessmentRun.actions.back", "Back")}
             </Button>
           </div>
         </div>
 
         <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
-          {t("loading.body", "Loading…")}
+          {t("student.assessmentRun.loading.body", "Loading…")}
         </div>
       </div>
     );
@@ -503,10 +520,10 @@ export default function StudentAssessmentRunPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-xl font-semibold">
-              {t("title", "Assessment")}
+              {t("student.assessmentRun.title", "Assessment")}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {t("error.subtitle", "Unable to load questions.")}
+              {t("student.assessmentRun.error.subtitle", "Unable to load questions.")}
             </p>
           </div>
 
@@ -515,18 +532,18 @@ export default function StudentAssessmentRunPage() {
               variant="secondary"
               onClick={() => navigate("/student/assessment")}
             >
-              {t("actions.back", "Back")}
+              {t("student.assessmentRun.actions.back", "Back")}
             </Button>
           </div>
         </div>
 
         <div className="mt-6 rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
           <div className="text-sm font-semibold">
-            {t("error.title", "Failed to load question pool")}
+            {t("student.assessmentRun.error.title", "Failed to load question pool")}
           </div>
           <div className="mt-1 text-sm text-[var(--text-muted)]">
             {poolError?.message ||
-              t("error.fallback", "Failed to load question pool.")}
+              t("student.assessmentRun.error.fallback", "Failed to load question pool.")}
           </div>
         </div>
       </div>
@@ -539,10 +556,10 @@ export default function StudentAssessmentRunPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-xl font-semibold">
-              {t("title", "Assessment")}
+              {t("student.assessmentRun.title", "Assessment")}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {t("empty.subtitle", "No questions available.")}
+              {t("student.assessmentRun.empty.subtitle", "No questions available.")}
             </p>
           </div>
 
@@ -551,13 +568,13 @@ export default function StudentAssessmentRunPage() {
               variant="secondary"
               onClick={() => navigate("/student/assessment")}
             >
-              {t("actions.back", "Back")}
+              {t("student.assessmentRun.actions.back", "Back")}
             </Button>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          {t("empty.body", "Unable to load questions.")}
+          {t("student.assessmentRun.empty.body", "Unable to load questions.")}
         </div>
       </div>
     );
@@ -569,11 +586,11 @@ export default function StudentAssessmentRunPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold">
-            {t("title", "Assessment")}
+            {t("student.assessmentRun.title", "Assessment")}
           </h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             {t(
-              "subtitle",
+              "student.assessmentRun.subtitle",
               "Answer honestly. There are no right or wrong answers."
             )}
           </p>
@@ -584,21 +601,21 @@ export default function StudentAssessmentRunPage() {
             value={lang}
             onChange={handleLangChange}
             className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
-            aria-label="Language"
+            aria-label={t("student.assessmentRun.language.ariaLabel", "Language")}
           >
-            <option value="en">EN</option>
-            <option value="kn">KN</option>
+          <option value="en">{t("common.language.en", "EN")}</option>
+          <option value="kn">{t("common.language.kn", "KN")}</option>
           </select>
           <Button variant="secondary" onClick={handleBack}>
-            {t("actions.back", "Back")}
+            {t("student.assessmentRun.actions.back", "Back")}
           </Button>
           <Button variant="secondary" onClick={handleSave}>
-            {t("actions.save", "Save")}
+            {t("student.assessmentRun.actions.save", "Save")}
           </Button>
           <Button onClick={handleNext} disabled={!selected}>
             {isLast
-              ? t("actions.submit", "Submit")
-              : t("actions.next", "Next")}
+              ? t("student.assessmentRun.actions.submit", "Submit")
+              : t("student.assessmentRun.actions.next", "Next")}
           </Button>
         </div>
       </div>
@@ -607,17 +624,17 @@ export default function StudentAssessmentRunPage() {
       <div className="mt-6">
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <div>
-            Question{" "}
+            {t("student.assessmentRun.progress.question", "Question")}{" "}
             <span className="font-medium text-[var(--text-primary)]">
               {index + 1}
             </span>{" "}
-            of{" "}
+            {t("student.assessmentRun.progress.of", "of")}{" "}
             <span className="font-medium text-[var(--text-primary)]">
               {QUESTIONS.length}
             </span>
             {attemptId ? (
               <span className="ml-2 opacity-80">
-                • Attempt ID: {attemptId}
+                • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
               </span>
             ) : null}
           </div>
@@ -642,8 +659,11 @@ export default function StudentAssessmentRunPage() {
 
       {/* Determinism metadata (auditable) */}
       <div className="mt-3 text-xs text-[var(--text-muted)]">
-        Deterministic selection: seed = attemptId, pick = {QUESTION_COUNT} (or
-        fewer if pool smaller)
+        {t(
+          "student.assessmentRun.meta.deterministicSelection",
+          "Deterministic selection: seed = attemptId, pick = {{count}} (or fewer if pool smaller)",
+          { count: QUESTION_COUNT }
+        )}
       </div>
 
       {/* Question Card */}
@@ -683,11 +703,11 @@ export default function StudentAssessmentRunPage() {
             className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm"
           >
              <div className="font-semibold">
-               {t("helper.select_title", "Select an option to continue")}
+               {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
              </div>
             <div className="mt-1 text-[var(--text-muted)]">
               {t(
-                "helper.select_body",
+                "student.assessmentRun.helper.select_body",
                 "You can change your answer anytime before submitting."
               )}
             </div>
@@ -696,7 +716,7 @@ export default function StudentAssessmentRunPage() {
 
         <div className="mt-5 text-xs text-[var(--text-muted)]">
           {t(
-            "note.scoring",
+            "student.assessmentRun.note.scoring",
             "Note: Scoring remains backend-owned. This runner only loads questions, selects deterministically, and stores a local draft."
           )}
         </div>

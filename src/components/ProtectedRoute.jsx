@@ -2,6 +2,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import LoadingScreen from "./LoadingScreen";
 import { useSession } from "../hooks/useSession";
+import { useContent } from "../locales/LanguageProvider";
 import { getToken, routeFromSession } from "../auth";
 
 /**
@@ -17,6 +18,7 @@ import { getToken, routeFromSession } from "../auth";
  */
 export default function ProtectedRoute({ allowRoles, children }) {
   const { bootstrapping, sessionUser } = useSession();
+  const { t } = useContent();
   const location = useLocation();
   const token = getToken();
 
@@ -24,7 +26,7 @@ export default function ProtectedRoute({ allowRoles, children }) {
   const DEV_ONLY = !import.meta.env.PROD;
 
   // Wait for bootstrap
-  if (bootstrapping) return <LoadingScreen label="Loading session…" />;
+  if (bootstrapping) return <LoadingScreen label={t("protectedRoute.loadingSession", "Loading session…")} />;
 
   // No token -> login
   if (!token) return <Navigate to="/login" replace state={{ from: location }} />;
