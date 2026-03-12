@@ -4,13 +4,13 @@ import { Link, useNavigate } from "react-router-dom";
 import Page from "../ui/Page";
 import Card from "../ui/Card";
 import AuthHeader from "../ui/AuthHeader";
-import useContent from "../hooks/useContent";
+import { useContent } from "../locales/LanguageProvider";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { t } = useContent("auth.signup");
+  const { t } = useContent();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

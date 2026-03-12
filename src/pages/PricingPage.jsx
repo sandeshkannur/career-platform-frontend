@@ -4,7 +4,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PublicHeader from "../ui/PublicHeader";
-import useContent from "../hooks/useContent";
+import { useContent } from "../locales/LanguageProvider";
 
 function PriceCard({
   title,
@@ -72,7 +72,7 @@ function PriceCard({
 }
 
 export default function PricingPage() {
-  const { t } = useContent("pricing");
+  const { t } = useContent();
 
   return (
     <div>

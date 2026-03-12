@@ -7,12 +7,12 @@ import Page from "../ui/Page";
 import Card from "../ui/Card";
 import { useSession } from "../hooks/useSession";
 import AuthHeader from "../ui/AuthHeader";
-import useContent from "../hooks/useContent";
+import { useContent } from "../locales/LanguageProvider";
 
 export default function LoginPage() {
   const { login } = useSession();
   const location = useLocation();
-  const { t } = useContent("auth.login");
+  const { t } = useContent();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
