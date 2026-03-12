@@ -1,24 +1,17 @@
 // src/ui/LanguageSwitcher.jsx
-import { useEffect, useState } from "react";
-import { getPreferredLang, setPreferredLang } from "../apiClient";
-import { t, SUPPORTED_LANGS } from "../i18n";
+import { useContent } from "../locales/LanguageProvider";
 
-
+const SUPPORTED_LANGS = [
+  { code: "en", label: "English" },
+  { code: "kn", label: "ಕನ್ನಡ (Kannada)" },
+];
 
 export default function LanguageSwitcher({ compact = false }) {
-  const [lang, setLang] = useState("en");
-
-  useEffect(() => {
-    setLang(getPreferredLang() || "en");
-  }, []);
+  const { language, setLanguage, t } = useContent();
 
   function onChange(e) {
     const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
-
-    // simplest + safest: reload so all pages/components pick up new language
-    window.location.reload();
+    setLanguage(next);
   }
 
   return (
@@ -30,7 +23,7 @@ export default function LanguageSwitcher({ compact = false }) {
       )}
 
       <select
-        value={lang}
+        value={language}
         onChange={onChange}
         style={{
           padding: "8px 10px",
