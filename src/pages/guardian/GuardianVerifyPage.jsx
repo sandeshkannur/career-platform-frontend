@@ -52,7 +52,10 @@ export default function GuardianVerifyPage() {
     decoded?.guardian_email ||
     decoded?.guardianEmail ||
     decoded?.email ||
-    t("guardian.verify.guardianFallback", "(will confirm after verification)");
+    t(
+      "guardian.verify.guardianFallback",
+      "(will confirm after verification)"
+    );
 
   const [otp, setOtp] = useState("");
   const [submitting, setSubmitting] = useState(false);

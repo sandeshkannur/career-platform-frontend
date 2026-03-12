@@ -106,7 +106,7 @@ export default function StudentAssessmentIntroPage() {
       const assessmentId = data?.assessment_id;
 
       if (!assessmentId) {
-        throw new Error("assessment_id missing from response");
+        throw new Error(t("student.assessmentIntro.errors.missingAssessmentId", "assessment_id missing from response"));
       }
 
       // Persist a minimal snapshot for resume.

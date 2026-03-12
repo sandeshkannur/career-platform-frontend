@@ -4,7 +4,7 @@ import { apiGet, getPreferredLang, setPreferredLang } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
-import useContent from "../../hooks/useContent";
+import { useContent } from "../../locales/LanguageProvider";
 import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
 
 import { getResultsBlocksV1 } from "../../content/resultsBlocks.v1";
@@ -105,7 +105,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
     career?.title ||
     career?.career_name ||
     career?.name ||
-    `Career #${idx + 1}`;
+    `${t("studentResults.topCareerFallback", "Career")} #${idx + 1}`;
 
   const cluster = career?.cluster_title || "";
   const drivers = Array.isArray(career?.drivers) ? career.drivers.slice(0, 3) : [];
@@ -148,7 +148,7 @@ export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { sessionUser } = useSession();
-  const { t } = useContent("studentResults");
+  const { t } = useContent();
 
   const canSeeScores =
     sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
@@ -965,7 +965,7 @@ export default function StudentResultsPage() {
                                 {t("studentResults.recommendedStream", "Recommended stream")}
                               </div>
                               <div style={{ fontWeight: 700 }}>
-                                {selectedResult.recommended_stream || "—"}
+                                {selectedResult.recommended_stream || t("studentResults.notAvailable", "—")}
                               </div>
                             </div>
 

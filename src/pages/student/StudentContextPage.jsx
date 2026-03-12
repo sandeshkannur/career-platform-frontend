@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
-import { apiGet, apiPut  } from "../../apiClient";
+import { apiGet, apiPut } from "../../apiClient";
 import { useSession } from "../../hooks/useSession";
 import { useContent } from "../../locales/LanguageProvider";
 
@@ -93,7 +93,10 @@ export default function StudentContextPage() {
   async function onSave() {
     if (!studentId) {
       setError(
-        t("student.context.errors.profileNotReady", "Student profile not ready yet.")
+        t(
+          "student.context.errors.profileNotReady",
+          "Student profile not ready yet."
+        )
       );
       return;
     }

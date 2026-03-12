@@ -107,10 +107,13 @@ export default function StudentResultsHistoryPage() {
                       </div>
                       <div className="text-sm text-muted">
                         {t("student.resultsHistory.row.submitted", "Submitted")}:{" "}
-                        {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "—"}
+                        {a.submitted_at
+                          ? new Date(a.submitted_at).toLocaleString()
+                          : t("student.resultsHistory.row.notAvailable", "—")}
                       </div>
                       <div className="text-sm text-muted">
-                        {t("student.resultsHistory.row.config", "Config")}: {a.scoring_config_version ?? "—"}
+                        {t("student.resultsHistory.row.config", "Config")}:{" "}
+                        {a.scoring_config_version ?? t("student.resultsHistory.row.notAvailable", "—")}
                       </div>
                     </div>
 

@@ -1,7 +1,7 @@
-import useContent from "../../hooks/useContent";
+import { useContent } from "../../locales/LanguageProvider";
 
 export default function StudentProfilePage() {
-  const { t } = useContent("student.profile");
+  const { t } = useContent();
 
   return (
     <div className="space-y-6">

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 
 import Button from "../../ui/Button";
-import useContent from "../../hooks/useContent";
+import { useContent } from "../../locales/LanguageProvider";
 
 import { getQuestionPool } from "../../api/questions";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
@@ -32,7 +32,7 @@ export default function StudentAssessmentRunPage() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
 
-  const { t } = useContent("student.assessment.run");
+  const { t } = useContent();
 
   const storageKey = useMemo(() => {
     return `${DRAFT_PREFIX_V2}:${attemptId || "unknown"}`;
@@ -88,7 +88,12 @@ export default function StudentAssessmentRunPage() {
         const questions = Array.isArray(data) ? data : data?.questions;
 
         if (!Array.isArray(questions)) {
-          throw new Error("Invalid question pool payload (expected array).");
+          throw new Error(
+            t(
+              "student.assessmentRun.errors.invalidQuestionPoolPayload",
+              "Invalid question pool payload (expected array)."
+            )
+          );
         }
 
         if (!cancelled) setPool(questions);
@@ -400,7 +405,13 @@ export default function StudentAssessmentRunPage() {
     ? current.choices
     : Array.isArray(current?.answers)
     ? current.answers
-    : ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+    : [
+        t("student.assessmentRun.options.stronglyDisagree", "Strongly Disagree"),
+        t("student.assessmentRun.options.disagree", "Disagree"),
+        t("student.assessmentRun.options.neutral", "Neutral"),
+        t("student.assessmentRun.options.agree", "Agree"),
+        t("student.assessmentRun.options.stronglyAgree", "Strongly Agree"),
+      ];
 
   const selected = currentId ? answers[currentId]?.answer : null;
   const isLast = index === QUESTIONS.length - 1;

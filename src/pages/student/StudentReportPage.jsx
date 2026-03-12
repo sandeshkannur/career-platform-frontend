@@ -169,7 +169,7 @@ export default function StudentReportPage() {
         >
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
             {t("student.report.error.title", "Failed to load report")}
-            {error.status ? ` (HTTP ${error.status})` : ""}
+            {error.status ? ` (${t("common.http", "HTTP")} ${error.status})` : ""}
           </div>
           <div style={{ fontSize: 14 }}>{error.message}</div>
           <div style={{ marginTop: 10 }}>

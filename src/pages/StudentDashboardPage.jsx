@@ -165,7 +165,7 @@ export default function StudentDashboardPage() {
           <div className="rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
             <div className="text-sm font-semibold">
               {t("student.dashboard.errorTitle", "Failed to load dashboard data")}
-              {error.status ? ` (HTTP ${error.status})` : ""}
+              {error.status ? ` (${t("common.http", "HTTP")} ${error.status})` : ""}
             </div>
             <div className="mt-1 text-sm text-[var(--text-muted)]">
               {error.message}
