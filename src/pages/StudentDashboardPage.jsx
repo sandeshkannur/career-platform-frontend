@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import Button from "../ui/Button";
 import { useSession } from "../hooks/useSession";
-import useContent from "../hooks/useContent";
+import { useContent } from "../locales/LanguageProvider";
 
 import {
   getStudentDashboard,
@@ -15,7 +15,7 @@ import {
 export default function StudentDashboardPage() {
   const navigate = useNavigate();
   const { logout, sessionUser } = useSession();
-  const { t } = useContent("student.dashboard");
+  const { t } = useContent();
 
   // IMPORTANT: We need a stable studentId. Adjust only if your /v1/auth/me payload uses a different field.
   const studentId = useMemo(() => {
