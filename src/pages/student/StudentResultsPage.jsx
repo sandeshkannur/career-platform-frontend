@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { apiGet, getPreferredLang, setPreferredLang } from "../../apiClient";
+import { apiGet } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
@@ -148,7 +148,7 @@ export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { sessionUser } = useSession();
-  const { t } = useContent();
+  const { t, language } = useContent();
 
   const canSeeScores =
     sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
@@ -169,25 +169,6 @@ export default function StudentResultsPage() {
   const [data, setData] = useState(null);
   const [ctx, setCtx] = useState(null);
 
-  const contentLocale = useMemo(() => {
-    const raw =
-      sessionUser?.locale ||
-      sessionUser?.preferred_locale ||
-      (typeof navigator !== "undefined" ? navigator.language : "en");
-    return (raw || "en").toString().split(/[-_]/)[0].toLowerCase();
-  }, [sessionUser]);
-  const [lang, setLang] = useState("en");
-
-  useEffect(() => {
-    // Student language = localStorage preference (can differ from browser/session user)
-    if (sessionUser?.role === "student") {
-      setLang(getPreferredLang() || "en");
-      return;
-    }
-
-    // Admin/counsellor can remain English for now (or browser/session locale)
-    setLang(contentLocale || "en");
-  }, [sessionUser?.role, contentLocale]);
 
   const [explainRes, setExplainRes] = useState({ facets: [], aqs: [] });
   const [explainLoading, setExplainLoading] = useState(false);
@@ -195,19 +176,11 @@ export default function StudentResultsPage() {
   const [deepRes, setDeepRes] = useState(null); // raw /deep response (keys only)
   const [deepCopy, setDeepCopy] = useState({}); // key -> resolved text
   const [deepLoading, setDeepLoading] = useState(false);
-  const [deepError, setDeepError] = useState("");
+  const lang = language || "en";
 
   const lastExplainSigRef = useRef("");
   const lastDeepSigRef = useRef("");
-  const handleLangChange = (e) => {
-    const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
 
-    // Force refetch of localized content (avoids signature cache blocking)
-    lastExplainSigRef.current = "";
-    lastDeepSigRef.current = "";
-  };
   const selectedAssessmentId = useMemo(() => {
     const fromState =
       location?.state?.assessment_id ??
@@ -473,22 +446,6 @@ export default function StudentResultsPage() {
     >
       <div className="cp-results">
         <div className="cp-resultsActions">
-          <select
-            value={lang}
-            onChange={handleLangChange}
-            style={{
-              height: 40,
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              padding: "0 10px",
-              fontSize: 13,
-              background: "white",
-            }}
-            aria-label={t("studentResults.languageAria", "Language")}
-          >
-            <option value="en">{t("studentResults.language.enShort", "EN")}</option>
-            <option value="kn">{t("studentResults.language.knShort", "KN")}</option>
-          </select>
           <Button variant="secondary" onClick={() => navigate("/student/dashboard")}>
             {t("studentResults.actions.backToDashboard", "Back to Dashboard")}
           </Button>

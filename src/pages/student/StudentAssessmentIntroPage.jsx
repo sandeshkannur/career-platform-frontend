@@ -6,7 +6,6 @@ import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 
 import { getActiveAssessment, startAssessment } from "../../api/assessments";
-import { getPreferredLang, setPreferredLang } from "../../apiClient";
 import { useContent } from "../../locales/LanguageProvider";
 /**
  * Assessment UX — Step 2 (wired)
@@ -53,13 +52,7 @@ export default function StudentAssessmentIntroPage() {
   const navigate = useNavigate();
   const { t } = useContent();
   const [busy, setBusy] = useState(false);
-  const [lang, setLang] = useState(getPreferredLang());
 
-  const handleLangChange = useCallback((e) => {
-    const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
-  }, []);
   const lastRun = useMemo(() => readLastRunSnapshot(), []);
 
   // Step 1: backend-authoritative state sync (no scoring/order logic on client)
@@ -144,27 +137,6 @@ export default function StudentAssessmentIntroPage() {
       subtitle={t("student.assessmentIntro.subtitle", "Understand your strengths, preferences, and aptitude.")}
       actions={
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <label style={{ fontSize: 12, opacity: 0.8 }} htmlFor="cp-lang">
-              {t("student.assessmentIntro.language", "Language")}
-            </label>
-            <select
-              id="cp-lang"
-              value={lang}
-              onChange={handleLangChange}
-              style={{
-                height: 40,
-                border: "1px solid #ddd",
-                borderRadius: 8,
-                padding: "0 10px",
-                fontSize: 13,
-                background: "white",
-              }}
-            >
-              <option value="en">{t("student.assessmentIntro.language.en", "English")}</option>
-              <option value="kn">{t("student.assessmentIntro.language.kn", "Kannada")}</option>
-            </select>
-          </div>
 
           <Button variant="secondary" disabled={busy || activeLoading} onClick={handleResume}>
             {t("student.assessmentIntro.resume", "Resume")}
