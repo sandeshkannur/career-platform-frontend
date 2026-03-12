@@ -5,7 +5,7 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 // ✅ one-time redirect guard (prevents repeated redirects / race conditions)
 const AUTH_REDIRECT_FLAG = "__AUTH_REDIRECTING__";
-const LANG_STORAGE_KEY = "CP_LANG";
+const LANG_STORAGE_KEY = "career_platform_language";
 const DEFAULT_LANG = "en";
 
 // Exported so UI can call it later (language dropdown/toggle)

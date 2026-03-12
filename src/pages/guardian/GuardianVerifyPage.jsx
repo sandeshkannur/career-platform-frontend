@@ -2,6 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useContent } from "../../locales/LanguageProvider";
+import LanguageSwitcher from "../../ui/LanguageSwitcher";
 
 /**
  * Best-effort decode JWT payload (for display only).
@@ -141,6 +142,10 @@ export default function GuardianVerifyPage() {
 
   return (
     <div style={{ maxWidth: 620, margin: "40px auto", padding: 16 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <LanguageSwitcher compact />
+      </div>
+
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>
         {t("guardian.verify.title", "Guardian Consent Verification")}
       </h1>

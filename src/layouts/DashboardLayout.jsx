@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useContent } from "../locales/LanguageProvider";
+import LanguageSwitcher from "../ui/LanguageSwitcher";
 
 function classNames(...xs) {
   return xs.filter(Boolean).join(" ");
@@ -63,7 +64,7 @@ export default function DashboardLayout() {
             {t("common.dashboardlayout.studentPortal", "Student Portal")}
           </div>
 
-          <div className="w-[42px]" />
+          <LanguageSwitcher compact />
         </div>
       </div>
 
@@ -72,11 +73,17 @@ export default function DashboardLayout() {
         {/* Desktop sidebar */}
         <aside className="hidden h-screen w-[260px] shrink-0 border-r border-[var(--border)] bg-white md:flex md:flex-col">
           <div className="px-5 py-4">
-            <div className="text-sm font-semibold">
-              {t("common.dashboardlayout.studentPortal", "Student Portal")}
-            </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">
-              {t("common.dashboardlayout.cleanSafeExperience", "Clean & safe experience")}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold">
+                  {t("common.dashboardlayout.studentPortal", "Student Portal")}
+                </div>
+                <div className="mt-1 text-xs text-[var(--text-muted)]">
+                  {t("common.dashboardlayout.cleanSafeExperience", "Clean & safe experience")}
+                </div>
+              </div>
+
+              <LanguageSwitcher compact />
             </div>
           </div>
 
@@ -116,6 +123,10 @@ export default function DashboardLayout() {
                 >
                   ✕
                 </button>
+              </div>
+
+              <div className="border-b border-[var(--border)] px-4 py-3">
+                <LanguageSwitcher compact />
               </div>
 
               <nav className="space-y-1 px-3 py-3">
