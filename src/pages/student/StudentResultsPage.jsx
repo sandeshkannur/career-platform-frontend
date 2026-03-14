@@ -173,6 +173,8 @@ export default function StudentResultsPage() {
   const [explainRes, setExplainRes] = useState({ facets: [], aqs: [] });
   const [explainLoading, setExplainLoading] = useState(false);
   const [explainError, setExplainError] = useState("");
+
+  const [deepError, setDeepError] = useState("");
   const [deepRes, setDeepRes] = useState(null); // raw /deep response (keys only)
   const [deepCopy, setDeepCopy] = useState({}); // key -> resolved text
   const [deepLoading, setDeepLoading] = useState(false);

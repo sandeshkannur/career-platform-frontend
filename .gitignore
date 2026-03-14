@@ -27,3 +27,6 @@ translation-audit-output/
 *.backup.*
 *_corrupted.json
 *.ps1
+
+# Ignore local snapshot generation folders
+Snapshot/
