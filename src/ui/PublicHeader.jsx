@@ -1,4 +1,9 @@
 // src/ui/PublicHeader.jsx
+// CHANGES FROM LIVE VERSION:
+//   1. Brand name: "CareerPlatform" → "MapYourCareer"
+//   2. Added: position sticky + top 0 + z-index 50 on the outer div
+// UNCHANGED: useContent(), LanguageSwitcher, NavLink, all styles, all t() keys
+
 import { Link, useLocation } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useContent } from "../locales/LanguageProvider";
@@ -31,6 +36,9 @@ export default function PublicHeader() {
       style={{
         borderBottom: "1px solid #eee",
         background: "#fff",
+        position: "sticky",   // ← NEW: stays at top on scroll
+        top: 0,               // ← NEW
+        zIndex: 50,           // ← NEW: above page content
       }}
     >
       <div
@@ -43,8 +51,9 @@ export default function PublicHeader() {
           gap: 16,
         }}
       >
+        {/* ← CHANGED: CareerPlatform → MapYourCareer */}
         <Link to="/" style={{ textDecoration: "none", color: "#111" }}>
-          <span style={{ fontWeight: 800 }}>CareerPlatform</span>
+          <span style={{ fontWeight: 800 }}>MapYourCareer</span>
         </Link>
 
         <div style={{ display: "flex", gap: 14, marginLeft: 12 }}>
