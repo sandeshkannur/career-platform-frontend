@@ -135,72 +135,55 @@ export default function StudentDashboardPage() {
         </div>
       )}
 
-      {/* Read-only data section (temporary but extremely useful for schema validation) */}
-      <div className="mt-6">
-        {!studentId && (
-          <div className="rounded-xl border border-[var(--border)] bg-white p-4">
-            <div className="text-sm font-semibold">
-              {t("student.dashboard.session.title", "Session")}
-            </div>
-            <div className="mt-2 text-sm text-[var(--text-muted)]">
-              {t("student.dashboard.session.cannotDeterminePrefix", "Could not determine")}{" "}
-              <code>studentId</code> {t("student.dashboard.session.cannotDetermineFrom", "from")}{" "}
-              <code>sessionUser</code>.
-              <br />
-              {t(
-                "student.dashboard.session.shareMePayload",
-                "Please share your /v1/auth/me payload field name for the student id."
-              )}
-            </div>
-          </div>
-        )}
-
-        {studentId && loading && (
-          <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
-            {t("student.dashboard.loading", "Loading dashboard data…")}
-          </div>
-        )}
-
-        {studentId && error && (
-          <div className="rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
-            <div className="text-sm font-semibold">
-              {t("student.dashboard.errorTitle", "Failed to load dashboard data")}
-              {error.status ? ` (${t("common.http", "HTTP")} ${error.status})` : ""}
-            </div>
-            <div className="mt-1 text-sm text-[var(--text-muted)]">
-              {error.message}
-            </div>
-            <div className="mt-3">
-              <Button variant="secondary" onClick={() => window.location.reload()}>
-                {t("common.retry", "Retry")}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {studentId && !loading && !error && (dashboard || assessments || results) && (
-          <details className="rounded-xl border border-[var(--border)] bg-white">
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold">
-              {t("student.dashboard.debug.title", "Backend Data (temporary debug view)")}
-              <span className="ml-2 text-xs font-normal text-[var(--text-muted)]">
-                {t("student.dashboard.debug.expandHint", "(click to expand)")}
-              </span>
-            </summary>
-
-            <div className="grid gap-3 px-4 pb-4">
-              <pre className="m-0 overflow-x-auto rounded-lg bg-[var(--bg-app)] p-3 text-xs">
-                {JSON.stringify({ studentId, dashboard }, null, 2)}
-              </pre>
-              <pre className="m-0 overflow-x-auto rounded-lg bg-[var(--bg-app)] p-3 text-xs">
-                {JSON.stringify({ assessments }, null, 2)}
-              </pre>
-              <pre className="m-0 overflow-x-auto rounded-lg bg-[var(--bg-app)] p-3 text-xs">
-                {JSON.stringify({ results }, null, 2)}
-              </pre>
-            </div>
-          </details>
-        )}
+{/* Dashboard KPI Summary */}
+{studentId && !loading && !error && dashboard && (
+  <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4">
+    <div className="flex flex-wrap gap-6">
+      <div>
+        <div className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-semibold">
+          {t("student.dashboard.kpi.assessments", "Assessments")}
+        </div>
+        <div className="mt-1 text-2xl font-bold">
+          {dashboard.assessment_kpis?.total_assessments ?? 0}
+        </div>
       </div>
+      <div>
+        <div className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-semibold">
+          {t("student.dashboard.kpi.lastSubmitted", "Last submitted:")}
+        </div>
+        <div className="mt-1 text-sm font-medium">
+          {dashboard.assessment_kpis?.last_submitted_at
+            ? new Date(dashboard.assessment_kpis.last_submitted_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+            : t("student.dashboard.kpi.notYet", "Not yet")}
+        </div>
+      </div>
+    </div>
+
+    {Array.isArray(dashboard.top_skills) && dashboard.top_skills.length > 0 && (
+      <div className="mt-4 border-t border-[var(--border)] pt-4">
+        <div className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-semibold mb-3">
+          {t("student.dashboard.kpi.scoring", "Your top strengths")}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {dashboard.top_skills.slice(0, 5).map((s) => (
+            <span
+              key={s.skill_id}
+              className="rounded-full border border-[var(--border)] bg-[var(--bg-app)] px-3 py-1 text-xs font-medium"
+            >
+              {s.skill_name || `Skill ${s.skill_id}`}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+{studentId && loading && (
+  <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
+    {t("student.dashboard.loading", "Loading dashboard data…")}
+  </div>
+)}
 
       {/* Action cards */}
       <div className="mt-6">
