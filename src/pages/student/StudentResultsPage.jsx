@@ -107,39 +107,82 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
     career?.name ||
     `${t("studentResults.topCareerFallback", "Career")} #${idx + 1}`;
 
-  const cluster = career?.cluster_title || "";
-  const drivers = Array.isArray(career?.drivers) ? career.drivers.slice(0, 3) : [];
+  // Use career.cluster (from API) not career.cluster_title
+  const cluster = career?.cluster || career?.cluster_title || "";
+
+  // matched_keyskills from API: [{ keyskill_name, keyskill_code }]
+  const matchedSkills = Array.isArray(career?.matched_keyskills)
+    ? career.matched_keyskills.slice(0, 3)
+    : [];
+
+  // top_keyskills from explainability vars
+  const topKeyskills = career?.explainability
+    ?.find((e) => e?.key === "CAREER_KEYSKILL_ALIGNMENT")
+    ?.vars?.top_keyskills || [];
+
+  // Fit band colour
+  const bandColour = {
+    high_potential: { bg: "#f0fdf4", border: "#86efac", text: "#15803d" },
+    strong:         { bg: "#eff6ff", border: "#93c5fd", text: "#1d4ed8" },
+    promising:      { bg: "#fefce8", border: "#fde047", text: "#854d0e" },
+    developing:     { bg: "#fdf4ff", border: "#e9d5ff", text: "#7e22ce" },
+    exploring:      { bg: "#f9fafb", border: "#d1d5db", text: "#374151" },
+  }[career?.fit_band_key] || { bg: "#f9fafb", border: "#d1d5db", text: "#374151" };
 
   return (
-    <div className="card top-career-card">
+    <div className="card top-career-card" style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      {/* Header — title + cluster + fit band */}
       <div className="top-career-card__header">
         <div className="top-career-card__titleWrap">
           <div className="top-career-card__title">{title}</div>
-
           {cluster ? (
             <div className="text-muted top-career-card__cluster">{cluster}</div>
           ) : null}
         </div>
-
         <div
           className="top-career-card__bandPill"
+          style={{ background: bandColour.bg, border: `1px solid ${bandColour.border}`, color: bandColour.text }}
           aria-label={`${t("studentResults.fitBandAriaPrefix", "Fit band:")} ${bandLabel}`}
-          title={bandDesc || bandLabel}
         >
           {bandLabel}
         </div>
       </div>
 
+      {/* Fit band description */}
       {bandDesc ? (
         <div className="text-muted top-career-card__bandDesc">{bandDesc}</div>
       ) : null}
 
-      {drivers.length > 0 ? (
-        <ul className="top-career-card__drivers">
-          {drivers.map((d, i) => (
-            <li key={i}>{d}</li>
-          ))}
-        </ul>
+      {/* Matched key skills — always shown, data always present */}
+      {matchedSkills.length > 0 ? (
+        <div className="top-career-card__skills">
+          <div className="top-career-card__skillsLabel text-muted">
+            {t("studentResults.card.matchedSkills", "Why this matches you")}
+          </div>
+          <div className="top-career-card__skillTags">
+            {matchedSkills.map((s, i) => (
+              <span key={i} className="top-career-card__skillTag">
+                {s.keyskill_name}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Key skills this career needs — from explainability */}
+      {topKeyskills.length > 0 ? (
+        <div className="top-career-card__keyskills">
+          <div className="top-career-card__skillsLabel text-muted">
+            {t("studentResults.card.careerNeeds", "Key skills for this career")}
+          </div>
+          <div className="top-career-card__skillTags">
+            {topKeyskills.slice(0, 3).map((s, i) => (
+              <span key={i} className="top-career-card__skillTag top-career-card__skillTag--secondary">
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -964,6 +1007,12 @@ export default function StudentResultsPage() {
                             .top-career-card__bandDesc { font-size: 13px; line-height: 1.45; margin-bottom: 10px; }
                             .top-career-card__drivers { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.45; }
                             .top-career-card__drivers li { margin-bottom: 6px; }
+                            .top-career-card__skills { margin-top: 12px; }
+                            .top-career-card__keyskills { margin-top: 10px; }
+                            .top-career-card__skillsLabel { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+                            .top-career-card__skillTags { display: flex; flex-wrap: wrap; gap: 6px; }
+                            .top-career-card__skillTag { font-size: 12px; font-weight: 500; background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; border-radius: 999px; padding: 3px 10px; }
+                            .top-career-card__skillTag--secondary { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
                             @media (max-width: 980px) {
                               .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                               .cp-cards3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

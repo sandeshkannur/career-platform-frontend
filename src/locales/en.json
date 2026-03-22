@@ -498,6 +498,9 @@
     "studentResults.fitBandFallback":  "Fit band",
     "studentResults.topCareerFallback": "Career",
     "studentResults.notAvailable": "—",
+    "studentResults.card.matchedSkills": "Why this matches you",
+    "studentResults.card.careerNeeds": "Key skills for this career",
+
     "home.footer.brand": "MapYourCareer",
     "home.hero.eyebrow":           "Now live · India's first AQ-based career assessment",
     "home.hero.headline":          "Discover the career you were built for",
