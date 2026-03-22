@@ -365,6 +365,10 @@
     "student.dashboard.session.title":  "Session",
     "student.dashboard.title":  "Student Dashboard",
     "student.dashboard.welcomePrefix":  "Welcome,",
+    "student.dashboard.kpi.taken": "taken",
+    "student.dashboard.kpi.strengthsNote": "Based on your latest assessment. Take another to see how your strengths evolve.",
+    "student.dashboard.kpi.latestMatch": "Latest top match",
+
     "student.nav.assessment":  "Assessment",
     "student.nav.dashboard":  "Dashboard",
     "student.nav.profile":  "Profile",

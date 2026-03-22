@@ -330,6 +330,9 @@
   "student.dashboard.session.shareMePayload": "/auth/me ಪ್ರತಿಕ್ರಿಯೆ",
   "student.dashboard.debug.title": "ಡಿಬಗ್ ಮಾಹಿತಿ",
   "student.dashboard.debug.expandHint": "ಡಿಬಗ್ ವಿವರಗಳನ್ನು ವಿಸ್ತರಿಸಿ",
+  "student.dashboard.kpi.taken": "ತೆಗೆದುಕೊಂಡಿದೆ",
+  "student.dashboard.kpi.strengthsNote": "ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಮೌಲ್ಯಮಾಪನದ ಆಧಾರದ ಮೇಲೆ. ನಿಮ್ಮ ಶಕ್ತಿಗಳು ಹೇಗೆ ಬದಲಾಗುತ್ತವೆ ಎಂದು ನೋಡಲು ಮತ್ತೊಂದನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ.",
+  "student.dashboard.kpi.latestMatch": "ಇತ್ತೀಚಿನ ಉನ್ನತ ಹೊಂದಾಣಿಕೆ",
 
   "student.onboarding.title": "ವಿದ್ಯಾರ್ಥಿ ಆನ್‌ಬೋರ್ಡಿಂಗ್",
   "student.onboarding.subtitleNamed": "ನಮಸ್ಕಾರ {{name}}, ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ನಿಮ್ಮ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಹೇಳಿ.",
