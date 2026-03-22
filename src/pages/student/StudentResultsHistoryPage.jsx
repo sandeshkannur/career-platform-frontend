@@ -12,7 +12,7 @@ export default function StudentResultsHistoryPage() {
   const { t } = useContent();
 
   // Backend-authoritative student identity:
-  // Resolve student_id via /v1/students/students/me (NOT via auth/me student_profile).
+  // Resolve student_id via /v1/students/me (NOT via auth/me student_profile).
   const [studentId, setStudentId] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function StudentResultsHistoryPage() {
     if (!sessionUser) return;
 
     try {
-      const meStudent = await apiGet(`/v1/students/students/me`);
+      const meStudent = await apiGet(`/v1/students/me`);
       setStudentId(meStudent?.id ?? null);
     } catch (e) {
       setStudentId(null);
