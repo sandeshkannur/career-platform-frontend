@@ -109,6 +109,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
 
   // Use career.cluster (from API) not career.cluster_title
   const cluster = career?.cluster || career?.cluster_title || "";
+  console.log('[TopCareerCard]', career?.title, { matchedSkills: career?.matched_keyskills, explainability: career?.explainability });
 
   // matched_keyskills from API: [{ keyskill_name, keyskill_code }]
   const matchedSkills = Array.isArray(career?.matched_keyskills)
