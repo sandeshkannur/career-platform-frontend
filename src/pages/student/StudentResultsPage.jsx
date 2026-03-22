@@ -8,7 +8,7 @@ import { useContent } from "../../locales/LanguageProvider";
 import { getContextImpactCopyV1 } from "../../content/contextImpact.v1";
 
 import { getResultsBlocksV1 } from "../../content/resultsBlocks.v1";
-import resultsNotReady_v1 from "../../content/resultsNotReady.v1";
+import getResultsNotReadyV1 from "../../content/resultsNotReady.v1";
 
 function PencilIcon({ size = 14 }) {
   return (
@@ -463,7 +463,7 @@ export default function StudentResultsPage() {
 
         {loading && <p>{t("studentResults.loading", "Loading results…")}</p>}
 
-        {!loading && error && <ResultsNotReadyView content={resultsNotReady_v1} />}
+        {!loading && error && <ResultsNotReadyView content={getResultsNotReadyV1(t)} />}
 
         {!loading && !error && (
           <>
@@ -979,7 +979,7 @@ export default function StudentResultsPage() {
                     })()}
                   </>
                 ) : (
-                  <ResultsNotReadyView content={resultsNotReady_v1} />
+                  <ResultsNotReadyView content={getResultsNotReadyV1(t)} />
                 )}
               </div>
             </div>
