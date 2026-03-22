@@ -536,16 +536,16 @@ export default function StudentResultsPage() {
                 <div className="cp-contextExplain">
                   <details className="cp-details">
                     <summary className="cp-detailsSummary">
-                      {getContextImpactCopyV1({ ctx }).title}
+                      {getContextImpactCopyV1({ ctx, t }).title}
                     </summary>
 
                     <div className="text-muted cp-detailsBody">
                       <div style={{ marginBottom: 8 }}>
-                        {getContextImpactCopyV1({ ctx }).intro}
+                        {getContextImpactCopyV1({ ctx, t }).intro}
                       </div>
 
                       <ul style={{ margin: 0, paddingLeft: 18 }}>
-                        {getContextImpactCopyV1({ ctx }).bullets.map((line, idx) => (
+                        {getContextImpactCopyV1({ ctx, t }).bullets.map((line, idx) => (
                           <li key={idx} style={{ marginBottom: 6 }}>
                             {line}
                           </li>
@@ -553,7 +553,7 @@ export default function StudentResultsPage() {
                       </ul>
 
                       <div style={{ marginTop: 8 }}>
-                        {getContextImpactCopyV1({ ctx }).footer}{" "}
+                        {getContextImpactCopyV1({ ctx, t }).footer}{" "}
                         <span
                           role="button"
                           tabIndex={0}
