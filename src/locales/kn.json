@@ -385,6 +385,12 @@
   "student.results.subtitle": "ನಿಮ್ಮ ಶಿಫಾರಸು ಮಾಡಿದ ವೃತ್ತಿಗಳನ್ನು ಅನ್ವೇಷಿಸಿ.",
   "student.results.loading": "ಫಲಿತಾಂಶಗಳು ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
 
+  "resultsBlocks.recommendations.title": "ಶಿಫಾರಸುಗಳು",
+  "resultsBlocks.stream.notAvailable": "ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ",
+  "resultsBlocks.stream.helper": "ನಿಮ್ಮ ಸ್ಟ್ರೀಮ್ ಮ್ಯಾಪಿಂಗ್ ರಚಿಸಿದ ನಂತರ ಇದು ಕಾಣಿಸುತ್ತದೆ.",
+  "resultsBlocks.careers.emptyText": "ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ — ನಿಮ್ಮ ಉನ್ನತ ವೃತ್ತಿ ಹೊಂದಾಣಿಕೆಗಳು ರಚಿಸಿದ ನಂತರ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
+  "resultsBlocks.footer": "ನಾವು ವಿವರಣೆಯನ್ನು ಸುಧಾರಿಸುತ್ತಾ ಹೆಚ್ಚು ವಿವರವಾದ ಒಳನೋಟಗಳನ್ನು ಸೇರಿಸುತ್ತೇವೆ.",
+
   "student.resultsHistory.title": "ಹಿಂದಿನ ಫಲಿತಾಂಶಗಳು",
   "student.resultsHistory.subtitle": "ಹಿಂದಿನ ಮೌಲ್ಯಮಾಪನ ಫಲಿತಾಂಶಗಳನ್ನು ವೀಕ್ಷಿಸಿ.",
   "student.resultsHistory.loading": "ಇತಿಹಾಸ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",

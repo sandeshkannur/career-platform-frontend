@@ -613,7 +613,7 @@ export default function StudentResultsPage() {
                     </p>
 
                     {(() => {
-                      const copy = getResultsBlocksV1({ result: selectedResult });
+                      const copy = getResultsBlocksV1({ result: selectedResult, t });
                       const rec = copy.recommendations;
                       const fitBandsCopy = copy.fitBands || {};
                       const assoc = copy.associatedQualities || null;

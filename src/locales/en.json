@@ -203,6 +203,13 @@
     "results.premium.locked":  "Upgrade to view detailed insights",
     "results.subtitle":  "Career recommendations based on your responses",
     "results.title":  "Your Results",
+
+    "resultsBlocks.recommendations.title": "Recommendations",
+    "resultsBlocks.stream.notAvailable": "Not available yet",
+    "resultsBlocks.stream.helper": "This will appear once your stream mapping is generated.",
+    "resultsBlocks.careers.emptyText": "Not available yet — your top career matches will appear here once generated.",
+    "resultsBlocks.footer": "We'll keep improving the explanation and add more detailed insights over time.",
+
     "student.assessmentIntro.activeError":  "Couldn't check saved progress right now. You can still start or resume if available.",
     "student.assessmentIntro.body1":  "This assessment helps generate deterministic and explainable career recommendations based on your responses.",
     "student.assessmentIntro.contextCard.addDetails":  "Add details",

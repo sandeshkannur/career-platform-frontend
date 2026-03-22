@@ -9,31 +9,32 @@
  */
 import { getFitBandsV1 } from "./fitBands.v1";
 import { getAssociatedQualitiesV1 } from "./associatedQualities.v1";
-export function getResultsBlocksV1({ result }) {
+export function getResultsBlocksV1({ result, t } = {}) {
+  const s = t || ((key, fallback) => fallback);
   // result is one item from GET /v1/students/{id}/results -> results[]
   const recommendedStream = result?.recommended_stream || null;
   const topCareers = Array.isArray(result?.top_careers) ? result.top_careers : [];
 
   return {
     recommendations: {
-      title: "Recommendations",
+      title: s("resultsBlocks.recommendations.title", "Recommendations"),
       blocks: [
         {
           key: "recommended_stream",
           title: "Recommended stream",
-          value: recommendedStream || "Not available yet",
-          helper: recommendedStream ? null : "This will appear once your stream mapping is generated.",
+          value: recommendedStream || s("resultsBlocks.stream.notAvailable", "Not available yet"),
+          helper: recommendedStream ? null : s("resultsBlocks.stream.helper", "This will appear once your stream mapping is generated."),
         },
         {
           key: "top_careers",
           title: "Top careers",
           // Keep normalized; UI decides list vs empty state.
           value: topCareers,
-          emptyText: "Not available yet (we’ll show your top career matches here once they’re generated).",
+          emptyText: s("resultsBlocks.careers.emptyText", "Not available yet (we'll show your top career matches here once they're generated)."),
           maxItems: 3,
         },
       ],
-      footer: "We’ll keep improving the explanation and add more detailed “why this fits you” insights over time.",
+      footer: s("resultsBlocks.footer", "We'll keep improving the explanation and add more detailed insights over time."),
     },
 
     /**
