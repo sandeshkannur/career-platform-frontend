@@ -30,7 +30,7 @@ export default function AuthHeader({ variant = "full" }) {
     return (
       <div className="flex items-center justify-between py-3">
         <Link to="/" className="text-[var(--text)] no-underline">
-          <span className="text-sm font-semibold">CareerPlatform</span>
+          <span className="text-sm font-semibold">MapYourCareer</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -59,7 +59,7 @@ export default function AuthHeader({ variant = "full" }) {
         }}
       >
         <Link to="/" style={{ textDecoration: "none", color: "#111" }}>
-          <span style={{ fontWeight: 800 }}>CareerPlatform</span>
+          <span style={{ fontWeight: 800 }}>MapYourCareer</span>
         </Link>
 
         <div style={{ display: "flex", gap: 14, marginLeft: 12 }}>
