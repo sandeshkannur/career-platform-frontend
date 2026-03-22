@@ -109,7 +109,6 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
 
   // Use career.cluster (from API) not career.cluster_title
   const cluster = career?.cluster || career?.cluster_title || "";
-  console.log('[TopCareerCard]', career?.title, { matchedSkills: career?.matched_keyskills, explainability: career?.explainability });
 
   // matched_keyskills from API: [{ keyskill_name, keyskill_code }]
   const matchedSkills = Array.isArray(career?.matched_keyskills)
@@ -170,21 +169,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
         </div>
       ) : null}
 
-      {/* Key skills this career needs — from explainability */}
-      {topKeyskills.length > 0 ? (
-        <div className="top-career-card__keyskills">
-          <div className="top-career-card__skillsLabel text-muted">
-            {t("studentResults.card.careerNeeds", "Key skills for this career")}
-          </div>
-          <div className="top-career-card__skillTags">
-            {topKeyskills.slice(0, 3).map((s, i) => (
-              <span key={i} className="top-career-card__skillTag top-career-card__skillTag--secondary">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
+
     </div>
   );
 }
