@@ -963,52 +963,6 @@ export default function StudentResultsPage() {
                               renderPremiumInsightsCard()}
                           </div>
 
-                          <style>{`
-                            .cp-results { display: flex; flex-direction: column; gap: 16px; }
-                            .cp-resultsActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-                            .results-section { margin-top: 6px; }
-                            .results-section__titleRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-                            .results-section__title { font-size: 16px; font-weight: 800; line-height: 1.2; }
-                            .results-section__sub { font-size: 13px; line-height: 1.45; }
-                            .cp-sectionCard { padding: 16px; }
-                            .cp-inlineIcon { display: inline-flex; align-items: center; gap: 8px; }
-                            .cp-contextGrid { margin-top: 2px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-                            .cp-miniCard { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px; }
-                            .cp-miniLabel { font-size: 12px; margin-bottom: 4px; }
-                            .cp-miniValue { font-weight: 700; line-height: 1.25; }
-                            .cp-contextExplain { margin-top: 12px; }
-                            .cp-detailsSummary { cursor: pointer; font-weight: 700; }
-                            .cp-detailsBody { font-size: 13px; margin-top: 10px; line-height: 1.5; }
-                            .cp-linkButton { text-decoration: underline; cursor: pointer; }
-                            .cp-cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
-                            .cp-insights2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
-                            .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
-                            .cp-softPanel { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px; background: rgba(0,0,0,0.02); }
-                            .top-career-card { padding: 16px; border-radius: 14px; }
-                            .top-career-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-                            .top-career-card__titleWrap { min-width: 0; }
-                            .top-career-card__title { font-weight: 800; line-height: 1.2; }
-                            .top-career-card__cluster { font-size: 12px; margin-top: 4px; }
-                            .top-career-card__bandPill { font-size: 12px; font-weight: 700; border: 1px solid rgba(0,0,0,0.12); border-radius: 999px; padding: 6px 10px; white-space: nowrap; }
-                            .top-career-card__bandDesc { font-size: 13px; line-height: 1.45; margin-bottom: 10px; }
-                            .top-career-card__drivers { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.45; }
-                            .top-career-card__drivers li { margin-bottom: 6px; }
-                            .top-career-card__skills { margin-top: 12px; }
-                            .top-career-card__keyskills { margin-top: 10px; }
-                            .top-career-card__skillsLabel { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-                            .top-career-card__skillTags { display: flex; flex-wrap: wrap; gap: 6px; }
-                            .top-career-card__skillTag { font-size: 12px; font-weight: 500; background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; border-radius: 999px; padding: 3px 10px; }
-                            .top-career-card__skillTag--secondary { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
-                            @media (max-width: 980px) {
-                              .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-                              .cp-cards3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-                              .cp-insights2 { grid-template-columns: 1fr; }
-                            }
-                            @media (max-width: 560px) {
-                              .cp-contextGrid { grid-template-columns: 1fr; }
-                              .cp-cards3 { grid-template-columns: 1fr; }
-                            }
-                          `}</style>
                         </div>
                       );
                     })()}

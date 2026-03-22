@@ -92,13 +92,14 @@ const styles = {
   },
   title: {
     margin: 0,
-    fontSize: 22,
+    fontSize: "var(--font-size-2xl)",
     lineHeight: "28px",
+    fontWeight: 800,
   },
   subtitle: {
     margin: "6px 0 0",
-    color: "#666",
-    fontSize: 14,
+    color: "var(--text-muted)",
+    fontSize: "var(--font-size-base)",
     lineHeight: "20px",
   },
   actions: {
@@ -110,26 +111,13 @@ const styles = {
   },
   divider: {
     height: 1,
-    background: "#eee",
+    background: "var(--border)",
     margin: "14px 0",
   },
-  body: {
-    display: "block",
-  },
-  stateWrap: {
-    padding: "18px 0",
-    textAlign: "center",
-  },
-  stateTitle: {
-    margin: 0,
-    fontSize: 16,
-    fontWeight: 600,
-  },
-  stateText: {
-    margin: "6px 0 0",
-    color: "#666",
-    fontSize: 14,
-  },
+  body: { display: "block" },
+  stateWrap: { padding: "18px 0", textAlign: "center" },
+  stateTitle: { margin: 0, fontSize: "var(--font-size-lg)", fontWeight: 600 },
+  stateText:  { margin: "6px 0 0", color: "var(--text-muted)", fontSize: "var(--font-size-base)" },
   footer: {
     display: "flex",
     justifyContent: "space-between",
@@ -138,3 +126,4 @@ const styles = {
     flexWrap: "wrap",
   },
 };
+
