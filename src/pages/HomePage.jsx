@@ -334,7 +334,7 @@ export default function HomePage() {
           alignItems: "center", justifyContent: "space-between", gap: 12,
         }}>
           <div style={{ fontWeight: 800, fontSize: 14, color: "var(--brand-primary)" }}>
-            MapYourCareer
+            {t("home.footer.brand", "MapYourCareer")}
           </div>
           <div style={{ display: "flex", gap: 20 }}>
             {[
