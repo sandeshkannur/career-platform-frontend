@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { setPreferredLang } from "../apiClient";
 import en from "./en.json";
 import kn from "./kn.json";
 
@@ -54,17 +55,21 @@ export function LanguageProvider({ children }) {
     }
   });
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, language);
-    } catch {
-      // ignore storage issues
-    }
-  }, [language]);
+    useEffect(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, language);
+        setPreferredLang(language); // keep apiClient in sync
+      } catch {
+        // ignore storage issues
+      }
+    }, [language]);
 
-  const setLanguage = (nextLanguage) => {
-    setLanguageState(dictionaries[nextLanguage] ? nextLanguage : "en");
-  };
+// Update setLanguage
+    const setLanguage = (nextLanguage) => {
+      const validated = dictionaries[nextLanguage] ? nextLanguage : "en";
+      setLanguageState(validated);
+      setPreferredLang(validated); // keep apiClient in sync
+    };
 
   const dict = dictionaries[language] || dictionaries.en;
 
