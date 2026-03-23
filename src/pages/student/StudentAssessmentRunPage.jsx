@@ -8,7 +8,6 @@ import { useContent } from "../../locales/LanguageProvider";
 
 import { getQuestionPool } from "../../api/questions";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
-import { getPreferredLang, setPreferredLang } from "../../apiClient";
 import { loadAnswerQueue, replayAnswerQueueOnce } from "../../lib/replayQueue";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
@@ -32,7 +31,7 @@ export default function StudentAssessmentRunPage() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
 
-  const { t } = useContent();
+
 
   const storageKey = useMemo(() => {
     return `${DRAFT_PREFIX_V2}:${attemptId || "unknown"}`;
@@ -43,16 +42,8 @@ export default function StudentAssessmentRunPage() {
   }, [attemptId]);
 
   const [index, setIndex] = useState(0);
-  const [lang, setLang] = useState(getPreferredLang());
-
-  const handleLangChange = (e) => {
-    const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
-
-    // Reset to first question for a predictable experience
-    setIndex(0);
-  };
+  const { t, language } = useContent();
+  const lang = language || "en";
 
   // answers: { [questionId]: { answer: string, answered_at: ISOString } }
   const [answers, setAnswers] = useState({});
@@ -608,15 +599,7 @@ export default function StudentAssessmentRunPage() {
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
-          <select
-            value={lang}
-            onChange={handleLangChange}
-            className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
-            aria-label={t("student.assessmentRun.language.ariaLabel", "Language")}
-          >
-          <option value="en">{t("common.language.en", "EN")}</option>
-          <option value="kn">{t("common.language.kn", "KN")}</option>
-          </select>
+
           <Button variant="secondary" onClick={handleBack}>
             {t("student.assessmentRun.actions.back", "Back")}
           </Button>
