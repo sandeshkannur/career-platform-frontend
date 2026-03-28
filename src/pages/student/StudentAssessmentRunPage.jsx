@@ -648,11 +648,13 @@ export default function StudentAssessmentRunPage() {
       )}
 
       {/* Chapter break screen */}
-      {chapterBreak.from && (
-        <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
-          {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
-        </div>
-      )}
+      {!showIntro && chapterBreak && (
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-8 text-center mt-6">
+          {chapterBreak.from && (
+            <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
+              {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
+            </div>
+          )}
           <div className="text-2xl font-bold mt-4 mb-2">
             {t(`student.assessmentChapters.${chapterBreak.to}.title`, "")}
           </div>
