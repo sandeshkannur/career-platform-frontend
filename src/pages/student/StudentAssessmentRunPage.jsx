@@ -24,6 +24,36 @@ const CHAPTER_BREAKS = [
 
 const MILESTONES = { 8: "q9", 26: "q18", 40: "q27", 47: "q36" };
 
+function AssessmentIntroScreen({ onContinue, t }) {
+  return (
+    <div className="mx-auto w-full max-w-lg px-6 py-12">
+      <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">
+        {t("student.assessmentChapters.intro.title")}
+      </h1>
+      <p className="text-[var(--text-muted)] mb-6">
+        {t("student.assessmentChapters.intro.body")}
+      </p>
+      <ul className="space-y-3 mb-6">
+        {["rule1", "rule2", "rule3", "rule4"].map((r) => (
+          <li key={r} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
+            <span className="text-green-500 mt-0.5">✓</span>
+            <span>{t(`student.assessmentChapters.intro.${r}`)}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-[var(--text-muted)] mb-8">
+        {t("student.assessmentChapters.intro.time")}
+      </p>
+      <button
+        onClick={onContinue}
+        className="w-full rounded-xl bg-[var(--brand-primary,#1d4ed8)] px-6 py-3 text-white font-semibold hover:opacity-90 transition"
+      >
+        {t("student.assessmentChapters.intro.cta")}
+      </button>
+    </div>
+  );
+}
+
 /**
  * Assessment Runner (PR4)
  * - Loads question pool from backend
@@ -51,6 +81,7 @@ export default function StudentAssessmentRunPage() {
 
   const [index, setIndex] = useState(0);
   const { t, language } = useContent();
+  const [showIntro, setShowIntro] = useState(true);
   const lang = language || "en";
 
   // answers: { [questionId]: { answer: string, answered_at: ISOString } }
@@ -605,8 +636,14 @@ export default function StudentAssessmentRunPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-            {/* Chapter break screen */}
-      {chapterBreak && (
+
+      {/* Assessment intro screen — shown once before Q1 */}
+      {showIntro && (
+        <AssessmentIntroScreen onContinue={() => setShowIntro(false)} t={t} />
+      )}
+
+      {/* Chapter break screen */}
+      {!showIntro && chapterBreak && (
         <div className="rounded-2xl border border-[var(--border)] bg-white p-8 text-center mt-6">
           <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
             {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
@@ -630,99 +667,124 @@ export default function StudentAssessmentRunPage() {
       )}
 
       {/* Milestone toast */}
-      {milestone && !chapterBreak && (
+      {!showIntro && milestone && !chapterBreak && (
         <div className="mt-4 rounded-xl border border-[#86efac] bg-[#f0fdf4] px-4 py-3 text-sm font-medium text-[#15803d]">
           {t(`student.assessmentChapters.milestone.${milestone}`, "")}
         </div>
       )}
 
-      {/* Main question UI — hidden during chapter break */}
-      {!chapterBreak && (
+      {/* Main question UI — hidden during intro or chapter break */}
+      {!showIntro && !chapterBreak && (
         <>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold">
-            {t("student.assessmentRun.title", "Assessment")}
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            {t(
-              "student.assessmentRun.subtitle",
-              "Answer honestly. There are no right or wrong answers."
-            )}
-          </p>
-        </div>
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold">
+                {t("student.assessmentRun.title", "Assessment")}
+              </h1>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
+                {t("student.assessmentRun.subtitle", "Answer honestly. There are no right or wrong answers.")}
+              </p>
+            </div>
+            <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
+              <Button variant="secondary" onClick={handleBack}>
+                {t("student.assessmentRun.actions.back", "Back")}
+              </Button>
+              <Button variant="secondary" onClick={handleSave}>
+                {t("student.assessmentRun.actions.save", "Save")}
+              </Button>
+              <Button onClick={handleNext} disabled={!selected}>
+                {isLast
+                  ? t("student.assessmentRun.actions.submit", "Submit")
+                  : t("student.assessmentRun.actions.next", "Next")}
+              </Button>
+            </div>
+          </div>
 
-        <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
-
-          <Button variant="secondary" onClick={handleBack}>
-            {t("student.assessmentRun.actions.back", "Back")}
-          </Button>
-          <Button variant="secondary" onClick={handleSave}>
-            {t("student.assessmentRun.actions.save", "Save")}
-          </Button>
-          <Button onClick={handleNext} disabled={!selected}>
-            {isLast
-              ? t("student.assessmentRun.actions.submit", "Submit")
-              : t("student.assessmentRun.actions.next", "Next")}
-          </Button>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-          <div>
-            {t("student.assessmentRun.progress.question", "Question")}{" "}
-            <span className="font-medium text-[var(--text-primary)]">
-              {index + 1}
-            </span>{" "}
-            {t("student.assessmentRun.progress.of", "of")}{" "}
-            <span className="font-medium text-[var(--text-primary)]">
-              {QUESTIONS.length}
-            </span>
-            {attemptId ? (
-              <span className="ml-2 opacity-80">
-                • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
-              </span>
+          {/* Progress */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+              <div>
+                {t("student.assessmentRun.progress.question", "Question")}{" "}
+                <span className="font-medium text-[var(--text-primary)]">{index + 1}</span>{" "}
+                {t("student.assessmentRun.progress.of", "of")}{" "}
+                <span className="font-medium text-[var(--text-primary)]">{QUESTIONS.length}</span>
+                {attemptId ? (
+                  <span className="ml-2 opacity-80">
+                    • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
+                  </span>
+                ) : null}
+              </div>
+              <div>{progressPct}%</div>
+            </div>
+            <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
+              <div
+                className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            {syncState.status !== "idle" ? (
+              <div className="mt-2 text-xs text-[var(--text-muted)]">{syncState.message}</div>
             ) : null}
           </div>
 
-          <div>{progressPct}%</div>
-        </div>
-
-        <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
-          <div
-            className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-
-        {/* A+ sync hint (neutral) */}
-        {syncState.status !== "idle" ? (
-          <div className="mt-2 text-xs text-[var(--text-muted)]">
-            {syncState.message}
+          {/* Determinism metadata */}
+          <div className="mt-3 text-xs text-[var(--text-muted)]">
+            {t(
+              "student.assessmentRun.meta.deterministicSelection",
+              "Deterministic selection: seed = attemptId, pick = {{count}} (or fewer if pool smaller)",
+              { count: QUESTION_COUNT }
+            )}
           </div>
-        ) : null}
-      </div>
 
-      {/* Determinism metadata (auditable) */}
-      <div className="mt-3 text-xs text-[var(--text-muted)]">
-        {t(
-          "student.assessmentRun.meta.deterministicSelection",
-          "Deterministic selection: seed = attemptId, pick = {{count}} (or fewer if pool smaller)",
-          { count: QUESTION_COUNT }
-        )}
-      </div>
-
-      {/* Question Card */}
-      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
-        <div className="text-lg font-semibold leading-snug">{currentText}</div>
-
-        <div className="mt-4 grid gap-3">
-          {currentOptions.map((opt) => {
-            const optText = String(opt);
-            const active = selected === optText;
+          {/* Question Card */}
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
+            <div className="text-lg font-semibold leading-snug">{currentText}</div>
+            <div className="mt-4 grid gap-3">
+              {currentOptions.map((opt) => {
+                const optText = String(opt);
+                const active = selected === optText;
+                return (
+                  <button
+                    key={optText}
+                    type="button"
+                    onClick={() => choose(optText)}
+                    className={[
+                      "w-full rounded-xl border px-4 py-3 text-left text-sm transition",
+                      "hover:shadow-sm",
+                      active
+                        ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
+                        : "border-[var(--border)] bg-white",
+                    ].join(" ")}
+                    aria-pressed={active}
+                  >
+                    <div className="font-medium text-[var(--text-primary)]">{optText}</div>
+                  </button>
+                );
+              })}
+            </div>
+            {!selected ? (
+              <div role="alert" className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm">
+                <div className="font-semibold">
+                  {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
+                </div>
+                <div className="mt-1 text-[var(--text-muted)]">
+                  {t("student.assessmentRun.helper.select_body", "You can change your answer anytime before submitting.")}
+                </div>
+              </div>
+            ) : null}
+            <div className="mt-5 text-xs text-[var(--text-muted)]">
+              {t(
+                "student.assessmentRun.note.scoring",
+                "Note: Scoring remains backend-owned. This runner only loads questions, selects deterministically, and stores a local draft."
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
             return (
               <button
