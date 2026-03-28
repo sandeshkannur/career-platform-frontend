@@ -14,7 +14,15 @@ const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
 const DRAFT_PREFIX_V1 = "__ASSESSMENT_RUN_DRAFT_V1__"; // legacy (migration only)
 const DRAFT_SCHEMA_VERSION = 2;
 
-const QUESTION_COUNT = 75;
+const QUESTION_COUNT = 45;
+
+const CHAPTER_BREAKS = [
+  { afterIndex: 10, from: "ch1", to: "ch2" },
+  { afterIndex: 21, from: "ch2", to: "ch3" },
+  { afterIndex: 27, from: "ch3", to: "ch4" },
+];
+
+const MILESTONES = { 8: "q9", 17: "q18", 26: "q27", 35: "q36" };
 
 /**
  * Assessment Runner (PR4)
@@ -60,6 +68,8 @@ export default function StudentAssessmentRunPage() {
 
   // A+ (auto-replay on open) — small, neutral UX signal
   const [syncState, setSyncState] = useState({ status: "idle", message: "" });
+  const [chapterBreak, setChapterBreak] = useState(null);
+  const [milestone, setMilestone] = useState(null);
   const didAutoReplayRef = useRef(false);
 
   /* ---------------- Load question pool ---------------- */
@@ -469,16 +479,27 @@ export default function StudentAssessmentRunPage() {
   }
 
   function handleNext() {
-    if (!selected) return;
+      if (!selected) return;
 
-    if (!isLast) {
-      setIndex((i) => i + 1);
-      return;
+      if (!isLast) {
+        const nextIndex = index + 1;
+        const breakPoint = CHAPTER_BREAKS.find((b) => b.afterIndex === index);
+        if (breakPoint) {
+          setChapterBreak(breakPoint);
+          setIndex(nextIndex);
+          return;
+        }
+        const milestoneKey = MILESTONES[index];
+        if (milestoneKey) {
+          setMilestone(milestoneKey);
+        } else {
+          setMilestone(null);
+        }
+        setIndex(nextIndex);
+        return;
+      }
+      navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
     }
-
-    // Last question -> submit page (existing route pattern)
-    navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
-  }
 
   // Wait for both: local draft load attempt + backend pool load attempt
   const stillLoading =
@@ -584,6 +605,40 @@ export default function StudentAssessmentRunPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
+            {/* Chapter break screen */}
+      {chapterBreak && (
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-8 text-center mt-6">
+          <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
+            {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
+          </div>
+          <div className="text-2xl font-bold mt-4 mb-2">
+            {t(`student.assessmentChapters.${chapterBreak.to}.title`, "")}
+          </div>
+          <div className="text-sm text-[var(--text-muted)] mb-1">
+            {t(`student.assessmentChapters.${chapterBreak.to}.subtitle`, "")}
+          </div>
+          <div className="mt-4 text-base text-[var(--text-primary)] max-w-lg mx-auto leading-relaxed">
+            {t(`student.assessmentChapters.${chapterBreak.to}.intro`, "")}
+          </div>
+          <button
+            className="mt-8 rounded-xl bg-[var(--brand-primary,#1d4ed8)] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
+            onClick={() => setChapterBreak(null)}
+          >
+            {t("student.assessmentRun.actions.next", "Continue")}
+          </button>
+        </div>
+      )}
+
+      {/* Milestone toast */}
+      {milestone && !chapterBreak && (
+        <div className="mt-4 rounded-xl border border-[#86efac] bg-[#f0fdf4] px-4 py-3 text-sm font-medium text-[#15803d]">
+          {t(`student.assessmentChapters.milestone.${milestone}`, "")}
+        </div>
+      )}
+
+      {/* Main question UI — hidden during chapter break */}
+      {!chapterBreak && (
+        <>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -715,6 +770,8 @@ export default function StudentAssessmentRunPage() {
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
