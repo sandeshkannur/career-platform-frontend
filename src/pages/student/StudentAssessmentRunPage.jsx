@@ -14,12 +14,12 @@ const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
 const DRAFT_PREFIX_V1 = "__ASSESSMENT_RUN_DRAFT_V1__"; // legacy (migration only)
 const DRAFT_SCHEMA_VERSION = 2;
 
-const QUESTION_COUNT = 45;
+const QUESTION_COUNT = 50;
 
 const CHAPTER_BREAKS = [
-  { afterIndex: 10, from: "ch1", to: "ch2" },
-  { afterIndex: 21, from: "ch2", to: "ch3" },
-  { afterIndex: 27, from: "ch3", to: "ch4" },
+  { afterIndex: 17, from: "ch1", to: "ch2" },
+  { afterIndex: 35, from: "ch2", to: "ch3" },
+  { afterIndex: 45, from: "ch3", to: "ch4" },
 ];
 
 const MILESTONES = { 8: "q9", 17: "q18", 26: "q27", 35: "q36" };
