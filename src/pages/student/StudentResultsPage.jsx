@@ -871,20 +871,13 @@ export default function StudentResultsPage() {
                                           <div style={{ fontWeight: 700 }}>
                                             {ci?.career_title || t("studentResults.whyFit.fallbackTitle", "Career")}
                                           </div>
-                                          <div style={{ marginTop: 6 }}>
-                                            {whyText && whyText.trim().length > 0 ? (
-                                              <span>{whyText}</span>
-                                            ) : (
-                                              <ComingSoon />
-                                            )}
-                                          </div>
-
-                                          <div
-                                            className="text-muted"
-                                            style={{ fontSize: 13, marginTop: 4 }}
-                                          >
-                                            {whyText || t("studentResults.comingSoon", "Insights coming soon.")}
-                                          </div>
+                                        <div style={{ marginTop: 6 }}>
+                                          {whyText && whyText.trim().length > 0 ? (
+                                            <span>{whyText}</span>
+                                          ) : (
+                                            <ComingSoon />
+                                          )}
+                                        </div>
                                         </div>
                                       );
                                     })}
