@@ -1,4 +1,4 @@
-﻿// src/pages/student/StudentAssessmentRunPage.jsx
+// src/pages/student/StudentAssessmentRunPage.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -36,7 +36,7 @@ function AssessmentIntroScreen({ onContinue, t }) {
       <ul className="space-y-3 mb-6">
         {["rule1", "rule2", "rule3", "rule4"].map((r) => (
           <li key={r} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
-            <span className="text-green-500 mt-0.5">âœ“</span>
+            <span className="text-green-500 mt-0.5">✓</span>
             <span>{t(`student.assessmentChapters.intro.${r}`)}</span>
           </li>
         ))}
@@ -97,7 +97,7 @@ export default function StudentAssessmentRunPage() {
   const [poolError, setPoolError] = useState(null);
   const [serverQuestionIds, setServerQuestionIds] = useState([]);
 
-  // A+ (auto-replay on open) â€” small, neutral UX signal
+  // A+ (auto-replay on open) — small, neutral UX signal
   const [syncState, setSyncState] = useState({ status: "idle", message: "" });
   const [chapterBreak, setChapterBreak] = useState(null);
   const [milestone, setMilestone] = useState(null);
@@ -343,7 +343,7 @@ export default function StudentAssessmentRunPage() {
       try {
         setSyncState({
           status: "syncing",
-          message: t("student.assessmentRun.sync.syncing", "Syncing saved answersâ€¦"),
+          message: t("student.assessmentRun.sync.syncing", "Syncing saved answers…"),
         });
 
         const res = await replayAnswerQueueOnce(attemptId);
@@ -547,7 +547,7 @@ export default function StudentAssessmentRunPage() {
               {t("student.assessmentRun.title", "Assessment")}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {t("student.assessmentRun.loading.subtitle", "Loading your assessmentâ€¦")}
+              {t("student.assessmentRun.loading.subtitle", "Loading your assessment…")}
             </p>
           </div>
 
@@ -562,7 +562,7 @@ export default function StudentAssessmentRunPage() {
         </div>
 
         <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
-          {t("student.assessmentRun.loading.body", "Loadingâ€¦")}
+          {t("student.assessmentRun.loading.body", "Loading…")}
         </div>
       </div>
     );
@@ -637,17 +637,22 @@ export default function StudentAssessmentRunPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
 
-      {/* Assessment intro screen â€” shown once before Q1 */}
       {showIntro && (
-        <AssessmentIntroScreen onContinue={() => setShowIntro(false)} t={t} />
+        <AssessmentIntroScreen 
+          onContinue={() => {
+            setShowIntro(false);
+            setChapterBreak({ afterIndex: -1, from: null, to: "ch1" });
+          }} 
+          t={t} 
+        />
       )}
 
       {/* Chapter break screen */}
-      {!showIntro && chapterBreak && (
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-8 text-center mt-6">
-          <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
-            {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
-          </div>
+      {chapterBreak.from && (
+        <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
+          {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
+        </div>
+      )}
           <div className="text-2xl font-bold mt-4 mb-2">
             {t(`student.assessmentChapters.${chapterBreak.to}.title`, "")}
           </div>
@@ -673,7 +678,7 @@ export default function StudentAssessmentRunPage() {
         </div>
       )}
 
-      {/* Main question UI â€” hidden during intro or chapter break */}
+      {/* Main question UI — hidden during intro or chapter break */}
       {!showIntro && !chapterBreak && (
         <>
           {/* Header */}
@@ -711,7 +716,7 @@ export default function StudentAssessmentRunPage() {
                 <span className="font-medium text-[var(--text-primary)]">{QUESTIONS.length}</span>
                 {attemptId ? (
                   <span className="ml-2 opacity-80">
-                    â€¢ {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
+                    • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
                   </span>
                 ) : null}
               </div>
@@ -785,3 +790,4 @@ export default function StudentAssessmentRunPage() {
     </div>
   );
 }
+
