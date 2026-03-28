@@ -22,7 +22,7 @@ const CHAPTER_BREAKS = [
   { afterIndex: 45, from: "ch3", to: "ch4" },
 ];
 
-const MILESTONES = { 8: "q9", 17: "q18", 26: "q27", 35: "q36" };
+const MILESTONES = { 8: "q9", 26: "q18", 40: "q27", 47: "q36" };
 
 /**
  * Assessment Runner (PR4)
