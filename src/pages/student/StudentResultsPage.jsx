@@ -663,7 +663,7 @@ export default function StudentResultsPage() {
 
                         return (
                           <div className="cp-cards3">
-                            {items.slice(0, isPaidOrPremium ? items.length : 3).map((c, idx) => (
+                            {items.slice(0, isPaidOrPremium ? 5 : 3).map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
