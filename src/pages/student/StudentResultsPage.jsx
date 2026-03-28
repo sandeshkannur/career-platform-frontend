@@ -162,7 +162,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
           <div className="top-career-card__skillTags">
             {matchedSkills.map((s, i) => (
               <span key={i} className="top-career-card__skillTag">
-                {s.keyskill_name}
+                {s.display_name || s.keyskill_name}
               </span>
             ))}
           </div>
@@ -663,7 +663,7 @@ export default function StudentResultsPage() {
 
                         return (
                           <div className="cp-cards3">
-                            {items.slice(0, 3).map((c, idx) => (
+                            {items.slice(0, isPaidOrPremium ? items.length : 3).map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
