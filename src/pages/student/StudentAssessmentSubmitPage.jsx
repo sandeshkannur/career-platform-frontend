@@ -1,4 +1,4 @@
-// src/pages/student/StudentAssessmentSubmitPage.jsx
+﻿// src/pages/student/StudentAssessmentSubmitPage.jsx
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -9,7 +9,7 @@ import { useContent } from "../../locales/LanguageProvider";
 import { getAssessment, postAssessmentResponses, submitAssessment } from "../../api/assessments";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
-const QUESTION_COUNT = 75;
+const QUESTION_COUNT = 50;
 function toLikertCode(value) {
   // Backend expects "1".."5"
   // UI draft currently stores labels like "Agree"
@@ -275,3 +275,4 @@ export default function StudentAssessmentSubmitPage() {
     </SkeletonPage>
   );
 }
+
