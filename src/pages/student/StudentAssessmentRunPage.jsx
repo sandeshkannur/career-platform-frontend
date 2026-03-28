@@ -1,4 +1,4 @@
-// src/pages/student/StudentAssessmentRunPage.jsx
+﻿// src/pages/student/StudentAssessmentRunPage.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -36,7 +36,7 @@ function AssessmentIntroScreen({ onContinue, t }) {
       <ul className="space-y-3 mb-6">
         {["rule1", "rule2", "rule3", "rule4"].map((r) => (
           <li key={r} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
-            <span className="text-green-500 mt-0.5">✓</span>
+            <span className="text-green-500 mt-0.5">âœ“</span>
             <span>{t(`student.assessmentChapters.intro.${r}`)}</span>
           </li>
         ))}
@@ -97,7 +97,7 @@ export default function StudentAssessmentRunPage() {
   const [poolError, setPoolError] = useState(null);
   const [serverQuestionIds, setServerQuestionIds] = useState([]);
 
-  // A+ (auto-replay on open) — small, neutral UX signal
+  // A+ (auto-replay on open) â€” small, neutral UX signal
   const [syncState, setSyncState] = useState({ status: "idle", message: "" });
   const [chapterBreak, setChapterBreak] = useState(null);
   const [milestone, setMilestone] = useState(null);
@@ -343,7 +343,7 @@ export default function StudentAssessmentRunPage() {
       try {
         setSyncState({
           status: "syncing",
-          message: t("student.assessmentRun.sync.syncing", "Syncing saved answers…"),
+          message: t("student.assessmentRun.sync.syncing", "Syncing saved answersâ€¦"),
         });
 
         const res = await replayAnswerQueueOnce(attemptId);
@@ -547,7 +547,7 @@ export default function StudentAssessmentRunPage() {
               {t("student.assessmentRun.title", "Assessment")}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {t("student.assessmentRun.loading.subtitle", "Loading your assessment…")}
+              {t("student.assessmentRun.loading.subtitle", "Loading your assessmentâ€¦")}
             </p>
           </div>
 
@@ -562,7 +562,7 @@ export default function StudentAssessmentRunPage() {
         </div>
 
         <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
-          {t("student.assessmentRun.loading.body", "Loading…")}
+          {t("student.assessmentRun.loading.body", "Loadingâ€¦")}
         </div>
       </div>
     );
@@ -637,7 +637,7 @@ export default function StudentAssessmentRunPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
 
-      {/* Assessment intro screen — shown once before Q1 */}
+      {/* Assessment intro screen â€” shown once before Q1 */}
       {showIntro && (
         <AssessmentIntroScreen onContinue={() => setShowIntro(false)} t={t} />
       )}
@@ -673,7 +673,7 @@ export default function StudentAssessmentRunPage() {
         </div>
       )}
 
-      {/* Main question UI — hidden during intro or chapter break */}
+      {/* Main question UI â€” hidden during intro or chapter break */}
       {!showIntro && !chapterBreak && (
         <>
           {/* Header */}
@@ -711,7 +711,7 @@ export default function StudentAssessmentRunPage() {
                 <span className="font-medium text-[var(--text-primary)]">{QUESTIONS.length}</span>
                 {attemptId ? (
                   <span className="ml-2 opacity-80">
-                    • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
+                    â€¢ {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
                   </span>
                 ) : null}
               </div>
@@ -781,58 +781,6 @@ export default function StudentAssessmentRunPage() {
             </div>
           </div>
         </>
-      )}
-    </div>
-  );
-}
-
-            return (
-              <button
-                key={optText}
-                type="button"
-                onClick={() => choose(optText)}
-                className={[
-                  "w-full rounded-xl border px-4 py-3 text-left text-sm transition",
-                  "hover:shadow-sm",
-                  active
-                    ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
-                    : "border-[var(--border)] bg-white",
-                ].join(" ")}
-                aria-pressed={active}
-              >
-                <div className="font-medium text-[var(--text-primary)]">
-                  {optText}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {!selected ? (
-          <div
-            role="alert"
-            className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm"
-          >
-             <div className="font-semibold">
-               {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
-             </div>
-            <div className="mt-1 text-[var(--text-muted)]">
-              {t(
-                "student.assessmentRun.helper.select_body",
-                "You can change your answer anytime before submitting."
-              )}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-5 text-xs text-[var(--text-muted)]">
-          {t(
-            "student.assessmentRun.note.scoring",
-            "Note: Scoring remains backend-owned. This runner only loads questions, selects deterministically, and stores a local draft."
-          )}
-        </div>
-      </div>
-      </>
       )}
     </div>
   );
