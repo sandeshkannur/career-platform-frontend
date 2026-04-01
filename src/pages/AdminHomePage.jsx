@@ -38,6 +38,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Bulk Upload</Button>
         </Link>
 
+        <Link to="/admin/sme">
+          <Button style={{ width: "100%" }}>SME Registry</Button>
+        </Link>
+
         <div style={{ marginTop: 10 }}>
           <Link to="/">← Home</Link>
         </div>
