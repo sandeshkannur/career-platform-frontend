@@ -16,6 +16,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { listSMETokens, createSMEToken, listSMEs } from "../../api/admin";
@@ -172,6 +173,16 @@ export default function AdminSMETokensPage() {
             ? t("admin.tokens.cancelButton", "Cancel")
             : t("admin.tokens.generateButton", "Generate Token")}
         </Button>
+      }
+      footer={
+        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Admin Console
+          </Link>
+          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            Home
+          </Link>
+        </div>
       }
     >
       {/* ── Filter tabs ──────────────────────────────────────────── */}

@@ -19,6 +19,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { listSMEs, createSME, deactivateSME } from "../../api/admin";
@@ -158,6 +159,21 @@ export default function AdminSMEPage() {
             ? t("admin.sme.cancelButton", "Cancel")
             : t("admin.sme.addButton", "Add SME")}
         </Button>
+      }
+      footer={
+        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Admin Console
+          </Link>
+          <div style={{ display: "flex", gap: 16 }}>
+            <Link to="/admin/sme-tokens" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+              Manage Tokens →
+            </Link>
+            <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+              Home
+            </Link>
+          </div>
+        </div>
       }
     >
       {/* ── Filter tabs ──────────────────────────────────────────── */}
@@ -351,12 +367,6 @@ export default function AdminSMEPage() {
           </table>
         </div>
       )}
-
-      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
-        <a href="/admin/sme-tokens" style={{ color: "#1F3864", fontSize: 13 }}>
-          → Manage submission tokens
-        </a>
-      </div>
     </SkeletonPage>
   );
 }
