@@ -42,6 +42,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>SME Registry</Button>
         </Link>
 
+        <Link to="/admin/sme-tokens">
+          <Button style={{ width: "100%" }}>SME Tokens</Button>
+        </Link>
+
         <div style={{ marginTop: 10 }}>
           <Link to="/">← Home</Link>
         </div>

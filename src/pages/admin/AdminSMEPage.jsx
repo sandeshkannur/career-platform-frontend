@@ -351,6 +351,12 @@ export default function AdminSMEPage() {
           </table>
         </div>
       )}
+
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
+        <a href="/admin/sme-tokens" style={{ color: "#1F3864", fontSize: 13 }}>
+          → Manage submission tokens
+        </a>
+      </div>
     </SkeletonPage>
   );
 }

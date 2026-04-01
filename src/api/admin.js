@@ -66,3 +66,41 @@ export async function deactivateSME(smeId) {
   if (!smeId) throw new Error("smeId is required");
   return apiDelete(`/v1/admin/sme/${smeId}`);
 }
+
+// ── SME Submission Tokens (ADM-B02) ───────────────────────────────────────
+
+/**
+ * Generate a submission token for an SME+career pair.
+ * POST /v1/admin/sme/{smeId}/tokens
+ *
+ * @param {number} smeId - SME profile ID
+ * @param {Object} payload - { career_id, round_number, expires_days }
+ * @returns {Object} Created token with URL
+ */
+export async function createSMEToken(smeId, payload) {
+  if (!smeId) throw new Error("smeId is required");
+  return apiPost(`/v1/admin/sme/${smeId}/tokens`, payload);
+}
+
+/**
+ * List all submission tokens, optionally filtered by status.
+ * GET /v1/admin/sme/tokens?status=pending|submitted|expired
+ *
+ * @param {string|null} status - "pending", "submitted", "expired", or null for all
+ * @returns {Array} List of token objects
+ */
+export async function listSMETokens(status = null) {
+  const qs = status ? `?status=${status}` : "";
+  return apiGet(`/v1/admin/sme/tokens${qs}`);
+}
+
+/**
+ * Admin manual submission fallback — submit ratings on behalf of SME.
+ * POST /v1/admin/sme/submit
+ *
+ * @param {Object} payload - { token_id, aq_ratings, keyskill_ratings }
+ * @returns {Object} Confirmation message
+ */
+export async function adminManualSubmit(payload) {
+  return apiPost("/v1/admin/sme/submit", payload);
+}
