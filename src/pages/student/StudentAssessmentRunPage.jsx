@@ -9,6 +9,7 @@ import { useContent } from "../../locales/LanguageProvider";
 import { getQuestionPool } from "../../api/questions";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
 import { loadAnswerQueue, replayAnswerQueueOnce } from "../../lib/replayQueue";
+import QuestionRenderer from "../../components/assessment/QuestionRenderer";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
 const DRAFT_PREFIX_V1 = "__ASSESSMENT_RUN_DRAFT_V1__"; // legacy (migration only)
@@ -747,29 +748,11 @@ export default function StudentAssessmentRunPage() {
           {/* Question Card */}
           <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
             <div className="text-lg font-semibold leading-snug">{currentText}</div>
-            <div className="mt-4 grid gap-3">
-              {currentOptions.map((opt) => {
-                const optText = String(opt);
-                const active = selected === optText;
-                return (
-                  <button
-                    key={optText}
-                    type="button"
-                    onClick={() => choose(optText)}
-                    className={[
-                      "w-full rounded-xl border px-4 py-3 text-left text-sm transition",
-                      "hover:shadow-sm",
-                      active
-                        ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
-                        : "border-[var(--border)] bg-white",
-                    ].join(" ")}
-                    aria-pressed={active}
-                  >
-                    <div className="font-medium text-[var(--text-primary)]">{optText}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <QuestionRenderer
+              question={current}
+              selected={selected}
+              onChoose={choose}
+            />
             {!selected ? (
               <div role="alert" className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm">
                 <div className="font-semibold">
