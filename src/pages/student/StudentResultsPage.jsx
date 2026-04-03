@@ -664,6 +664,20 @@ export default function StudentResultsPage() {
                       const fitBandsCopy = copy.fitBands || {};
                       const assoc = copy.associatedQualities || null;
 
+                      const allCareers = Array.isArray(selectedResult?.recommended_careers)
+                        ? selectedResult.recommended_careers
+                        : Array.isArray(selectedResult?.top_careers)
+                        ? selectedResult.top_careers
+                        : [];
+
+                      const careersByCluster = {};
+                      allCareers.forEach((c) => {
+                        const name = c.cluster || c.cluster_title || t("studentResults.clusterSignals.other", "Other");
+                        if (!careersByCluster[name]) careersByCluster[name] = [];
+                        careersByCluster[name].push(c);
+                      });
+                      const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
+
                       const renderTopCareersCards = () => {
                         const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
                         const items = Array.isArray(topBlock?.items)
@@ -693,6 +707,95 @@ export default function StudentResultsPage() {
                         );
                       };
 
+                      const renderCareerDataSections = () => {
+                        if (clusterEntries.length === 0 && allCareers.length === 0) return null;
+                        const careersWithSkills = allCareers
+                          .filter((c) => {
+                            const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                            return Array.isArray(skills) && skills.length > 0;
+                          })
+                          .slice(0, 3);
+                        return (
+                          <div style={{ marginTop: 14 }}>
+                            <div className="cp-insightsStack">
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
+                                </div>
+                                {clusterEntries.length > 0 ? (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                    {clusterEntries.map(([clusterName, careers]) => (
+                                      <div
+                                        key={clusterName}
+                                        style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                      >
+                                        <div style={{ fontWeight: 700 }}>{clusterName}</div>
+                                        <ul style={{ marginTop: 6, paddingLeft: 18 }}>
+                                          {careers.slice(0, 3).map((c, i) => {
+                                            const bandLabel = fitBandsCopy?.[c.fit_band_key]?.label || c.fit_band_key || "";
+                                            return (
+                                              <li key={c.career_id || c.career_code || i} style={{ marginBottom: 4, fontSize: 13 }}>
+                                                {c.title || c.career_title}
+                                                {bandLabel ? (
+                                                  <span style={{ marginLeft: 6, opacity: 0.6, fontStyle: "italic" }}>
+                                                    ({bandLabel})
+                                                  </span>
+                                                ) : null}
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
+                                </div>
+                                {careersWithSkills.length > 0 ? (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                    {careersWithSkills.map((c, idx) => {
+                                      const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                                      return (
+                                        <div
+                                          key={c.career_id || c.career_code || idx}
+                                          style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                        >
+                                          <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
+                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                                            {skills.slice(0, 3).map((sk, ski) => (
+                                              <span
+                                                key={sk.keyskill_code || sk.keyskill_name || sk.name || ski}
+                                                style={{
+                                                  fontSize: 12,
+                                                  padding: "2px 8px",
+                                                  borderRadius: 999,
+                                                  background: "rgba(0,0,0,0.06)",
+                                                  color: "var(--text-primary)",
+                                                }}
+                                              >
+                                                {sk.keyskill_name || sk.name || sk.keyskill_code || String(sk)}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      };
+
                       const renderPremiumInsightsCard = () => {
                         if (!assoc) return null;
 
@@ -705,21 +808,6 @@ export default function StudentResultsPage() {
                           .filter((t) => typeof t === "string" && t.trim().length > 0)
                           // Safety: never show raw AQ keys if backend returns them as text
                           .filter((t) => !/^AQ_\d{2}$/i.test(t.trim()));
-
-                        const allCareers = Array.isArray(selectedResult?.recommended_careers)
-                          ? selectedResult.recommended_careers
-                          : Array.isArray(selectedResult?.top_careers)
-                          ? selectedResult.top_careers
-                          : [];
-
-
-                        const careersByCluster = {};
-                        allCareers.forEach((c) => {
-                          const name = c.cluster || c.cluster_title || t("studentResults.clusterSignals.other", "Other");
-                          if (!careersByCluster[name]) careersByCluster[name] = [];
-                          careersByCluster[name].push(c);
-                        });
-                        const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
 
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
@@ -801,192 +889,6 @@ export default function StudentResultsPage() {
                             <div className="cp-insightsStack">
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
-                                </div>
-
-                                {deepLoading ? (
-                                  <div className="text-muted" style={{ fontSize: 13 }}>
-                                    {t("studentResults.clusterSignals.loading", "Loading cluster signals…")}
-                                  </div>
-                                ) : deepRes?.cluster_insights?.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: 10,
-                                      marginTop: 10,
-                                    }}
-                                  >
-                                    {deepRes.cluster_insights.slice(0, 2).map((cl, idx) => {
-                                      const insightKeys = Array.isArray(cl?.insight_keys)
-                                        ? cl.insight_keys
-                                        : [];
-
-                                      const resolved = insightKeys
-                                        .map((k) => deepCopy?.[k])
-                                        .filter(
-                                          (t) => typeof t === "string" && t.trim().length > 0
-                                        );
-
-                                      return (
-                                        <div
-                                          key={cl?.cluster_id || cl?.cluster_title || idx}
-                                          style={{
-                                            paddingBottom: 10,
-                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                          }}
-                                        >
-                                          <div style={{ fontWeight: 700 }}>
-                                            {cl?.cluster_title || t("studentResults.clusterSignals.fallbackTitle", "Cluster")}
-                                          </div>
-
-                                          {resolved.length > 0 ? (
-                                            <ul style={{ marginTop: 8, paddingLeft: 18 }}>
-                                              {resolved.slice(0, 3).map((t, j) => (
-                                                <li key={j} style={{ marginBottom: 6 }}>
-                                                  {formatTemplate(t, {
-                                                    cluster_title: cl?.cluster_title || "",
-                                                  })}
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          ) : (
-                                            <ComingSoon />
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                ) : clusterEntries.length > 0 ? (
-                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
-                                    {clusterEntries.map(([clusterName, careers]) => (
-                                      <div
-                                        key={clusterName}
-                                        style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                                      >
-                                        <div style={{ fontWeight: 700 }}>{clusterName}</div>
-                                        <ul style={{ marginTop: 6, paddingLeft: 18 }}>
-                                          {careers.slice(0, 3).map((c, i) => {
-                                            const bandLabel = fitBandsCopy?.[c.fit_band_key]?.label || c.fit_band_key || "";
-                                            return (
-                                              <li key={c.career_id || c.career_code || i} style={{ marginBottom: 4, fontSize: 13 }}>
-                                                {c.title || c.career_title}
-                                                {bandLabel ? (
-                                                  <span style={{ marginLeft: 6, opacity: 0.6, fontStyle: "italic" }}>
-                                                    ({bandLabel})
-                                                  </span>
-                                                ) : null}
-                                              </li>
-                                            );
-                                          })}
-                                        </ul>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <ComingSoon />
-                                )}
-                              </div>
-
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
-                                </div>
-
-                                {deepLoading ? (
-                                  <div className="text-muted" style={{ fontSize: 13 }}>
-                                    {t("studentResults.whyFit.loading", "Loading deep insights…")}
-                                  </div>
-                                ) : deepRes?.career_insights?.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: 10,
-                                      marginTop: 10,
-                                    }}
-                                  >
-                                    {deepRes.career_insights.slice(0, 3).map((ci, idx) => {
-                                      const whyKey = Array.isArray(ci?.why_keys)
-                                        ? ci.why_keys[0]
-                                        : "";
-
-                                      const rawWhy = deepCopy?.[whyKey] || "";
-                                      const whyText = formatTemplate(rawWhy, {
-                                        career_title: ci?.career_title || "",
-                                      });
-
-                                      return (
-                                        <div
-                                          key={ci?.career_id || idx}
-                                          style={{
-                                            paddingBottom: 10,
-                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                          }}
-                                        >
-                                          <div style={{ fontWeight: 700 }}>
-                                            {ci?.career_title || t("studentResults.whyFit.fallbackTitle", "Career")}
-                                          </div>
-                                        <div style={{ marginTop: 6 }}>
-                                          {whyText && whyText.trim().length > 0 ? (
-                                            <span>{whyText}</span>
-                                          ) : (
-                                            <ComingSoon />
-                                          )}
-                                        </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                ) : (() => {
-                                  const careersWithSkills = allCareers
-                                    .filter((c) => {
-                                      const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
-                                      return Array.isArray(skills) && skills.length > 0;
-                                    })
-                                    .slice(0, 3);
-                                  return careersWithSkills.length > 0 ? (
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
-                                      {careersWithSkills.map((c, idx) => {
-                                        const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
-                                        return (
-                                          <div
-                                            key={c.career_id || c.career_code || idx}
-                                            style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                                          >
-                                            <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
-                                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-                                              {skills.slice(0, 3).map((sk, ski) => (
-                                                <span
-                                                  key={sk.keyskill_code || sk.keyskill_name || sk.name || ski}
-                                                  style={{
-                                                    fontSize: 12,
-                                                    padding: "2px 8px",
-                                                    borderRadius: 999,
-                                                    background: "rgba(0,0,0,0.06)",
-                                                    color: "var(--text-primary)",
-                                                  }}
-                                                >
-                                                  {sk.keyskill_name || sk.name || sk.keyskill_code || String(sk)}
-                                                </span>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : <ComingSoon />;
-                                })()}
-
-                                {deepError ? (
-                                  <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
-                                    {deepError}
-                                  </div>
-                                ) : null}
-                              </div>
-
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
                                   {t("studentResults.guidedNextSteps.title", "Guided next steps")}
                                 </div>
 
@@ -1043,6 +945,8 @@ export default function StudentResultsPage() {
                             </div>
 
                             {renderTopCareersCards()}
+
+                            {renderCareerDataSections()}
 
                             {(resultsTier === "paid" || resultsTier === "premium") &&
                               renderPremiumInsightsCard()}
