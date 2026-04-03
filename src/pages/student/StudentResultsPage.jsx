@@ -708,11 +708,14 @@ export default function StudentResultsPage() {
 
                         const allCareers = Array.isArray(selectedResult?.recommended_careers)
                           ? selectedResult.recommended_careers
+                          : Array.isArray(selectedResult?.top_careers)
+                          ? selectedResult.top_careers
                           : [];
 
                         console.log('selectedResult keys:', Object.keys(selectedResult || {}));
                         console.log('recommended_careers:', selectedResult?.recommended_careers?.length);
                         console.log('allCareers computed:', allCareers?.length);
+                        console.log('top_careers[0]:', selectedResult?.top_careers?.[0]);
 
                         const careersByCluster = {};
                         allCareers.forEach((c) => {
