@@ -715,7 +715,7 @@ export default function StudentResultsPage() {
                         console.log('selectedResult keys:', Object.keys(selectedResult || {}));
                         console.log('recommended_careers:', selectedResult?.recommended_careers?.length);
                         console.log('allCareers computed:', allCareers?.length);
-                        console.log('top_careers[0]:', selectedResult?.top_careers?.[0]);
+                        console.log('top_careers[0] full:', JSON.stringify(selectedResult?.top_careers?.[0], null, 2));
 
                         const careersByCluster = {};
                         allCareers.forEach((c) => {
@@ -724,6 +724,7 @@ export default function StudentResultsPage() {
                           careersByCluster[name].push(c);
                         });
                         const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
+                        console.log('clusterEntries:', clusterEntries.map(([name, cs]) => `${name}(${cs.length})`));
 
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
@@ -946,34 +947,40 @@ export default function StudentResultsPage() {
                                   </div>
                                 ) : (() => {
                                   const careersWithSkills = allCareers
-                                    .filter((c) => Array.isArray(c.matched_keyskills) && c.matched_keyskills.length > 0)
+                                    .filter((c) => {
+                                      const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                                      return Array.isArray(skills) && skills.length > 0;
+                                    })
                                     .slice(0, 3);
                                   return careersWithSkills.length > 0 ? (
                                     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
-                                      {careersWithSkills.map((c, idx) => (
-                                        <div
-                                          key={c.career_id || c.career_code || idx}
-                                          style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                                        >
-                                          <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
-                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-                                            {c.matched_keyskills.slice(0, 3).map((sk) => (
-                                              <span
-                                                key={sk.keyskill_code || sk.keyskill_name}
-                                                style={{
-                                                  fontSize: 12,
-                                                  padding: "2px 8px",
-                                                  borderRadius: 999,
-                                                  background: "rgba(0,0,0,0.06)",
-                                                  color: "var(--text-primary)",
-                                                }}
-                                              >
-                                                {sk.keyskill_name || sk.keyskill_code}
-                                              </span>
-                                            ))}
+                                      {careersWithSkills.map((c, idx) => {
+                                        const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                                        return (
+                                          <div
+                                            key={c.career_id || c.career_code || idx}
+                                            style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                          >
+                                            <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
+                                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                                              {skills.slice(0, 3).map((sk, ski) => (
+                                                <span
+                                                  key={sk.keyskill_code || sk.keyskill_name || sk.name || ski}
+                                                  style={{
+                                                    fontSize: 12,
+                                                    padding: "2px 8px",
+                                                    borderRadius: 999,
+                                                    background: "rgba(0,0,0,0.06)",
+                                                    color: "var(--text-primary)",
+                                                  }}
+                                                >
+                                                  {sk.keyskill_name || sk.name || sk.keyskill_code || String(sk)}
+                                                </span>
+                                              ))}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        );
+                                      })}
                                     </div>
                                   ) : <ComingSoon />;
                                 })()}
