@@ -294,8 +294,12 @@ export default function StudentResultsPage() {
       .then((res) => {
         if (!cancelled) setCtx(res ?? null);
       })
-      .catch(() => {
-        // Best-effort — ctx stays null, fields show "Not shared yet"
+      .catch((e) => {
+        // 405 means the endpoint is not yet implemented on the backend — fail silently.
+        // Any other error is also non-fatal: ctx stays null, fields show "Not shared yet".
+        if (e?.status !== 405) {
+          console.warn('[StudentResultsPage] context-profile fetch failed:', e?.status, e?.message);
+        }
       });
     return () => {
       cancelled = true;
@@ -705,6 +709,10 @@ export default function StudentResultsPage() {
                         const allCareers = Array.isArray(selectedResult?.recommended_careers)
                           ? selectedResult.recommended_careers
                           : [];
+
+                        console.log('selectedResult keys:', Object.keys(selectedResult || {}));
+                        console.log('recommended_careers:', selectedResult?.recommended_careers?.length);
+                        console.log('allCareers computed:', allCareers?.length);
 
                         const careersByCluster = {};
                         allCareers.forEach((c) => {
