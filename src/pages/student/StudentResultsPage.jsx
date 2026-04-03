@@ -689,6 +689,19 @@ export default function StudentResultsPage() {
                           // Safety: never show raw AQ keys if backend returns them as text
                           .filter((t) => !/^AQ_\d{2}$/i.test(t.trim()));
 
+                        const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
+                        const allCareers = Array.isArray(topBlock?.items)
+                          ? topBlock.items
+                          : (selectedResult.top_careers || []);
+
+                        const careersByCluster = {};
+                        allCareers.forEach((c) => {
+                          const name = c.cluster || c.cluster_title || t("studentResults.clusterSignals.other", "Other");
+                          if (!careersByCluster[name]) careersByCluster[name] = [];
+                          careersByCluster[name].push(c);
+                        });
+                        const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
+
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
                             {t("studentResults.loadingQualities", "Loading qualities…")}
@@ -826,6 +839,32 @@ export default function StudentResultsPage() {
                                       );
                                     })}
                                   </div>
+                                ) : clusterEntries.length > 0 ? (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                    {clusterEntries.map(([clusterName, careers]) => (
+                                      <div
+                                        key={clusterName}
+                                        style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                      >
+                                        <div style={{ fontWeight: 700 }}>{clusterName}</div>
+                                        <ul style={{ marginTop: 6, paddingLeft: 18 }}>
+                                          {careers.slice(0, 3).map((c, i) => {
+                                            const bandLabel = fitBandsCopy?.[c.fit_band_key]?.label || c.fit_band_key || "";
+                                            return (
+                                              <li key={c.career_id || c.career_code || i} style={{ marginBottom: 4, fontSize: 13 }}>
+                                                {c.title || c.career_title}
+                                                {bandLabel ? (
+                                                  <span style={{ marginLeft: 6, opacity: 0.6, fontStyle: "italic" }}>
+                                                    ({bandLabel})
+                                                  </span>
+                                                ) : null}
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
                                 ) : (
                                   <ComingSoon />
                                 )}
@@ -882,9 +921,39 @@ export default function StudentResultsPage() {
                                       );
                                     })}
                                   </div>
-                                ) : (
-                                  <ComingSoon />
-                                )}
+                                ) : (() => {
+                                  const careersWithSkills = allCareers
+                                    .filter((c) => Array.isArray(c.matched_keyskills) && c.matched_keyskills.length > 0)
+                                    .slice(0, 3);
+                                  return careersWithSkills.length > 0 ? (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                      {careersWithSkills.map((c, idx) => (
+                                        <div
+                                          key={c.career_id || c.career_code || idx}
+                                          style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                        >
+                                          <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
+                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                                            {c.matched_keyskills.slice(0, 3).map((sk) => (
+                                              <span
+                                                key={sk.keyskill_code || sk.keyskill_name}
+                                                style={{
+                                                  fontSize: 12,
+                                                  padding: "2px 8px",
+                                                  borderRadius: 999,
+                                                  background: "rgba(0,0,0,0.06)",
+                                                  color: "var(--text-primary)",
+                                                }}
+                                              >
+                                                {sk.keyskill_name || sk.keyskill_code}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : <ComingSoon />;
+                                })()}
 
                                 {deepError ? (
                                   <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
