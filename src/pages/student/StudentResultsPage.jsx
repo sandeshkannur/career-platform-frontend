@@ -702,10 +702,9 @@ export default function StudentResultsPage() {
                           // Safety: never show raw AQ keys if backend returns them as text
                           .filter((t) => !/^AQ_\d{2}$/i.test(t.trim()));
 
-                        const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
-                        const allCareers = Array.isArray(topBlock?.items)
-                          ? topBlock.items
-                          : (selectedResult.top_careers || []);
+                        const allCareers = Array.isArray(selectedResult?.recommended_careers)
+                          ? selectedResult.recommended_careers
+                          : [];
 
                         const careersByCluster = {};
                         allCareers.forEach((c) => {
