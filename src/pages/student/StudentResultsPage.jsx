@@ -724,7 +724,8 @@ export default function StudentResultsPage() {
                           careersByCluster[name].push(c);
                         });
                         const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
-                        console.log('clusterEntries:', clusterEntries.map(([name, cs]) => `${name}(${cs.length})`));
+                        console.log('careersByCluster (raw):', careersByCluster);
+                        console.log('clusterEntries length:', clusterEntries.length, '| first entry:', clusterEntries[0]);
 
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
@@ -952,6 +953,7 @@ export default function StudentResultsPage() {
                                       return Array.isArray(skills) && skills.length > 0;
                                     })
                                     .slice(0, 3);
+                                  console.log('careersWithSkills.length:', careersWithSkills.length, '| allCareers[0] skills:', allCareers[0]?.matched_keyskills, allCareers[0]?.top_keyskills, allCareers[0]?.keyskills);
                                   return careersWithSkills.length > 0 ? (
                                     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                                       {careersWithSkills.map((c, idx) => {
