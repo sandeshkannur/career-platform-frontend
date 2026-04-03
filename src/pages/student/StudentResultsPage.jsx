@@ -284,9 +284,10 @@ export default function StudentResultsPage() {
   const hasPremiumSignals = facetKeys.length > 0 || aqKeys.length > 0;
 
   const isPaidOrPremium = useMemo(() => {
+    const premiumTiers = ["premium", "paid", "pro"];
     const resultTier = (selectedResult?.tier || "").toString().toLowerCase();
-    if (resultTier === "paid" || resultTier === "premium") return true;
-    return resultsTier === "paid" || resultsTier === "premium";
+    if (premiumTiers.includes(resultTier)) return true;
+    return premiumTiers.includes(resultsTier);
   }, [selectedResult?.tier, resultsTier]);
 
   useEffect(() => {
@@ -698,7 +699,7 @@ export default function StudentResultsPage() {
 
                         return (
                           <div className="cp-cards3">
-                            {items.slice(0, 5).map((c, idx) => (
+                            {(isPaidOrPremium ? items : items.slice(0, 5)).map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
@@ -802,23 +803,42 @@ export default function StudentResultsPage() {
 
                       const renderUpsellCard = () => (
                         <div
-                          className="cp-softPanel"
-                          style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}
+                          style={{
+                            border: "1px solid var(--brand-primary)",
+                            borderRadius: 12,
+                            padding: 20,
+                            marginTop: 16,
+                            background: "var(--bg-card, #ffffff)",
+                          }}
                         >
-                          <div style={{ fontWeight: 700 }}>
-                            {t("studentResults.upsell.title", "Unlock deeper insights")}
+                          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>
+                            ⭐ {t("results.upsell.title", "Unlock deeper career insights")}
                           </div>
-                          <div className="text-muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
-                            {t(
-                              "studentResults.upsell.body",
-                              "See which clusters match you, why each career fits, and get guided next steps."
-                            )}
-                          </div>
-                          <div>
-                            <Button onClick={() => navigate("/pricing")}>
-                              {t("studentResults.upsell.cta", "Get Premium")}
-                            </Button>
-                          </div>
+                          <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 12, margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                            {t("results.upsell.body", "See which career clusters match you, understand why each career fits your strengths, and get guided next steps to move forward.")}
+                          </p>
+                          <ul style={{ fontSize: 13, paddingLeft: 18, marginBottom: 16, margin: "0 0 16px 0" }}>
+                            {["feature1", "feature2", "feature3", "feature4"].map((k) => (
+                              <li key={k} style={{ marginBottom: 4 }}>
+                                ✓ {t(`results.upsell.${k}`)}
+                              </li>
+                            ))}
+                          </ul>
+                          <button
+                            onClick={() => navigate("/pricing")}
+                            style={{
+                              background: "var(--brand-primary)",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: 8,
+                              padding: "10px 20px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              fontSize: 14,
+                            }}
+                          >
+                            {t("results.upsell.cta", "Get Premium")}
+                          </button>
                         </div>
                       );
 
