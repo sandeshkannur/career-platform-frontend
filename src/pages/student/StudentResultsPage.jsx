@@ -712,10 +712,6 @@ export default function StudentResultsPage() {
                           ? selectedResult.top_careers
                           : [];
 
-                        console.log('selectedResult keys:', Object.keys(selectedResult || {}));
-                        console.log('recommended_careers:', selectedResult?.recommended_careers?.length);
-                        console.log('allCareers computed:', allCareers?.length);
-                        console.log('top_careers[0] full:', JSON.stringify(selectedResult?.top_careers?.[0], null, 2));
 
                         const careersByCluster = {};
                         allCareers.forEach((c) => {
@@ -724,8 +720,6 @@ export default function StudentResultsPage() {
                           careersByCluster[name].push(c);
                         });
                         const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
-                        console.log('careersByCluster (raw):', careersByCluster);
-                        console.log('clusterEntries length:', clusterEntries.length, '| first entry:', clusterEntries[0]);
 
                         const qualitiesBody = explainLoading ? (
                           <div className="text-muted" style={{ fontSize: 13 }}>
@@ -814,8 +808,7 @@ export default function StudentResultsPage() {
                                   <div className="text-muted" style={{ fontSize: 13 }}>
                                     {t("studentResults.clusterSignals.loading", "Loading cluster signals…")}
                                   </div>
-                                ) : Array.isArray(deepRes?.cluster_insights) &&
-                                  deepRes.cluster_insights.length > 0 ? (
+                                ) : deepRes?.cluster_insights?.length > 0 ? (
                                   <div
                                     style={{
                                       display: "flex",
@@ -904,8 +897,7 @@ export default function StudentResultsPage() {
                                   <div className="text-muted" style={{ fontSize: 13 }}>
                                     {t("studentResults.whyFit.loading", "Loading deep insights…")}
                                   </div>
-                                ) : Array.isArray(deepRes?.career_insights) &&
-                                  deepRes.career_insights.length > 0 ? (
+                                ) : deepRes?.career_insights?.length > 0 ? (
                                   <div
                                     style={{
                                       display: "flex",
@@ -953,7 +945,6 @@ export default function StudentResultsPage() {
                                       return Array.isArray(skills) && skills.length > 0;
                                     })
                                     .slice(0, 3);
-                                  console.log('careersWithSkills.length:', careersWithSkills.length, '| allCareers[0] skills:', allCareers[0]?.matched_keyskills, allCareers[0]?.top_keyskills, allCareers[0]?.keyskills);
                                   return careersWithSkills.length > 0 ? (
                                     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                                       {careersWithSkills.map((c, idx) => {
