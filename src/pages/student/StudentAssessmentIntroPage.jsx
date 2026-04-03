@@ -54,6 +54,10 @@ export default function StudentAssessmentIntroPage() {
   const [busy, setBusy] = useState(false);
 
   const lastRun = useMemo(() => readLastRunSnapshot(), []);
+  const contextCompleted = useMemo(
+    () => localStorage.getItem("cp_context_completed") === "1",
+    []
+  );
 
   // Step 1: backend-authoritative state sync (no scoring/order logic on client)
   const [activeLoading, setActiveLoading] = useState(true);
@@ -153,24 +157,26 @@ export default function StudentAssessmentIntroPage() {
         <p style={{ marginTop: 0 }}>
           {t("student.assessmentIntro.body1", "This assessment helps generate deterministic and explainable career recommendations based on your responses.")}
         </p>
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>
-            {t("student.assessmentIntro.contextCard.title", "Help us tailor guidance (optional, ~30 seconds)")}
-          </div>
+        {!contextCompleted && (
+          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+            <div style={{ fontWeight: 800, marginBottom: 6 }}>
+              {t("student.assessmentIntro.contextCard.title", "Help us tailor guidance (optional, ~30 seconds)")}
+            </div>
 
-          <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4, marginBottom: 10 }}>
-            {t("student.assessmentIntro.contextCard.desc", "Adding a few details helps keep recommendations practical for you. You can skip this and update later anytime.")}
-          </div>
+            <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4, marginBottom: 10 }}>
+              {t("student.assessmentIntro.contextCard.desc", "Adding a few details helps keep recommendations practical for you. You can skip this and update later anytime.")}
+            </div>
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Button type="button" onClick={() => navigate("/student/context")}>
-              {t("student.assessmentIntro.contextCard.addDetails", "Add details")}
-            </Button>
-            <Button type="button" onClick={() => {}} style={{ opacity: 0.8 }}>
-              {t("student.assessmentIntro.contextCard.skip", "Skip for now")}
-            </Button>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Button type="button" onClick={() => navigate("/student/context")}>
+                {t("student.assessmentIntro.contextCard.addDetails", "Add details")}
+              </Button>
+              <Button type="button" onClick={() => {}} style={{ opacity: 0.8 }}>
+                {t("student.assessmentIntro.contextCard.skip", "Skip for now")}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
         {activeError ? (
           <div style={{ fontSize: 12, opacity: 0.7 }}>
             {t("student.assessmentIntro.activeError", "Couldn’t check saved progress right now. You can still start or resume if available.")}
