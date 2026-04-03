@@ -41,7 +41,7 @@ function LikertQuestion({ selected, onChoose }) {
 
 function EmojiLikertQuestion({ question, selected, onChoose }) {
   const cfg = question.renderer_config || {};
-  const emojis = cfg.emojis || ["😰", "🙁", "😐", "🙂", "😎"];
+  const emojis = cfg.emojis || ["😞", "😐", "🙂", "😊", "😄"];
   const labels = cfg.labels || ["Not at all", "Not really", "Sometimes", "Often", "Always"];
   return (
     <div className="flex justify-between gap-2">
@@ -159,7 +159,17 @@ function SliderQuestion({ question, selected, onChoose }) {
   const right  = cfg.right  || "Completely";
   const emojis = cfg.emojis || ["😔", "😞", "😐", "🙂", "💪"];
   const labels = cfg.labels || ["Not at all", "A little", "Somewhat", "Quite a bit", "Completely"];
-  const val    = selected ? parseInt(selected, 10) : 3;
+
+  // Track whether the user has explicitly moved the slider.
+  // Until they do, we show a neutral position but do not submit an answer,
+  // keeping the Next button disabled (selected stays null in the parent).
+  const [touched, setTouched] = useState(false);
+  const displayVal = selected ? parseInt(selected, 10) : 3;
+
+  function handleChange(e) {
+    setTouched(true);
+    onChoose(String(e.target.value));
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -170,15 +180,21 @@ function SliderQuestion({ question, selected, onChoose }) {
       <input
         type="range"
         min="1" max="5" step="1"
-        value={val}
-        onChange={(e) => onChoose(String(e.target.value))}
+        value={displayVal}
+        onChange={handleChange}
         className="w-full accent-[var(--brand-primary)]"
       />
       <div className="text-center">
-        <span className="text-3xl leading-none" role="img" aria-hidden="true">
-          {emojis[val - 1]}
-        </span>
-        <p className="text-sm text-[var(--text-muted)] mt-1">{labels[val - 1]}</p>
+        {touched || selected ? (
+          <>
+            <span className="text-3xl leading-none" role="img" aria-hidden="true">
+              {emojis[displayVal - 1]}
+            </span>
+            <p className="text-sm text-[var(--text-muted)] mt-1">{labels[displayVal - 1]}</p>
+          </>
+        ) : (
+          <p className="text-sm text-[var(--text-muted)]">Move the slider to answer</p>
+        )}
       </div>
     </div>
   );
@@ -188,20 +204,22 @@ function ThisOrThatQuestion({ question, selected, onChoose }) {
   const options = question.response_options || [];
   const optA = options.find((o) => o.side === "a") || options[0];
   const optB = options.find((o) => o.side === "b") || options[1];
+  const pair = [optA, optB].filter(Boolean);
 
   return (
-    <div className="flex gap-3">
-      {[optA, optB].filter(Boolean).map((opt, i) => {
+    <div className="flex items-stretch gap-3">
+      {pair.map((opt, i) => {
         const val = String(opt.score_value);
         const active = selected === val;
         return (
-          <div key={val} className="flex flex-1 flex-col gap-2">
+          <>
             {i === 1 && (
-              <div className="flex items-center justify-center">
+              <div key="or-divider" className="flex flex-shrink-0 items-center">
                 <span className="text-xs font-medium text-[var(--text-muted)]">or</span>
               </div>
             )}
             <button
+              key={val}
               type="button"
               onClick={() => onChoose(val)}
               className={[
@@ -212,7 +230,7 @@ function ThisOrThatQuestion({ question, selected, onChoose }) {
             >
               {opt.label}
             </button>
-          </div>
+          </>
         );
       })}
     </div>
@@ -229,7 +247,9 @@ const RENDERERS = {
 };
 
 export default function QuestionRenderer({ question, selected, onChoose }) {
-  const type = question?.question_type || "likert";
+  // Normalise: trim whitespace and lowercase so "EMOJI_LIKERT", "Slider", etc. all resolve correctly
+  const raw = question?.question_type ?? question?.type ?? "";
+  const type = raw.trim().toLowerCase().replace(/-/g, "_") || "likert";
   const Component = RENDERERS[type] || LikertQuestion;
   return (
     <div className={`question-renderer renderer-${type}`}>
