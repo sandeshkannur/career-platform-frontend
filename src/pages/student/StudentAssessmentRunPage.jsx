@@ -432,20 +432,6 @@ export default function StudentAssessmentRunPage() {
   const currentText =
     current?.text ?? current?.question_text ?? current?.prompt ?? "";
 
-  const currentOptions = Array.isArray(current?.options)
-    ? current.options
-    : Array.isArray(current?.choices)
-    ? current.choices
-    : Array.isArray(current?.answers)
-    ? current.answers
-    : [
-        t("student.assessmentRun.options.stronglyDisagree", "Strongly Disagree"),
-        t("student.assessmentRun.options.disagree", "Disagree"),
-        t("student.assessmentRun.options.neutral", "Neutral"),
-        t("student.assessmentRun.options.agree", "Agree"),
-        t("student.assessmentRun.options.stronglyAgree", "Strongly Agree"),
-      ];
-
   const selected = currentId ? answers[currentId]?.answer : null;
   const isLast = index === QUESTIONS.length - 1;
 
@@ -605,7 +591,7 @@ export default function StudentAssessmentRunPage() {
     );
   }
 
-  if (!current || !currentId || !Array.isArray(currentOptions)) {
+  if (!current || !currentId) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
         <div className="flex items-start justify-between gap-4">
@@ -748,11 +734,18 @@ export default function StudentAssessmentRunPage() {
           {/* Question Card */}
           <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
             <div className="text-lg font-semibold leading-snug">{currentText}</div>
-            <QuestionRenderer
-              question={current}
-              selected={selected}
-              onChoose={choose}
-            />
+            <div className="mt-4">
+              <QuestionRenderer
+                question={{
+                  ...current,
+                  question_type: current?.question_type || current?.type || "likert",
+                  question_text: currentText,
+                  response_options: current?.response_options || current?.options || current?.choices || [],
+                }}
+                selected={selected}
+                onChoose={(value) => choose(value)}
+              />
+            </div>
             {!selected ? (
               <div role="alert" className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm">
                 <div className="font-semibold">
