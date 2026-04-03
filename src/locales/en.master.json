@@ -581,6 +581,13 @@
  
     "studentResults.card.matchedSkills": "Why this matches you",
     "studentResults.card.careerNeeds": "Key skills for this career",
+    "results.upsell.title": "Unlock deeper career insights",
+    "results.upsell.body": "See which career clusters match you, understand why each career fits your strengths, and get guided next steps to move forward.",
+    "results.upsell.cta": "Get Premium",
+    "results.upsell.feature1": "Career cluster signals across 15 fields",
+    "results.upsell.feature2": "Why each career matches your strengths",
+    "results.upsell.feature3": "Guided next steps personalised for you",
+    "results.upsell.feature4": "Download your full career report",
  
     "admin.home.title": "Admin Console",
     "admin.home.subtitle": "Manage master data and mappings.",
