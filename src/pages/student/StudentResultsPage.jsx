@@ -287,6 +287,19 @@ export default function StudentResultsPage() {
 
   useEffect(() => {
     setCtx(null);
+    if (!selectedResult?.assessment_id) return;
+
+    let cancelled = false;
+    apiGet(`/v1/assessments/${selectedResult.assessment_id}/context-profile`)
+      .then((res) => {
+        if (!cancelled) setCtx(res ?? null);
+      })
+      .catch(() => {
+        // Best-effort — ctx stays null, fields show "Not shared yet"
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedResult?.assessment_id]);
 
   useEffect(() => {
