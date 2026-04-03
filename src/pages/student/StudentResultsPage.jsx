@@ -191,8 +191,6 @@ export default function StudentResultsPage() {
       .toString()
       .toLowerCase();
 
-  const isPaidOrPremium = resultsTier === "paid" || resultsTier === "premium";
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
@@ -284,6 +282,12 @@ export default function StudentResultsPage() {
   }, [backendBlocks]);
 
   const hasPremiumSignals = facetKeys.length > 0 || aqKeys.length > 0;
+
+  const isPaidOrPremium = useMemo(() => {
+    const resultTier = (selectedResult?.tier || "").toString().toLowerCase();
+    if (resultTier === "paid" || resultTier === "premium") return true;
+    return resultsTier === "paid" || resultsTier === "premium";
+  }, [selectedResult?.tier, resultsTier]);
 
   useEffect(() => {
     setCtx(null);
@@ -502,7 +506,7 @@ export default function StudentResultsPage() {
             {t("studentResults.actions.viewHistory", "View History")}
           </Button>
 
-          <Button variant="secondary" disabled>
+          <Button variant="secondary" disabled={!isPaidOrPremium}>
             {t("studentResults.actions.downloadReport", "Download Report")}
           </Button>
         </div>
@@ -694,7 +698,7 @@ export default function StudentResultsPage() {
 
                         return (
                           <div className="cp-cards3">
-                            {items.slice(0, isPaidOrPremium ? 5 : 3).map((c, idx) => (
+                            {items.slice(0, 5).map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
@@ -795,6 +799,28 @@ export default function StudentResultsPage() {
                           </div>
                         );
                       };
+
+                      const renderUpsellCard = () => (
+                        <div
+                          className="cp-softPanel"
+                          style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}
+                        >
+                          <div style={{ fontWeight: 700 }}>
+                            {t("studentResults.upsell.title", "Unlock deeper insights")}
+                          </div>
+                          <div className="text-muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
+                            {t(
+                              "studentResults.upsell.body",
+                              "See which clusters match you, why each career fits, and get guided next steps."
+                            )}
+                          </div>
+                          <div>
+                            <Button onClick={() => navigate("/pricing")}>
+                              {t("studentResults.upsell.cta", "Get Premium")}
+                            </Button>
+                          </div>
+                        </div>
+                      );
 
                       const renderPremiumInsightsCard = () => {
                         if (!assoc) return null;
@@ -946,10 +972,14 @@ export default function StudentResultsPage() {
 
                             {renderTopCareersCards()}
 
-                            {renderCareerDataSections()}
-
-                            {(resultsTier === "paid" || resultsTier === "premium") &&
-                              renderPremiumInsightsCard()}
+                            {isPaidOrPremium ? (
+                              <>
+                                {renderCareerDataSections()}
+                                {renderPremiumInsightsCard()}
+                              </>
+                            ) : (
+                              renderUpsellCard()
+                            )}
                           </div>
 
                           <style>{`
