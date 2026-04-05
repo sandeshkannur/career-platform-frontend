@@ -51,9 +51,55 @@
   --font-size-3xl:  28px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg:    0 8px 32px rgba(0,0,0,0.10);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+
+  /* Brand tint & hover */
+  --brand-tint:  rgba(11, 31, 58, 0.06);
+  --brand-hover: #162d50;
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.2s ease;
+
+  /* Semantic state colours */
+  --success-bg:     #f0fdf4;
+  --success-border: #86efac;
+  --success-text:   #15803d;
+  --warning-bg:     #fefce8;
+  --warning-border: #fde047;
+  --warning-text:   #854d0e;
+  --error-bg:       #fef2f2;
+  --error-border:   #fca5a5;
+  --error-text:     #dc2626;
+
+  /* Fit band colours */
+  --fit-high_potential-bg:     #f0fdf4;
+  --fit-high_potential-border: #86efac;
+  --fit-high_potential-text:   #15803d;
+  --fit-high_potential-accent: #22c55e;
+
+  --fit-strong-bg:     #eff6ff;
+  --fit-strong-border: #93c5fd;
+  --fit-strong-text:   #1d4ed8;
+  --fit-strong-accent: #3b82f6;
+
+  --fit-promising-bg:     #fefce8;
+  --fit-promising-border: #fde047;
+  --fit-promising-text:   #854d0e;
+  --fit-promising-accent: #eab308;
+
+  --fit-developing-bg:     #fdf4ff;
+  --fit-developing-border: #e9d5ff;
+  --fit-developing-text:   #7e22ce;
+  --fit-developing-accent: #a855f7;
+
+  --fit-exploring-bg:     #f9fafb;
+  --fit-exploring-border: #d1d5db;
+  --fit-exploring-text:   #374151;
+  --fit-exploring-accent: #9ca3af;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────── */
@@ -308,4 +354,69 @@
 @media (max-width: 640px) {
   .cp-contextGrid { grid-template-columns: 1fr; }
   .cp-cards3      { grid-template-columns: 1fr; }
+  .career-grid    { grid-template-columns: 1fr; }
+}
+
+/* ─── Career grid ────────────────────────────────────────────────────────── */
+.career-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (max-width: 980px) {
+  .career-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ─── Career card (with fit-band left accent) ────────────────────────────── */
+.career-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-left-color: var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: box-shadow var(--transition-base);
+}
+.career-card:hover { box-shadow: var(--shadow-hover); }
+
+.career-card[data-band="high_potential"] { border-left-color: var(--fit-high_potential-accent); }
+.career-card[data-band="strong"]         { border-left-color: var(--fit-strong-accent); }
+.career-card[data-band="promising"]      { border-left-color: var(--fit-promising-accent); }
+.career-card[data-band="developing"]     { border-left-color: var(--fit-developing-accent); }
+.career-card[data-band="exploring"]      { border-left-color: var(--fit-exploring-accent); }
+
+/* ─── Option button (question choices) ───────────────────────────────────── */
+.option-btn {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.option-btn:hover  { border-color: var(--brand-primary); box-shadow: var(--shadow-sm); }
+.option-btn.selected {
+  border-color: var(--brand-primary);
+  background: var(--brand-tint);
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

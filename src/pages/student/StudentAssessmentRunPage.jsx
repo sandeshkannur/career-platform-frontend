@@ -678,7 +678,7 @@ export default function StudentAssessmentRunPage() {
           </div>
 
           {/* Question Card */}
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6" style={{ maxWidth: 680, marginLeft: "auto", marginRight: "auto" }}>
             <div className="text-lg font-semibold leading-snug">{currentText}</div>
             <div className="mt-4">
               <QuestionRenderer

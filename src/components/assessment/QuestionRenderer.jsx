@@ -7,12 +7,6 @@
 
 import { useState } from "react";
 
-const baseBtn =
-  "w-full rounded-xl border px-4 py-3 text-left text-sm transition hover:shadow-sm";
-const activeStyle =
-  "border-[var(--brand-primary)] bg-[var(--bg-app)]";
-const inactiveStyle =
-  "border-[var(--border)] bg-white";
 
 function LikertQuestion({ selected, onChoose }) {
   const options = [
@@ -29,10 +23,10 @@ function LikertQuestion({ selected, onChoose }) {
           key={opt.value}
           type="button"
           onClick={() => onChoose(opt.value)}
-          className={[baseBtn, selected === opt.value ? activeStyle : inactiveStyle].join(" ")}
+          className={["option-btn", selected === opt.value ? "selected" : ""].join(" ").trim()}
           aria-pressed={selected === opt.value}
         >
-          <div className="font-medium text-[var(--text-primary)]">{opt.label}</div>
+          <div className="font-medium">{opt.label}</div>
         </button>
       ))}
     </div>
@@ -41,7 +35,7 @@ function LikertQuestion({ selected, onChoose }) {
 
 function EmojiLikertQuestion({ question, selected, onChoose }) {
   const cfg = question.renderer_config || {};
-  const emojis = cfg.emojis || ["😞", "😐", "🙂", "😊", "😄"];
+  const emojis = ["😞", "😐", "🙂", "😊", "😄"];
   const lang = question?.lang_used || "en";
   const labels =
     (lang === "kn" ? cfg.labels : cfg.labels_en) ||
@@ -60,7 +54,7 @@ function EmojiLikertQuestion({ question, selected, onChoose }) {
             onClick={() => onChoose(val)}
             className={[
               "flex flex-1 flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
-              active ? activeStyle : inactiveStyle,
+              active ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
             ].join(" ")}
             aria-pressed={active}
           >
@@ -86,10 +80,7 @@ function ScenarioQuestion({ question, selected, onChoose }) {
             key={i}
             type="button"
             onClick={() => onChoose(val)}
-            className={[
-              "flex items-start gap-2 rounded-xl border px-3 py-3 text-left text-sm transition hover:shadow-sm",
-              active ? activeStyle : inactiveStyle,
-            ].join(" ")}
+            className={["option-btn", "flex items-start gap-2", active ? "selected" : ""].join(" ").trim()}
             aria-pressed={active}
           >
             <span className={[
@@ -100,7 +91,7 @@ function ScenarioQuestion({ question, selected, onChoose }) {
             ].join(" ")}>
               {letters[i]}
             </span>
-            <span className="font-medium text-[var(--text-primary)] leading-snug">{opt.label}</span>
+            <span className="font-medium leading-snug">{opt.label}</span>
           </button>
         );
       })}
@@ -144,7 +135,7 @@ function RankingQuestion({ question, onChoose }) {
           className={[
             "flex items-center gap-3 rounded-xl border px-3 py-3 text-sm cursor-grab transition select-none",
             dragging === i ? "opacity-40" : "opacity-100",
-            i === 0 ? activeStyle : inactiveStyle,
+            i === 0 ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
           ].join(" ")}
         >
           <span className="text-[var(--text-muted)]">⠿</span>
@@ -229,7 +220,7 @@ function ThisOrThatQuestion({ question, selected, onChoose }) {
               onClick={() => onChoose(val)}
               className={[
                 "flex flex-1 items-center justify-center rounded-xl border px-4 py-5 text-center text-sm font-medium transition hover:shadow-sm",
-                active ? activeStyle : inactiveStyle,
+                active ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
               ].join(" ")}
               aria-pressed={active}
             >
@@ -258,9 +249,6 @@ export default function QuestionRenderer({ question, selected, onChoose }) {
   const Component = RENDERERS[type] || LikertQuestion;
   return (
     <div className={`question-renderer renderer-${type}`}>
-      <div style={{ fontSize: "12px", color: "red", marginBottom: "8px" }}>
-      DEBUG TYPE: {type}
-    </div>
       <Component
         question={question}
         selected={selected}
