@@ -120,17 +120,15 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
     ?.find((e) => e?.key === "CAREER_KEYSKILL_ALIGNMENT")
     ?.vars?.top_keyskills || [];
 
-  // Fit band colour
-  const bandColour = {
-    high_potential: { bg: "#f0fdf4", border: "#86efac", text: "#15803d" },
-    strong:         { bg: "#eff6ff", border: "#93c5fd", text: "#1d4ed8" },
-    promising:      { bg: "#fefce8", border: "#fde047", text: "#854d0e" },
-    developing:     { bg: "#fdf4ff", border: "#e9d5ff", text: "#7e22ce" },
-    exploring:      { bg: "#f9fafb", border: "#d1d5db", text: "#374151" },
-  }[career?.fit_band_key] || { bg: "#f9fafb", border: "#d1d5db", text: "#374151" };
+  const bandKey = career?.fit_band_key || "exploring";
+  const bandPillStyle = {
+    background:  `var(--fit-${bandKey}-bg, #f9fafb)`,
+    border:      `1px solid var(--fit-${bandKey}-border, #d1d5db)`,
+    color:       `var(--fit-${bandKey}-text, #374151)`,
+  };
 
   return (
-    <div className="card top-career-card" style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+    <div className="career-card top-career-card" data-band={bandKey}>
       {/* Header — title + cluster + fit band */}
       <div className="top-career-card__header">
         <div className="top-career-card__titleWrap">
@@ -141,7 +139,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
         </div>
         <div
           className="top-career-card__bandPill"
-          style={{ background: bandColour.bg, border: `1px solid ${bandColour.border}`, color: bandColour.text }}
+          style={bandPillStyle}
           aria-label={`${t("studentResults.fitBandAriaPrefix", "Fit band:")} ${bandLabel}`}
         >
           {bandLabel}
@@ -710,11 +708,11 @@ export default function StudentResultsPage() {
                           return ra - rb;
                         });
                         const displayItems = isPaidOrPremium
-                          ? sortedItems.slice(0, 20)
+                          ? sortedItems.slice(0, 9)
                           : sortedItems.slice(0, 5);
 
                         return (
-                          <div className="cp-cards3">
+                          <div className="career-grid">
                             {displayItems.map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
@@ -1036,6 +1034,7 @@ export default function StudentResultsPage() {
                             .cp-detailsBody { font-size: 13px; margin-top: 10px; line-height: 1.5; }
                             .cp-linkButton { text-decoration: underline; cursor: pointer; }
                             .cp-cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+                            .career-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
                             .cp-insights2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
                             .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
                             .cp-softPanel { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px; background: rgba(0,0,0,0.02); }
@@ -1053,12 +1052,14 @@ export default function StudentResultsPage() {
                             @media (max-width: 980px) {
                               .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                               .cp-cards3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                              .career-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                               .cp-insights2 { grid-template-columns: 1fr; }
                               .results-section__titleRow { flex-direction: column; gap: 8px; }
                             }
                             @media (max-width: 640px) {
                               .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                               .cp-cards3 { grid-template-columns: 1fr; }
+                              .career-grid { grid-template-columns: 1fr; }
                               .cp-insights2 { grid-template-columns: 1fr; }
                               .cp-resultsActions { flex-direction: column; align-items: stretch; }
                               .cp-resultsActions > * { width: 100%; justify-content: center; }
@@ -1071,6 +1072,7 @@ export default function StudentResultsPage() {
                             @media (max-width: 400px) {
                               .cp-contextGrid { grid-template-columns: 1fr; }
                               .cp-cards3 { grid-template-columns: 1fr; }
+                              .career-grid { grid-template-columns: 1fr; }
                             }
                           `}</style>
 
