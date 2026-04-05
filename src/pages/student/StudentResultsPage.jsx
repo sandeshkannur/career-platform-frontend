@@ -162,7 +162,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
           <div className="top-career-card__skillTags">
             {matchedSkills.map((s, i) => (
               <span key={i} className="top-career-card__skillTag">
-                {s.keyskill_name}
+                {s.display_name || s.keyskill_name}
               </span>
             ))}
           </div>
@@ -190,8 +190,6 @@ export default function StudentResultsPage() {
       "free")
       .toString()
       .toLowerCase();
-
-  const isPaidOrPremium = resultsTier === "paid" || resultsTier === "premium";
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -285,8 +283,32 @@ export default function StudentResultsPage() {
 
   const hasPremiumSignals = facetKeys.length > 0 || aqKeys.length > 0;
 
+  const isPaidOrPremium = useMemo(() => {
+    const premiumTiers = ["premium", "paid", "pro"];
+    const resultTier = (selectedResult?.tier || "").toString().toLowerCase();
+    if (premiumTiers.includes(resultTier)) return true;
+    return premiumTiers.includes(resultsTier);
+  }, [selectedResult?.tier, resultsTier]);
+
   useEffect(() => {
     setCtx(null);
+    if (!selectedResult?.assessment_id) return;
+
+    let cancelled = false;
+    apiGet(`/v1/assessments/${selectedResult.assessment_id}/context-profile`)
+      .then((res) => {
+        if (!cancelled) setCtx(res ?? null);
+      })
+      .catch((e) => {
+        // 405 means the endpoint is not yet implemented on the backend — fail silently.
+        // Any other error is also non-fatal: ctx stays null, fields show "Not shared yet".
+        if (e?.status !== 405) {
+          console.warn('[StudentResultsPage] context-profile fetch failed:', e?.status, e?.message);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedResult?.assessment_id]);
 
   useEffect(() => {
@@ -485,7 +507,7 @@ export default function StudentResultsPage() {
             {t("studentResults.actions.viewHistory", "View History")}
           </Button>
 
-          <Button variant="secondary" disabled>
+          <Button variant="secondary" disabled={!isPaidOrPremium}>
             {t("studentResults.actions.downloadReport", "Download Report")}
           </Button>
         </div>
@@ -647,6 +669,20 @@ export default function StudentResultsPage() {
                       const fitBandsCopy = copy.fitBands || {};
                       const assoc = copy.associatedQualities || null;
 
+                      const allCareers = Array.isArray(selectedResult?.recommended_careers)
+                        ? selectedResult.recommended_careers
+                        : Array.isArray(selectedResult?.top_careers)
+                        ? selectedResult.top_careers
+                        : [];
+
+                      const careersByCluster = {};
+                      allCareers.forEach((c) => {
+                        const name = c.cluster || c.cluster_title || t("studentResults.clusterSignals.other", "Other");
+                        if (!careersByCluster[name]) careersByCluster[name] = [];
+                        careersByCluster[name].push(c);
+                      });
+                      const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
+
                       const renderTopCareersCards = () => {
                         const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
                         const items = Array.isArray(topBlock?.items)
@@ -661,9 +697,25 @@ export default function StudentResultsPage() {
                           );
                         }
 
+                        const FIT_BAND_ORDER = {
+                          high_potential: 0,
+                          strong: 1,
+                          promising: 2,
+                          developing: 3,
+                          exploring: 4,
+                        };
+                        const sortedItems = [...items].sort((a, b) => {
+                          const ra = FIT_BAND_ORDER[a.fit_band_key] ?? 99;
+                          const rb = FIT_BAND_ORDER[b.fit_band_key] ?? 99;
+                          return ra - rb;
+                        });
+                        const displayItems = isPaidOrPremium
+                          ? sortedItems.slice(0, 20)
+                          : sortedItems.slice(0, 5);
+
                         return (
                           <div className="cp-cards3">
-                            {items.slice(0, 3).map((c, idx) => (
+                            {displayItems.map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
@@ -675,6 +727,136 @@ export default function StudentResultsPage() {
                           </div>
                         );
                       };
+
+                      const renderCareerDataSections = () => {
+                        if (clusterEntries.length === 0 && allCareers.length === 0) return null;
+                        const careersWithSkills = allCareers
+                          .filter((c) => {
+                            const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                            return Array.isArray(skills) && skills.length > 0;
+                          })
+                          .slice(0, 3);
+                        return (
+                          <div style={{ marginTop: 14 }}>
+                            <div className="cp-insightsStack">
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
+                                </div>
+                                {clusterEntries.length > 0 ? (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                    {clusterEntries.map(([clusterName, careers]) => (
+                                      <div
+                                        key={clusterName}
+                                        style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                      >
+                                        <div style={{ fontWeight: 700 }}>{clusterName}</div>
+                                        <ul style={{ marginTop: 6, paddingLeft: 18 }}>
+                                          {careers.slice(0, 3).map((c, i) => {
+                                            const bandLabel = fitBandsCopy?.[c.fit_band_key]?.label || c.fit_band_key || "";
+                                            return (
+                                              <li key={c.career_id || c.career_code || i} style={{ marginBottom: 4, fontSize: 13 }}>
+                                                {c.title || c.career_title}
+                                                {bandLabel ? (
+                                                  <span style={{ marginLeft: 6, opacity: 0.6, fontStyle: "italic" }}>
+                                                    ({bandLabel})
+                                                  </span>
+                                                ) : null}
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+
+                              <div className="cp-softPanel">
+                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
+                                </div>
+                                {careersWithSkills.length > 0 ? (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                                    {careersWithSkills.map((c, idx) => {
+                                      const skills = c.matched_keyskills || c.top_keyskills || c.keyskills || [];
+                                      return (
+                                        <div
+                                          key={c.career_id || c.career_code || idx}
+                                          style={{ paddingBottom: 10, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                                        >
+                                          <div style={{ fontWeight: 700 }}>{c.title || c.career_title}</div>
+                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                                            {skills.slice(0, 3).map((sk, ski) => (
+                                              <span
+                                                key={sk.keyskill_code || sk.keyskill_name || sk.name || ski}
+                                                style={{
+                                                  fontSize: 12,
+                                                  padding: "2px 8px",
+                                                  borderRadius: 999,
+                                                  background: "rgba(0,0,0,0.06)",
+                                                  color: "var(--text-primary)",
+                                                }}
+                                              >
+                                                {sk.keyskill_name || sk.name || sk.keyskill_code || String(sk)}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <ComingSoon />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      };
+
+                      const renderUpsellCard = () => (
+                        <div
+                          style={{
+                            border: "1px solid var(--brand-primary)",
+                            borderRadius: 12,
+                            padding: 20,
+                            marginTop: 16,
+                            background: "var(--bg-card, #ffffff)",
+                          }}
+                        >
+                          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>
+                            ⭐ {t("results.upsell.title", "Unlock deeper career insights")}
+                          </div>
+                          <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 12, margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                            {t("results.upsell.body", "See which career clusters match you, understand why each career fits your strengths, and get guided next steps to move forward.")}
+                          </p>
+                          <ul style={{ fontSize: 13, paddingLeft: 18, marginBottom: 16, margin: "0 0 16px 0" }}>
+                            {["feature1", "feature2", "feature3", "feature4"].map((k) => (
+                              <li key={k} style={{ marginBottom: 4 }}>
+                                ✓ {t(`results.upsell.${k}`)}
+                              </li>
+                            ))}
+                          </ul>
+                          <button
+                            onClick={() => navigate("/pricing")}
+                            style={{
+                              background: "var(--brand-primary)",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: 8,
+                              padding: "10px 20px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              fontSize: 14,
+                            }}
+                          >
+                            {t("results.upsell.cta", "Get Premium")}
+                          </button>
+                        </div>
+                      );
 
                       const renderPremiumInsightsCard = () => {
                         if (!assoc) return null;
@@ -769,139 +951,6 @@ export default function StudentResultsPage() {
                             <div className="cp-insightsStack">
                               <div className="cp-softPanel">
                                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
-                                </div>
-
-                                {deepLoading ? (
-                                  <div className="text-muted" style={{ fontSize: 13 }}>
-                                    {t("studentResults.clusterSignals.loading", "Loading cluster signals…")}
-                                  </div>
-                                ) : Array.isArray(deepRes?.cluster_insights) &&
-                                  deepRes.cluster_insights.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: 10,
-                                      marginTop: 10,
-                                    }}
-                                  >
-                                    {deepRes.cluster_insights.slice(0, 2).map((cl, idx) => {
-                                      const insightKeys = Array.isArray(cl?.insight_keys)
-                                        ? cl.insight_keys
-                                        : [];
-
-                                      const resolved = insightKeys
-                                        .map((k) => deepCopy?.[k])
-                                        .filter(
-                                          (t) => typeof t === "string" && t.trim().length > 0
-                                        );
-
-                                      return (
-                                        <div
-                                          key={cl?.cluster_id || cl?.cluster_title || idx}
-                                          style={{
-                                            paddingBottom: 10,
-                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                          }}
-                                        >
-                                          <div style={{ fontWeight: 700 }}>
-                                            {cl?.cluster_title || t("studentResults.clusterSignals.fallbackTitle", "Cluster")}
-                                          </div>
-
-                                          {resolved.length > 0 ? (
-                                            <ul style={{ marginTop: 8, paddingLeft: 18 }}>
-                                              {resolved.slice(0, 3).map((t, j) => (
-                                                <li key={j} style={{ marginBottom: 6 }}>
-                                                  {formatTemplate(t, {
-                                                    cluster_title: cl?.cluster_title || "",
-                                                  })}
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          ) : (
-                                            <ComingSoon />
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                ) : (
-                                  <ComingSoon />
-                                )}
-                              </div>
-
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
-                                </div>
-
-                                {deepLoading ? (
-                                  <div className="text-muted" style={{ fontSize: 13 }}>
-                                    {t("studentResults.whyFit.loading", "Loading deep insights…")}
-                                  </div>
-                                ) : Array.isArray(deepRes?.career_insights) &&
-                                  deepRes.career_insights.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: 10,
-                                      marginTop: 10,
-                                    }}
-                                  >
-                                    {deepRes.career_insights.slice(0, 3).map((ci, idx) => {
-                                      const whyKey = Array.isArray(ci?.why_keys)
-                                        ? ci.why_keys[0]
-                                        : "";
-
-                                      const rawWhy = deepCopy?.[whyKey] || "";
-                                      const whyText = formatTemplate(rawWhy, {
-                                        career_title: ci?.career_title || "",
-                                      });
-
-                                      return (
-                                        <div
-                                          key={ci?.career_id || idx}
-                                          style={{
-                                            paddingBottom: 10,
-                                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                          }}
-                                        >
-                                          <div style={{ fontWeight: 700 }}>
-                                            {ci?.career_title || t("studentResults.whyFit.fallbackTitle", "Career")}
-                                          </div>
-                                          <div style={{ marginTop: 6 }}>
-                                            {whyText && whyText.trim().length > 0 ? (
-                                              <span>{whyText}</span>
-                                            ) : (
-                                              <ComingSoon />
-                                            )}
-                                          </div>
-
-                                          <div
-                                            className="text-muted"
-                                            style={{ fontSize: 13, marginTop: 4 }}
-                                          >
-                                            {whyText || t("studentResults.comingSoon", "Insights coming soon.")}
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                ) : (
-                                  <ComingSoon />
-                                )}
-
-                                {deepError ? (
-                                  <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
-                                    {deepError}
-                                  </div>
-                                ) : null}
-                              </div>
-
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
                                   {t("studentResults.guidedNextSteps.title", "Guided next steps")}
                                 </div>
 
@@ -959,9 +1008,71 @@ export default function StudentResultsPage() {
 
                             {renderTopCareersCards()}
 
-                            {(resultsTier === "paid" || resultsTier === "premium") &&
-                              renderPremiumInsightsCard()}
+                            {isPaidOrPremium ? (
+                              <>
+                                {renderCareerDataSections()}
+                                {renderPremiumInsightsCard()}
+                              </>
+                            ) : (
+                              renderUpsellCard()
+                            )}
                           </div>
+
+                          <style>{`
+                            .cp-results { display: flex; flex-direction: column; gap: 16px; }
+                            .cp-resultsActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+                            .results-section { margin-top: 6px; }
+                            .results-section__titleRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+                            .results-section__title { font-size: 16px; font-weight: 800; line-height: 1.2; }
+                            .results-section__sub { font-size: 13px; line-height: 1.45; }
+                            .cp-sectionCard { padding: 16px; }
+                            .cp-inlineIcon { display: inline-flex; align-items: center; gap: 8px; }
+                            .cp-contextGrid { margin-top: 2px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+                            .cp-miniCard { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px; }
+                            .cp-miniLabel { font-size: 12px; margin-bottom: 4px; }
+                            .cp-miniValue { font-weight: 700; line-height: 1.25; }
+                            .cp-contextExplain { margin-top: 12px; }
+                            .cp-detailsSummary { cursor: pointer; font-weight: 700; }
+                            .cp-detailsBody { font-size: 13px; margin-top: 10px; line-height: 1.5; }
+                            .cp-linkButton { text-decoration: underline; cursor: pointer; }
+                            .cp-cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+                            .cp-insights2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+                            .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+                            .cp-softPanel { border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px; background: rgba(0,0,0,0.02); }
+                            .top-career-card { padding: 16px; border-radius: 14px; }
+                            .top-career-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+                            .top-career-card__titleWrap { min-width: 0; flex: 1; }
+                            .top-career-card__title { font-weight: 800; line-height: 1.2; }
+                            .top-career-card__cluster { font-size: 12px; margin-top: 4px; }
+                            .top-career-card__bandPill { font-size: 12px; font-weight: 700; border: 1px solid rgba(0,0,0,0.12); border-radius: 999px; padding: 4px 10px; white-space: nowrap; flex-shrink: 0; }
+                            .top-career-card__bandDesc { font-size: 13px; line-height: 1.45; margin-bottom: 10px; }
+                            .top-career-card__skills { margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.06); }
+                            .top-career-card__skillsLabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+                            .top-career-card__skillTags { display: flex; flex-wrap: wrap; gap: 6px; }
+                            .top-career-card__skillTag { background: var(--bg-app, #f3f4f6); border: 1px solid var(--border, #e5e7eb); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+                            @media (max-width: 980px) {
+                              .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                              .cp-cards3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                              .cp-insights2 { grid-template-columns: 1fr; }
+                              .results-section__titleRow { flex-direction: column; gap: 8px; }
+                            }
+                            @media (max-width: 640px) {
+                              .cp-contextGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                              .cp-cards3 { grid-template-columns: 1fr; }
+                              .cp-insights2 { grid-template-columns: 1fr; }
+                              .cp-resultsActions { flex-direction: column; align-items: stretch; }
+                              .cp-resultsActions > * { width: 100%; justify-content: center; }
+                              .cp-miniCard { padding: 10px; }
+                              .top-career-card { padding: 12px; }
+                              .top-career-card__bandPill { font-size: 11px; padding: 3px 8px; }
+                              .cp-sectionCard { padding: 12px; }
+                              .results-section__title { font-size: 15px; }
+                            }
+                            @media (max-width: 400px) {
+                              .cp-contextGrid { grid-template-columns: 1fr; }
+                              .cp-cards3 { grid-template-columns: 1fr; }
+                            }
+                          `}</style>
 
                         </div>
                       );

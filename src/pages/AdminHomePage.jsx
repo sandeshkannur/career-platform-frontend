@@ -16,6 +16,13 @@ export default function AdminHomePage() {
           : "Manage master data and mappings."
       }
       actions={<Button onClick={logout}>Logout</Button>}
+      footer={
+        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Home
+          </Link>
+        </div>
+      }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <Link to="/admin/career-clusters">
@@ -38,10 +45,15 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Bulk Upload</Button>
         </Link>
 
-        <div style={{ marginTop: 10 }}>
-          <Link to="/">← Home</Link>
-        </div>
-      </div>
+        <Link to="/admin/sme">
+          <Button style={{ width: "100%" }}>SME Registry</Button>
+        </Link>
+
+        <Link to="/admin/sme-tokens">
+          <Button style={{ width: "100%" }}>SME Tokens</Button>
+        </Link>
+
+</div>
     </SkeletonPage>
   );
 }

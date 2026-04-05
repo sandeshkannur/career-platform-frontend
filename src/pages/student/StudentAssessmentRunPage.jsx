@@ -6,16 +6,53 @@ import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../ui/Button";
 import { useContent } from "../../locales/LanguageProvider";
 
-import { getQuestionPool } from "../../api/questions";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
-import { getPreferredLang, setPreferredLang } from "../../apiClient";
 import { loadAnswerQueue, replayAnswerQueueOnce } from "../../lib/replayQueue";
+import QuestionRenderer from "../../components/assessment/QuestionRenderer";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
 const DRAFT_PREFIX_V1 = "__ASSESSMENT_RUN_DRAFT_V1__"; // legacy (migration only)
 const DRAFT_SCHEMA_VERSION = 2;
 
-const QUESTION_COUNT = 75;
+const QUESTION_COUNT = 50;
+
+const CHAPTER_BREAKS = [
+  { afterIndex: 17, from: "ch1", to: "ch2" },
+  { afterIndex: 35, from: "ch2", to: "ch3" },
+  { afterIndex: 45, from: "ch3", to: "ch4" },
+];
+
+const MILESTONES = { 8: "q9", 26: "q18", 40: "q27", 47: "q36" };
+
+function AssessmentIntroScreen({ onContinue, t }) {
+  return (
+    <div className="mx-auto w-full max-w-lg px-6 py-12">
+      <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">
+        {t("student.assessmentChapters.intro.title")}
+      </h1>
+      <p className="text-[var(--text-muted)] mb-6">
+        {t("student.assessmentChapters.intro.body")}
+      </p>
+      <ul className="space-y-3 mb-6">
+        {["rule1", "rule2", "rule3", "rule4"].map((r) => (
+          <li key={r} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
+            <span className="text-green-500 mt-0.5">✓</span>
+            <span>{t(`student.assessmentChapters.intro.${r}`)}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-[var(--text-muted)] mb-8">
+        {t("student.assessmentChapters.intro.time")}
+      </p>
+      <button
+        onClick={onContinue}
+        className="w-full rounded-xl bg-[var(--brand-primary,#1d4ed8)] px-6 py-3 text-white font-semibold hover:opacity-90 transition"
+      >
+        {t("student.assessmentChapters.intro.cta")}
+      </button>
+    </div>
+  );
+}
 
 /**
  * Assessment Runner (PR4)
@@ -32,7 +69,7 @@ export default function StudentAssessmentRunPage() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
 
-  const { t } = useContent();
+
 
   const storageKey = useMemo(() => {
     return `${DRAFT_PREFIX_V2}:${attemptId || "unknown"}`;
@@ -43,16 +80,9 @@ export default function StudentAssessmentRunPage() {
   }, [attemptId]);
 
   const [index, setIndex] = useState(0);
-  const [lang, setLang] = useState(getPreferredLang());
-
-  const handleLangChange = (e) => {
-    const next = (e?.target?.value || "en").trim().toLowerCase();
-    setPreferredLang(next);
-    setLang(next);
-
-    // Reset to first question for a predictable experience
-    setIndex(0);
-  };
+  const { t, language } = useContent();
+  const [showIntro, setShowIntro] = useState(true);
+  const lang = language || "en";
 
   // answers: { [questionId]: { answer: string, answered_at: ISOString } }
   const [answers, setAnswers] = useState({});
@@ -63,101 +93,52 @@ export default function StudentAssessmentRunPage() {
   // Prevent autosave from overwriting storage before we load/migrate draft
   const didLoadDraftRef = useRef(false);
 
-  const [pool, setPool] = useState(null);
-  const [poolError, setPoolError] = useState(null);
-  const [serverQuestionIds, setServerQuestionIds] = useState([]);
+  const [serverQuestions, setServerQuestions] = useState([]);
+  const [questionsError, setQuestionsError] = useState(null);
+  const [questionsLoaded, setQuestionsLoaded] = useState(false);
 
   // A+ (auto-replay on open) — small, neutral UX signal
   const [syncState, setSyncState] = useState({ status: "idle", message: "" });
+  const [chapterBreak, setChapterBreak] = useState(null);
+  const [milestone, setMilestone] = useState(null);
   const didAutoReplayRef = useRef(false);
 
-  /* ---------------- Load question pool ---------------- */
+  /* ---------------- Load questions from assessment API (single source of truth) ---------------- */
   useEffect(() => {
     let cancelled = false;
 
-    async function loadPool() {
-      setPool(null);
-      setPoolError(null);
-
-      try {
-        const data = await getQuestionPool({ lang });
-
-        // Backend contract can be either:
-        // - { questions: [...] }
-        // - [...]
-        const questions = Array.isArray(data) ? data : data?.questions;
-
-        if (!Array.isArray(questions)) {
-          throw new Error(
-            t(
-              "student.assessmentRun.errors.invalidQuestionPoolPayload",
-              "Invalid question pool payload (expected array)."
-            )
-          );
-        }
-
-        if (!cancelled) setPool(questions);
-      } catch (e) {
-        if (!cancelled) setPoolError(e);
-      }
-    }
-
-    loadPool();
-    return () => {
-      cancelled = true;
-    };
-  }, [attemptId, lang]);
-
-  /* ---------------- Load assessment questions (server canonical) ---------------- */
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadAssessmentQuestions() {
+    async function loadQuestions() {
       if (!attemptId || attemptId === "unknown") return;
+      setQuestionsLoaded(false);
+      setQuestionsError(null);
 
       try {
         const data = await getAssessmentQuestions(attemptId, lang);
-
-        // Backend returns: { questions: [ { question_id: "3", ... }, ... ] }
-        const ids = Array.isArray(data?.questions)
-          ? data.questions.map((q) => String(q.question_id))
-          : [];
-
-        if (!cancelled) setServerQuestionIds(ids);
+        const questions = Array.isArray(data?.questions) ? data.questions : [];
+        if (!cancelled) {
+          setServerQuestions(questions);
+          setQuestionsLoaded(true);
+        }
       } catch (e) {
-        if (!cancelled) setServerQuestionIds([]);
+        if (!cancelled) {
+          setQuestionsError(e);
+          setQuestionsLoaded(true);
+        }
       }
     }
 
-    loadAssessmentQuestions();
+    loadQuestions();
     return () => {
       cancelled = true;
     };
   }, [attemptId, lang]);
 
-  /* ---------------- Select questions (server canonical) ---------------- */
-  const QUESTIONS = useMemo(() => {
-    if (!Array.isArray(pool)) return [];
-    if (!Array.isArray(serverQuestionIds) || serverQuestionIds.length === 0)
-      return [];
+  const QUESTIONS = useMemo(() => serverQuestions, [serverQuestions]);
 
-    const byId = new Map(
-      pool.map((q) => [
-        String(q?.question_id ?? q?.id ?? q?.questionId ?? ""),
-        q,
-      ])
-    );
-
-    // Preserve server order
-    return serverQuestionIds
-      .map((id) => byId.get(String(id)))
-      .filter(Boolean);
-  }, [pool, serverQuestionIds]);
-
-  // Stable list of selected question ids (server canonical)
-  const selectedQuestionIds = useMemo(() => {
-    return Array.isArray(serverQuestionIds) ? serverQuestionIds.filter(Boolean) : [];
-  }, [serverQuestionIds]);
+  const selectedQuestionIds = useMemo(
+    () => serverQuestions.map((q) => String(q.question_id || q.id || "")),
+    [serverQuestions]
+  );
 
   const current = QUESTIONS[index];
 
@@ -396,22 +377,7 @@ export default function StudentAssessmentRunPage() {
   const currentId =
     current?.question_id ?? current?.id ?? current?.questionId ?? null;
 
-  const currentText =
-    current?.text ?? current?.question_text ?? current?.prompt ?? "";
-
-  const currentOptions = Array.isArray(current?.options)
-    ? current.options
-    : Array.isArray(current?.choices)
-    ? current.choices
-    : Array.isArray(current?.answers)
-    ? current.answers
-    : [
-        t("student.assessmentRun.options.stronglyDisagree", "Strongly Disagree"),
-        t("student.assessmentRun.options.disagree", "Disagree"),
-        t("student.assessmentRun.options.neutral", "Neutral"),
-        t("student.assessmentRun.options.agree", "Agree"),
-        t("student.assessmentRun.options.stronglyAgree", "Strongly Agree"),
-      ];
+  const currentText = current?.question_text || current?.text || current?.prompt || "";
 
   const selected = currentId ? answers[currentId]?.answer : null;
   const isLast = index === QUESTIONS.length - 1;
@@ -478,22 +444,32 @@ export default function StudentAssessmentRunPage() {
   }
 
   function handleNext() {
-    if (!selected) return;
+      if (!selected) return;
 
-    if (!isLast) {
-      setIndex((i) => i + 1);
-      return;
+      if (!isLast) {
+        const nextIndex = index + 1;
+        const breakPoint = CHAPTER_BREAKS.find((b) => b.afterIndex === index);
+        if (breakPoint) {
+          setChapterBreak(breakPoint);
+          setIndex(nextIndex);
+          return;
+        }
+        const milestoneKey = MILESTONES[index];
+        if (milestoneKey) {
+          setMilestone(milestoneKey);
+        } else {
+          setMilestone(null);
+        }
+        setIndex(nextIndex);
+        return;
+      }
+      navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
     }
 
-    // Last question -> submit page (existing route pattern)
-    navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
-  }
-
-  // Wait for both: local draft load attempt + backend pool load attempt
   const stillLoading =
-    !loaded ||
-    (!pool && !poolError) ||
-    (attemptId && attemptId !== "unknown" && serverQuestionIds.length === 0);
+    !questionsLoaded ||
+    (!loaded) ||
+    (!serverQuestions.length && !questionsError && attemptId && attemptId !== "unknown");
 
   if (stillLoading) {
     return (
@@ -525,7 +501,7 @@ export default function StudentAssessmentRunPage() {
     );
   }
 
-  if (poolError) {
+  if (questionsError) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
         <div className="flex items-start justify-between gap-4">
@@ -550,18 +526,18 @@ export default function StudentAssessmentRunPage() {
 
         <div className="mt-6 rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
           <div className="text-sm font-semibold">
-            {t("student.assessmentRun.error.title", "Failed to load question pool")}
+            {t("student.assessmentRun.error.title", "Failed to load questions")}
           </div>
           <div className="mt-1 text-sm text-[var(--text-muted)]">
-            {poolError?.message ||
-              t("student.assessmentRun.error.fallback", "Failed to load question pool.")}
+            {questionsError?.message ||
+              t("student.assessmentRun.error.fallback", "Failed to load questions.")}
           </div>
         </div>
       </div>
     );
   }
 
-  if (!current || !currentId || !Array.isArray(currentOptions)) {
+  if (!current || !currentId) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
         <div className="flex items-start justify-between gap-4">
@@ -593,145 +569,151 @@ export default function StudentAssessmentRunPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold">
-            {t("student.assessmentRun.title", "Assessment")}
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            {t(
-              "student.assessmentRun.subtitle",
-              "Answer honestly. There are no right or wrong answers."
-            )}
-          </p>
-        </div>
 
-        <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
-          <select
-            value={lang}
-            onChange={handleLangChange}
-            className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
-            aria-label={t("student.assessmentRun.language.ariaLabel", "Language")}
+      {showIntro && (
+        <AssessmentIntroScreen 
+          onContinue={() => {
+            setShowIntro(false);
+            setChapterBreak({ afterIndex: -1, from: null, to: "ch1" });
+          }} 
+          t={t} 
+        />
+      )}
+
+      {/* Chapter break screen */}
+      {!showIntro && chapterBreak && (
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-8 text-center mt-6">
+          {chapterBreak.from && (
+            <div className="text-sm font-medium text-[var(--text-muted)] mb-4">
+              {t(`student.assessmentChapters.${chapterBreak.from}.reveal`, "")}
+            </div>
+          )}
+          <div className="text-2xl font-bold mt-4 mb-2">
+            {t(`student.assessmentChapters.${chapterBreak.to}.title`, "")}
+          </div>
+          <div className="text-sm text-[var(--text-muted)] mb-1">
+            {t(`student.assessmentChapters.${chapterBreak.to}.subtitle`, "")}
+          </div>
+          <div className="mt-4 text-base text-[var(--text-primary)] max-w-lg mx-auto leading-relaxed">
+            {t(`student.assessmentChapters.${chapterBreak.to}.intro`, "")}
+          </div>
+          <button
+            className="mt-8 rounded-xl bg-[var(--brand-primary,#1d4ed8)] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
+            onClick={() => setChapterBreak(null)}
           >
-          <option value="en">{t("common.language.en", "EN")}</option>
-          <option value="kn">{t("common.language.kn", "KN")}</option>
-          </select>
-          <Button variant="secondary" onClick={handleBack}>
-            {t("student.assessmentRun.actions.back", "Back")}
-          </Button>
-          <Button variant="secondary" onClick={handleSave}>
-            {t("student.assessmentRun.actions.save", "Save")}
-          </Button>
-          <Button onClick={handleNext} disabled={!selected}>
-            {isLast
-              ? t("student.assessmentRun.actions.submit", "Submit")
-              : t("student.assessmentRun.actions.next", "Next")}
-          </Button>
+            {t("student.assessmentRun.actions.next", "Continue")}
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Progress */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-          <div>
-            {t("student.assessmentRun.progress.question", "Question")}{" "}
-            <span className="font-medium text-[var(--text-primary)]">
-              {index + 1}
-            </span>{" "}
-            {t("student.assessmentRun.progress.of", "of")}{" "}
-            <span className="font-medium text-[var(--text-primary)]">
-              {QUESTIONS.length}
-            </span>
-            {attemptId ? (
-              <span className="ml-2 opacity-80">
-                • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
-              </span>
+      {/* Milestone toast */}
+      {!showIntro && milestone && !chapterBreak && (
+        <div className="mt-4 rounded-xl border border-[#86efac] bg-[#f0fdf4] px-4 py-3 text-sm font-medium text-[#15803d]">
+          {t(`student.assessmentChapters.milestone.${milestone}`, "")}
+        </div>
+      )}
+
+      {/* Main question UI — hidden during intro or chapter break */}
+      {!showIntro && !chapterBreak && (
+        <>
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold">
+                {t("student.assessmentRun.title", "Assessment")}
+              </h1>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
+                {t("student.assessmentRun.subtitle", "Answer honestly. There are no right or wrong answers.")}
+              </p>
+            </div>
+            <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
+              <Button variant="secondary" onClick={handleBack}>
+                {t("student.assessmentRun.actions.back", "Back")}
+              </Button>
+              <Button variant="secondary" onClick={handleSave}>
+                {t("student.assessmentRun.actions.save", "Save")}
+              </Button>
+              <Button onClick={handleNext} disabled={!selected}>
+                {isLast
+                  ? t("student.assessmentRun.actions.submit", "Submit")
+                  : t("student.assessmentRun.actions.next", "Next")}
+              </Button>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+              <div>
+                {t("student.assessmentRun.progress.question", "Question")}{" "}
+                <span className="font-medium text-[var(--text-primary)]">{index + 1}</span>{" "}
+                {t("student.assessmentRun.progress.of", "of")}{" "}
+                <span className="font-medium text-[var(--text-primary)]">{QUESTIONS.length}</span>
+                {attemptId ? (
+                  <span className="ml-2 opacity-80">
+                    • {t("student.assessmentRun.progress.attemptId", "Attempt ID:")} {attemptId}
+                  </span>
+                ) : null}
+              </div>
+              <div>{progressPct}%</div>
+            </div>
+            <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
+              <div
+                className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            {syncState.status !== "idle" ? (
+              <div className="mt-2 text-xs text-[var(--text-muted)]">{syncState.message}</div>
             ) : null}
           </div>
 
-          <div>{progressPct}%</div>
-        </div>
-
-        <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
-          <div
-            className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-
-        {/* A+ sync hint (neutral) */}
-        {syncState.status !== "idle" ? (
-          <div className="mt-2 text-xs text-[var(--text-muted)]">
-            {syncState.message}
+          {/* Determinism metadata */}
+          <div className="mt-3 text-xs text-[var(--text-muted)]">
+            {t(
+              "student.assessmentRun.meta.deterministicSelection",
+              "Deterministic selection: seed = attemptId, pick = {{count}} (or fewer if pool smaller)",
+              { count: QUESTION_COUNT }
+            )}
           </div>
-        ) : null}
-      </div>
 
-      {/* Determinism metadata (auditable) */}
-      <div className="mt-3 text-xs text-[var(--text-muted)]">
-        {t(
-          "student.assessmentRun.meta.deterministicSelection",
-          "Deterministic selection: seed = attemptId, pick = {{count}} (or fewer if pool smaller)",
-          { count: QUESTION_COUNT }
-        )}
-      </div>
-
-      {/* Question Card */}
-      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
-        <div className="text-lg font-semibold leading-snug">{currentText}</div>
-
-        <div className="mt-4 grid gap-3">
-          {currentOptions.map((opt) => {
-            const optText = String(opt);
-            const active = selected === optText;
-
-            return (
-              <button
-                key={optText}
-                type="button"
-                onClick={() => choose(optText)}
-                className={[
-                  "w-full rounded-xl border px-4 py-3 text-left text-sm transition",
-                  "hover:shadow-sm",
-                  active
-                    ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
-                    : "border-[var(--border)] bg-white",
-                ].join(" ")}
-                aria-pressed={active}
-              >
-                <div className="font-medium text-[var(--text-primary)]">
-                  {optText}
+          {/* Question Card */}
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
+            <div className="text-lg font-semibold leading-snug">{currentText}</div>
+            <div className="mt-4">
+              <QuestionRenderer
+                question={{
+                  ...current,
+                  question_type: current?.question_type || "likert",
+                  question_text: currentText,
+                  response_options: current?.response_options || [],
+                  renderer_config: current?.renderer_config || null,
+                  lang_used: lang,
+                }}
+                selected={selected}
+                onChoose={(value) => choose(value)}
+              />
+            </div>
+            {!selected ? (
+              <div role="alert" className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm">
+                <div className="font-semibold">
+                  {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
                 </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {!selected ? (
-          <div
-            role="alert"
-            className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm"
-          >
-             <div className="font-semibold">
-               {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
-             </div>
-            <div className="mt-1 text-[var(--text-muted)]">
+                <div className="mt-1 text-[var(--text-muted)]">
+                  {t("student.assessmentRun.helper.select_body", "You can change your answer anytime before submitting.")}
+                </div>
+              </div>
+            ) : null}
+            <div className="mt-5 text-xs text-[var(--text-muted)]">
               {t(
-                "student.assessmentRun.helper.select_body",
-                "You can change your answer anytime before submitting."
+                "student.assessmentRun.note.scoring",
+                "Note: Scoring remains backend-owned. This runner only loads questions, selects deterministically, and stores a local draft."
               )}
             </div>
           </div>
-        ) : null}
-
-        <div className="mt-5 text-xs text-[var(--text-muted)]">
-          {t(
-            "student.assessmentRun.note.scoring",
-            "Note: Scoring remains backend-owned. This runner only loads questions, selects deterministically, and stores a local draft."
-          )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
+
