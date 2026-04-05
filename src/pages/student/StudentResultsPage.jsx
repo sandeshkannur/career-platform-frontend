@@ -697,9 +697,25 @@ export default function StudentResultsPage() {
                           );
                         }
 
+                        const FIT_BAND_ORDER = {
+                          high_potential: 0,
+                          strong: 1,
+                          promising: 2,
+                          developing: 3,
+                          exploring: 4,
+                        };
+                        const sortedItems = [...items].sort((a, b) => {
+                          const ra = FIT_BAND_ORDER[a.fit_band_key] ?? 99;
+                          const rb = FIT_BAND_ORDER[b.fit_band_key] ?? 99;
+                          return ra - rb;
+                        });
+                        const displayItems = isPaidOrPremium
+                          ? sortedItems.slice(0, 20)
+                          : sortedItems.slice(0, 5);
+
                         return (
                           <div className="cp-cards3">
-                            {(isPaidOrPremium ? items : items.slice(0, 5)).map((c, idx) => (
+                            {displayItems.map((c, idx) => (
                               <TopCareerCard
                                 key={c.career_id || c.career_code || c.career_title || idx}
                                 career={c}
