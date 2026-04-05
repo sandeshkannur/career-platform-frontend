@@ -42,7 +42,12 @@ function LikertQuestion({ selected, onChoose }) {
 function EmojiLikertQuestion({ question, selected, onChoose }) {
   const cfg = question.renderer_config || {};
   const emojis = cfg.emojis || ["😞", "😐", "🙂", "😊", "😄"];
-  const labels = cfg.labels || ["Not at all", "Not really", "Sometimes", "Often", "Always"];
+  const lang = question?.lang_used || "en";
+  const labels =
+    (lang === "kn" ? cfg.labels : cfg.labels_en) ||
+    cfg.labels_en ||
+    cfg.labels ||
+    ["Never", "Rarely", "Sometimes", "Often", "Always"];
   return (
     <div className="flex justify-between gap-2">
       {emojis.map((em, i) => {
@@ -253,6 +258,9 @@ export default function QuestionRenderer({ question, selected, onChoose }) {
   const Component = RENDERERS[type] || LikertQuestion;
   return (
     <div className={`question-renderer renderer-${type}`}>
+      <div style={{ fontSize: "12px", color: "red", marginBottom: "8px" }}>
+      DEBUG TYPE: {type}
+    </div>
       <Component
         question={question}
         selected={selected}
