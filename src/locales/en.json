@@ -611,12 +611,12 @@
   "student.assessmentChapters.milestone.q18": "Chapter 2 halfway done — keep going!",
   "student.assessmentChapters.milestone.q27": "Almost through Chapter 3 — one more to go!",
   "student.assessmentChapters.milestone.q36": "Final chapter — you are nearly there!",
-  "studentResults.clusterMap.title": "Your career world strengths",
-  "studentResults.clusterMap.sub": "A career world groups jobs sharing similar skills. The longer the bar, the stronger your fit.",
+  "studentResults.clusterMap.title": "How your strengths spread across career worlds",
+  "studentResults.clusterMap.sub": "Each bar shows how many of your top matches fall in that career world.",
   "studentResults.clusterMap.career": "career",
   "studentResults.clusterMap.careers": "careers",
-  "studentResults.interestInventory.title": "Discover what you enjoy — coming next",
-  "studentResults.interestInventory.sub": "10 quick activity questions will show which career worlds excite you most. Research shows trait + interest together are 2x more predictive of career satisfaction.",
+  "studentResults.interestInventory.title": "Personalise your results",
+  "studentResults.interestInventory.sub": "Answer 10 quick activity questions to add your interest profile. This is included in Chapter 5 of your next assessment.",
   "studentResults.interestInventory.badge": "Coming soon",
   "studentResults.topMatchLabel": "Top match",
   "studentResults.whyMatches": "Why this matches you",
@@ -697,5 +697,9 @@
   "interest.question": "Question",
   "interest.of": "of",
   "interest.nav.answered": "answered",
-  "interest.nav.submitting": "Submitting…"
+  "interest.nav.submitting": "Submitting…",
+  "interest.results.title": "Your interest signal is active",
+  "interest.results.retake": "Retake →",
+  "interest.results.sub": "Your recommendations now include your interest profile. Top career worlds:",
+  "interest.teaser.cta": "Start →"
 }

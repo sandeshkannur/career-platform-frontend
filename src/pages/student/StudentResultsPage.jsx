@@ -223,10 +223,10 @@ function ClusterStrengthMap({ careers, t }) {
       borderRadius: 12, padding: 16, marginBottom: 14,
     }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", marginBottom: 3 }}>
-        {t("studentResults.clusterMap.title", "Your career world strengths")}
+        {t("studentResults.clusterMap.title", "How your strengths spread across career worlds")}
       </div>
       <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5, marginBottom: 12 }}>
-        {t("studentResults.clusterMap.sub", "A career world groups jobs sharing similar skills. The longer the bar, the stronger your fit.")}
+        {t("studentResults.clusterMap.sub", "Each bar shows how many of your top matches fall in that career world.")}
       </div>
       {sorted.map(([cl, { n, top }]) => {
         const pct = Math.round((top / maxTop) * 100);
@@ -250,28 +250,70 @@ function ClusterStrengthMap({ careers, t }) {
 }
 
 // ─── Interest Inventory teaser ────────────────────────────────────────────
-function InterestInventoryTeaser({ t }) {
+function InterestInventoryTeaser({ t, interestData, studentId }) {
+  const navigate = useNavigate();
+  // Student has completed interest inventory — show their top clusters
+  if (interestData?.top_clusters?.length > 0) {
+    return (
+      <div style={{
+        background: "#fff", border: "1px solid #e2e8f0",
+        borderRadius: 12, padding: 14, marginBottom: 12,
+      }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
+            {t("interest.results.title", "Your interest signal is active")}
+          </div>
+          <button
+            onClick={() => navigate("/student/interest")}
+            style={{ fontSize: 11, color: "#0b1f3a", background: "none", border: "none", cursor: "pointer", fontWeight: 600, flexShrink: 0 }}
+          >
+            {t("interest.results.retake", "Retake →")}
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>
+          {t("interest.results.sub", "Your recommendations now include your interest profile. Top career worlds:")}
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {interestData.top_clusters.slice(0, 3).map((cl, i) => (
+            <span key={cl} style={{
+              background: i === 0 ? "#0b1f3a" : "#f0fdf4",
+              color: i === 0 ? "#fff" : "#166534",
+              border: i === 0 ? "none" : "1px solid #bbf7d0",
+              borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600,
+            }}>
+              {cl}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  // Student has NOT completed interest inventory — show prompt with Start button
   return (
     <div style={{
       background: "#fff", border: "1px solid #e2e8f0",
-      borderRadius: 12, padding: 16, marginBottom: 14,
+      borderRadius: 12, padding: 14, marginBottom: 12,
     }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", marginBottom: 3 }}>
-            {t("studentResults.interestInventory.title", "Discover what you enjoy — coming next")}
+            {t("studentResults.interestInventory.title", "Personalise your results")}
           </div>
           <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
-            {t("studentResults.interestInventory.sub", "10 quick activity questions will show which career worlds excite you most. Research shows trait + interest together are 2x more predictive of career satisfaction.")}
+            {t("studentResults.interestInventory.sub", "Answer 10 quick activity questions to add your interest profile. This is included in Chapter 5 of your next assessment.")}
           </div>
         </div>
-        <span style={{
-          background: "#eff6ff", color: "#1e40af",
-          borderRadius: 999, padding: "3px 10px",
-          fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0,
-        }}>
-          {t("studentResults.interestInventory.badge", "Coming soon")}
-        </span>
+        <button
+          onClick={() => navigate("/student/interest")}
+          style={{
+            background: "#0b1f3a", color: "#fff", border: "none",
+            borderRadius: 8, padding: "6px 14px",
+            fontSize: 12, fontWeight: 600, cursor: "pointer",
+            whiteSpace: "nowrap", flexShrink: 0,
+          }}
+        >
+          {t("interest.teaser.cta", "Start →")}
+        </button>
       </div>
     </div>
   );
@@ -579,6 +621,7 @@ export default function StudentResultsPage() {
 
   const [recs, setRecs] = useState(null);
   const [recsLoading, setRecsLoading] = useState(false);
+  const [interestData, setInterestData] = useState(null);
 
   const lastExplainSigRef = useRef("");
   const lastDeepSigRef = useRef("");
@@ -641,6 +684,17 @@ export default function StudentResultsPage() {
     }
     if (studentId) loadRecs();
   }, [studentId, contentLang]);
+
+  useEffect(() => {
+    async function loadInterest() {
+      if (!studentId) return;
+      try {
+        const res = await apiGet(`/v1/interest/${studentId}`);
+        setInterestData(res);
+      } catch { /* silent — interest data is optional */ }
+    }
+    if (studentId) loadInterest();
+  }, [studentId]);
 
   const selectedResult = useMemo(() => {
     if (!Array.isArray(data?.results) || data.results.length === 0) return null;
@@ -1105,7 +1159,7 @@ export default function StudentResultsPage() {
                           : null;
 
                         // Interest inventory teaser — always shown (remove when Layer 2 ships)
-                        const interestTeaser = <InterestInventoryTeaser t={t} />;
+                        const interestTeaser = <InterestInventoryTeaser t={t} interestData={interestData} studentId={studentId} />;
 
                         // Premium — group by cluster
                         if (isPaidOrPremium && visible.length > 1) {
@@ -1432,15 +1486,6 @@ export default function StudentResultsPage() {
                           </div>
 
                           <div className="card" style={{ padding: 16 }}>
-                            <div style={{ marginBottom: 14 }}>
-                              <div className="text-muted" style={{ fontSize: 12, marginBottom: 4 }}>
-                                {t("studentResults.recommendedStream", "Recommended stream")}
-                              </div>
-                              <div style={{ fontWeight: 700 }}>
-                                {selectedResult.recommended_stream || t("studentResults.notAvailable", "—")}
-                              </div>
-                            </div>
-
                             {renderTopCareersCards()}
 
                             {isPaidOrPremium ? (
