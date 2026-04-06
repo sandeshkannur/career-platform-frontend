@@ -505,7 +505,13 @@ export default function StudentResultsPage() {
             {t("studentResults.actions.viewHistory", "View History")}
           </Button>
 
-          <Button variant="secondary" disabled={!isPaidOrPremium}>
+          <Button
+            variant="secondary"
+            onClick={() => alert(t(
+              "studentResults.actions.downloadReportSoon",
+              "Report download is coming soon. This feature will be available in the next release."
+            ))}
+          >
             {t("studentResults.actions.downloadReport", "Download Report")}
           </Button>
         </div>
