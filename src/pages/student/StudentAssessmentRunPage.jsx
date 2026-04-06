@@ -9,12 +9,30 @@ import { useContent } from "../../locales/LanguageProvider";
 import { getAssessmentQuestions, postAssessmentResponses } from "../../api/assessments";
 import { loadAnswerQueue, replayAnswerQueueOnce } from "../../lib/replayQueue";
 import QuestionRenderer from "../../components/assessment/QuestionRenderer";
+import { apiPost } from "../../apiClient";
+import { useSession } from "../../hooks/useSession";
 
 const DRAFT_PREFIX_V2 = "__ASSESSMENT_RUN_DRAFT_V2__";
 const DRAFT_PREFIX_V1 = "__ASSESSMENT_RUN_DRAFT_V1__"; // legacy (migration only)
 const DRAFT_SCHEMA_VERSION = 2;
 
 const QUESTION_COUNT = 50;
+
+// ─── Interest Inventory (Chapter 5 — Q51-Q60) ────────────────────────────
+const INTEREST_QUESTIONS = [
+  { id: "q1",  opts: ["a", "b", "c"] },
+  { id: "q2",  opts: ["a", "b", "c"] },
+  { id: "q3",  opts: ["a", "b", "c"] },
+  { id: "q4",  opts: ["a", "b", "c"] },
+  { id: "q5",  opts: ["a", "b", "c"] },
+  { id: "q6",  opts: ["a", "b", "c"] },
+  { id: "q7",  opts: ["a", "b", "c"] },
+  { id: "q8",  opts: ["a", "b", "c"] },
+  { id: "q9",  opts: ["a", "b", "c"] },
+  { id: "q10", opts: ["a", "b", "c"] },
+];
+
+// Phases: "psychometric" | "ch5_intro" | "interest" | "submitting"
 
 const CHAPTER_BREAKS = [
   { afterIndex: 17, from: "ch1", to: "ch2" },
@@ -80,7 +98,7 @@ export default function StudentAssessmentRunPage() {
   }, [attemptId]);
 
   const [index, setIndex] = useState(0);
-  const { t, language } = useContent();
+  const { t, language, setLanguage } = useContent();
   const [showIntro, setShowIntro] = useState(true);
   const lang = language || "en";
 
@@ -102,6 +120,16 @@ export default function StudentAssessmentRunPage() {
   const [chapterBreak, setChapterBreak] = useState(null);
   const [milestone, setMilestone] = useState(null);
   const didAutoReplayRef = useRef(false);
+
+  // Chapter 5 — Interest Inventory state
+  const [phase, setPhase] = useState("psychometric"); // "psychometric"|"ch5_intro"|"interest"|"submitting"
+  const [interestIndex, setInterestIndex] = useState(0);
+  const [interestAnswers, setInterestAnswers] = useState({});
+  const [interestSubmitting, setInterestSubmitting] = useState(false);
+  const [interestError, setInterestError] = useState("");
+
+  const { sessionUser } = useSession();
+  const studentId = sessionUser?.student_profile?.student_id ?? null;
 
   /* ---------------- Load questions from assessment API (single source of truth) ---------------- */
   useEffect(() => {
@@ -444,27 +472,76 @@ export default function StudentAssessmentRunPage() {
   }
 
   function handleNext() {
-      if (!selected) return;
+    if (!selected) return;
 
-      if (!isLast) {
-        const nextIndex = index + 1;
-        const breakPoint = CHAPTER_BREAKS.find((b) => b.afterIndex === index);
-        if (breakPoint) {
-          setChapterBreak(breakPoint);
-          setIndex(nextIndex);
-          return;
-        }
-        const milestoneKey = MILESTONES[index];
-        if (milestoneKey) {
-          setMilestone(milestoneKey);
-        } else {
-          setMilestone(null);
-        }
+    if (!isLast) {
+      const nextIndex = index + 1;
+      const breakPoint = CHAPTER_BREAKS.find((b) => b.afterIndex === index);
+      if (breakPoint) {
+        setChapterBreak(breakPoint);
         setIndex(nextIndex);
         return;
       }
-      navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
+      const milestoneKey = MILESTONES[index];
+      if (milestoneKey) {
+        setMilestone(milestoneKey);
+      } else {
+        setMilestone(null);
+      }
+      setIndex(nextIndex);
+      return;
     }
+    // Q50 done → show Chapter 5 intro instead of going to submit
+    setPhase("ch5_intro");
+  }
+
+  function handleLangChange(e) {
+    setLanguage(e.target.value);
+  }
+
+  function handleInterestSelect(qId, opt) {
+    setInterestAnswers(prev => ({ ...prev, [qId]: opt }));
+  }
+
+  function handleInterestNext() {
+    const currentIQ = INTEREST_QUESTIONS[interestIndex];
+    if (!interestAnswers[currentIQ.id]) return;
+    if (interestIndex < INTEREST_QUESTIONS.length - 1) {
+      setInterestIndex(i => i + 1);
+      return;
+    }
+    // All 10 interest questions answered → submit both
+    handleFinalSubmit();
+  }
+
+  function handleInterestBack() {
+    if (interestIndex > 0) {
+      setInterestIndex(i => i - 1);
+    } else {
+      // Back from first interest Q → back to Ch5 intro
+      setPhase("ch5_intro");
+    }
+  }
+
+  async function handleFinalSubmit() {
+    setPhase("submitting");
+    setInterestError("");
+
+    // 1) POST interest answers to /v1/interest/{studentId} (non-blocking — best effort)
+    if (studentId && Object.keys(interestAnswers).length > 0) {
+      try {
+        await apiPost(`/v1/interest/${studentId}`, {
+          answers: interestAnswers,
+          lang: lang || "en",
+        });
+      } catch {
+        // Interest submit failure is non-fatal — psychometric results still valid
+      }
+    }
+
+    // 2) Navigate to psychometric submit page (existing flow)
+    navigate(`/student/assessment/submit/${attemptId || "unknown"}`);
+  }
 
   const stillLoading =
     !questionsLoaded ||
@@ -562,6 +639,222 @@ export default function StudentAssessmentRunPage() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           {t("student.assessmentRun.empty.body", "Unable to load questions.")}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Chapter 5 Intro Screen ──────────────────────────────────────────────
+  if (phase === "ch5_intro") {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold">
+              {t("student.assessmentRun.title", "Assessment")}
+            </h1>
+          </div>
+          <Button variant="secondary" onClick={() => setPhase("psychometric")}>
+            {t("student.assessmentRun.actions.back", "Back")}
+          </Button>
+        </div>
+
+        {/* Chapter 5 progress — full bar since psychometric is done */}
+        <div className="mb-6">
+          <div className="flex justify-between text-xs text-[var(--text-muted)] mb-2">
+            <span>{t("student.assessmentChapters.ch5.progressLabel", "Chapter 5 of 5")}</span>
+            <span>50/60 {t("student.assessmentRun.progress.of", "of")} 60</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-[var(--border)]">
+            <div className="h-2 rounded-full bg-[var(--brand-primary)]" style={{ width: "83%" }} />
+          </div>
+        </div>
+
+        {/* Chapter intro card — same style as chapters 1-4 */}
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-8">
+          <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
+            {t("student.assessmentChapters.ch5.label", "Chapter 5")}
+          </div>
+          <div className="text-2xl font-bold text-[var(--text-primary)] mb-4">
+            {t("student.assessmentChapters.ch5.title", "What do you enjoy?")}
+          </div>
+          <div className="text-sm text-[var(--text-muted)] leading-relaxed mb-6">
+            {t(
+              "student.assessmentChapters.ch5.intro",
+              "This final chapter has 10 short activity questions. They are different from the previous chapters — there are no right or wrong answers, and no scoring scales. Simply pick what feels most natural to you. This helps us understand which career worlds genuinely excite you."
+            )}
+          </div>
+
+          {/* Why it matters callout */}
+          <div className="rounded-xl bg-[var(--bg-app)] border border-[var(--border)] p-4 mb-6">
+            <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+              {t("student.assessmentChapters.ch5.whyLabel", "Why this matters")}
+            </div>
+            <div className="text-sm text-[var(--text-primary)]">
+              {t(
+                "student.assessmentChapters.ch5.why",
+                "Research shows that measuring both traits and interests together is 2× more accurate at predicting career satisfaction than traits alone. Your answers here add an interest layer to your profile."
+              )}
+            </div>
+          </div>
+
+          <div className="text-sm text-[var(--text-muted)] mb-6">
+            {t("student.assessmentChapters.ch5.instructions", "10 questions · 2–3 minutes · Pick one option per question")}
+          </div>
+
+          <Button
+            onClick={() => setPhase("interest")}
+            style={{ background: "var(--brand-primary)", color: "#fff", border: "none", padding: "10px 24px" }}
+          >
+            {t("student.assessmentChapters.ch5.cta", "Start Chapter 5 →")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Chapter 5 Interest Questions ────────────────────────────────────────
+  if (phase === "interest" || phase === "submitting") {
+    const iq = INTEREST_QUESTIONS[interestIndex];
+    const iqSelected = interestAnswers[iq?.id];
+    const isLastIQ = interestIndex === INTEREST_QUESTIONS.length - 1;
+    const interestProgressPct = Math.round(((50 + interestIndex + 1) / 60) * 100);
+
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold">
+              {t("student.assessmentRun.title", "Assessment")}
+            </h1>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              {t("student.assessmentChapters.ch5.title", "What do you enjoy?")}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={lang}
+              onChange={handleLangChange}
+              className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
+            >
+              <option value="en">{t("common.language.en", "EN")}</option>
+              <option value="kn">{t("common.language.kn", "KN")}</option>
+            </select>
+            <Button variant="secondary" onClick={handleInterestBack}>
+              {t("student.assessmentRun.actions.back", "Back")}
+            </Button>
+          </div>
+        </div>
+
+        {/* Progress — Q51-Q60 out of 60 total */}
+        <div className="mt-6">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+            <div>
+              {t("student.assessmentRun.progress.question", "Question")}{" "}
+              <span className="font-medium text-[var(--text-primary)]">
+                {50 + interestIndex + 1}
+              </span>{" "}
+              {t("student.assessmentRun.progress.of", "of")}{" "}
+              <span className="font-medium text-[var(--text-primary)]">60</span>
+              <span className="ml-2 opacity-70">
+                · {t("student.assessmentChapters.ch5.label", "Chapter 5")}
+              </span>
+            </div>
+            <div>{interestProgressPct}%</div>
+          </div>
+          <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
+            <div
+              className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
+              style={{ width: `${interestProgressPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Interest Question Card */}
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6" style={{ maxWidth: 680, marginLeft: "auto", marginRight: "auto" }}>
+          <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
+            {t("interest.question", "Question")} {interestIndex + 1} {t("interest.of", "of")} 10
+          </div>
+
+          <div className="text-lg font-semibold leading-snug mb-2">
+            {t(`interest.${iq.id}.text`, `Activity question ${interestIndex + 1}`)}
+          </div>
+
+          <div className="text-sm text-[var(--text-muted)] mb-5">
+            {t(`interest.${iq.id}.sub`, "Pick what feels most natural to you")}
+          </div>
+
+          {/* 3 activity options */}
+          <div className="mt-4 grid gap-3">
+            {iq.opts.map((opt) => {
+              const optText = t(`interest.${iq.id}.${opt}`, `Option ${opt.toUpperCase()}`);
+              const active = iqSelected === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => handleInterestSelect(iq.id, opt)}
+                  disabled={phase === "submitting"}
+                  className={[
+                    "w-full rounded-xl border px-4 py-3 text-left text-sm transition",
+                    "hover:shadow-sm",
+                    active
+                      ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
+                      : "border-[var(--border)] bg-white",
+                  ].join(" ")}
+                  aria-pressed={active}
+                >
+                  <div className="font-medium text-[var(--text-primary)]">{optText}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          {!iqSelected && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm"
+            >
+              <div className="font-semibold">
+                {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
+              </div>
+              <div className="mt-1 text-[var(--text-muted)]">
+                {t("student.assessmentRun.helper.select_body", "You can change your answer anytime before submitting.")}
+              </div>
+            </div>
+          )}
+
+          {interestError && (
+            <div className="mt-3 text-sm text-red-600 font-medium">{interestError}</div>
+          )}
+        </div>
+
+        {/* Nav buttons */}
+        <div className="mt-4 flex justify-between items-center" style={{ maxWidth: 680, marginLeft: "auto", marginRight: "auto" }}>
+          <Button variant="secondary" onClick={handleInterestBack}>
+            {t("student.assessmentRun.actions.back", "Back")}
+          </Button>
+
+          <span className="text-xs text-[var(--text-muted)]">
+            {Object.keys(interestAnswers).length}/10 {t("interest.nav.answered", "answered")}
+          </span>
+
+          <Button
+            onClick={handleInterestNext}
+            disabled={!iqSelected || phase === "submitting"}
+            style={
+              iqSelected && phase !== "submitting"
+                ? { background: "var(--brand-primary)", color: "#fff", border: "none" }
+                : {}
+            }
+          >
+            {phase === "submitting"
+              ? t("interest.nav.submitting", "Submitting…")
+              : isLastIQ
+              ? t("student.assessmentRun.actions.submit", "Submit")
+              : t("student.assessmentRun.actions.next", "Next")}
+          </Button>
         </div>
       </div>
     );
