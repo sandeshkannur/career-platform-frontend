@@ -721,12 +721,12 @@
   "student.assessmentChapters.milestone.q18": "ಅತ್ಯುತ್ತಮ — ಅಧ್ಯಾಯ 2 ಮುಗಿದಿದೆ. ಅರ್ಧದಾರಿ ಆಯಿತು!",
   "student.assessmentChapters.milestone.q27": "ಮೂರು ಅಧ್ಯಾಯಗಳು ಮುಗಿದಿವೆ, ಇನ್ನೊಂದು ಮಾತ್ರ. ಬಹುತೇಕ ತಲುಪಿದ್ದೀರಿ!",
   "student.assessmentChapters.milestone.q36": "ಅಂತಿಮ ಅಧ್ಯಾಯ — ನೀವು ತುಂಬಾ ಹತ್ತಿರದಲ್ಲಿದ್ದೀರಿ. ಬಲವಾಗಿ ಮುಗಿಸಿ!",
-  "studentResults.clusterMap.title": "ನಿಮ್ಮ ವೃತ್ತಿ ಜಗತ್ತಿನ ಶಕ್ತಿಗಳು",
-  "studentResults.clusterMap.sub": "ಒಂದು ವೃತ್ತಿ ಜಗತ್ತು ಒಂದೇ ರೀತಿಯ ಕೌಶಲ ಹೊಂದಿರುವ ಉದ್ಯೋಗಗಳನ್ನು ಒಟ್ಟುಗೂಡಿಸುತ್ತದೆ. ಉದ್ದವಾದ ಬಾರ್ ೎ಂದರೆ ಆ ಜಗತ್ತಿನಲ್ಲಿ ನಿಮ್ಮ ಹೊಂದಾణಿಕೆ ಹೆಚ್ಚು.",
+  "studentResults.clusterMap.title": "ನಿಮ್ಮ ಶಕ್ತಿಗಳು ವೃತ್ತಿ ಜಗತ್ತುಗಳಲ್ಲಿ ಹೇಗೆ ಹರಡಿವೆ",
+  "studentResults.clusterMap.sub": "ಪ್ರತಿ ಬಾರ್ ಆ ವೃತ್ತಿ ಜಗತ್ತಿನಲ್ಲಿ ನಿಮ್ಮ ೆಷ್ಟು ಅಗ್ರ ಹೊಂದಾಣಿಕೆಗಳಿವೆ ೆಂದು ತೋರಿಸುತ್ತದೆ.",
   "studentResults.clusterMap.career": "ವೃತ್ತಿ",
   "studentResults.clusterMap.careers": "ವೃತ್ತಿಗಳು",
-  "studentResults.interestInventory.title": "ನಿಮ್ಮಗೆ ಮೆಚ್ಚಿನದು ಕಂಡುಹಿಡಿಯಿರಿ — ಶೀಘ್ರದಲ್ಲೇ",
-  "studentResults.interestInventory.sub": "10 ಚಟುವಟಿಕೆ ಪ್ರಶ್ನೆಗಳು ಯಾವ ವೃತ್ತಿ ಜಗತ್ತು ನಿಮ್ಮಗೆ ಉತ್ಸಾಹ ನೀಡುತ್ತದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ. ಗುಣ + ಆಸಕ್ತಿ ಒಟ್ಟಾಗಿ ವೃತ್ತಿ ತೃಪ್ತಿಯನ್ನು 2 ಪಟ್ಟು ಹೆಚ್ಚು ನಿರೀಕ್ಷಿಸುತ್ತದೆ.",
+  "studentResults.interestInventory.title": "ನಿಮ್ಮ ಫಲಿತಾಂಶಗಳನ್ನು ವೈಯಕ್ತಿಕಗೊಳಿಸಿ",
+  "studentResults.interestInventory.sub": "ನಿಮ್ಮ ಆಸಕ್ತಿ ಪ್ರೋಫೈಲ್ ಸೇರಿಸಲು 10 ಚಟುವಟಿಕೆ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಿಸಿ. ಇದು ನಿಮ್ಮ ಮುಂದಿನ ಮೌಲ್ಯಮಾಪನದ ಅಧ್ಯಾಯ 5 ರಲ್ಲಿ ಒಳಗೊಂಡಿದೆ.",
   "studentResults.interestInventory.badge": "ಶೀಘ್ರದಲ್ಲೇ",
   "studentResults.topMatchLabel": "ಅತ್ಯುತ್ತಮ ಹೊಂದಾణಿಕೆ",
   "studentResults.whyMatches": "ಇದು ನಿಮ್ಮಗೆ ಏಕೆ ಹೊಂದುತ್ತದೆ",
@@ -807,5 +807,9 @@
   "interest.question": "ಪ್ರಶ್ನೆ",
   "interest.of": "ರಲ್ಲಿ",
   "interest.nav.answered": "ಉತ್ತರಿಸಲಾಗಿದೆ",
-  "interest.nav.submitting": "ಸಲ್ಲಿಸುತ್ತಿದೆ…"
+  "interest.nav.submitting": "ಸಲ್ಲಿಸುತ್ತಿದೆ…",
+  "interest.results.title": "ನಿಮ್ಮ ಆಸಕ್ತಿ ಸಂಕೇತ ಸಕ್ರಿಯವಾಗಿದೆ",
+  "interest.results.retake": "ಮತ್ತೆ ತೆಗೆದುಕೊಳ್ಳಿ →",
+  "interest.results.sub": "ನಿಮ್ಮ ಶಿಫಾರಸುಗಳು ಇಂದು ನಿಮ್ಮ ಆಸಕ್ತಿ ಪ್ರೋಫೈಲ್ ಅನ್ನು ಒಳಗೊಂಡಿವೆ. ಮುಖ್ಯ ವೃತ್ತಿ ಜಗತ್ತುಗಳು:",
+  "interest.teaser.cta": "ಪ್ರಾರಂಭಿಸಿ →"
 }
