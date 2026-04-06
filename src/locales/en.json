@@ -684,5 +684,18 @@
   "interest.q10.sub": "Pick the project you’d be most proud to present",
   "interest.q10.a": "An app or website that solves a problem in your school or village",
   "interest.q10.b": "A report on how the local government or law system works",
-  "interest.q10.c": "A campaign — posters, social media, or a short film — about a cause you care about"
+  "interest.q10.c": "A campaign — posters, social media, or a short film — about a cause you care about",
+  "student.assessmentChapters.ch5.label": "Chapter 5",
+  "student.assessmentChapters.ch5.title": "What do you enjoy?",
+  "student.assessmentChapters.ch5.progressLabel": "Chapter 5 of 5",
+  "student.assessmentChapters.ch5.intro": "This final chapter has 10 short activity questions. They are different from the previous chapters — there are no right or wrong answers, and no scoring scales. Simply pick what feels most natural to you. This helps us understand which career worlds genuinely excite you.",
+  "student.assessmentChapters.ch5.whyLabel": "Why this matters",
+  "student.assessmentChapters.ch5.why": "Research shows that measuring both traits and interests together is 2× more accurate at predicting career satisfaction than traits alone. Your answers here add an interest layer to your profile.",
+  "student.assessmentChapters.ch5.instructions": "10 questions · 2–3 minutes · Pick one option per question",
+  "student.assessmentChapters.ch5.cta": "Start Chapter 5 →",
+  "student.assessmentChapters.ch5.reveal": "You have completed all 5 chapters. Your full career results — including your interest profile — are ready. Tap Submit to see them.",
+  "interest.question": "Question",
+  "interest.of": "of",
+  "interest.nav.answered": "answered",
+  "interest.nav.submitting": "Submitting…"
 }
