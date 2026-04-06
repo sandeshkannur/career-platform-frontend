@@ -345,14 +345,13 @@ export default function StudentResultsPage() {
   const canSeeScores =
     sessionUser?.role === "admin" || sessionUser?.role === "counsellor";
 
-  const resultsTier =
-    (sessionUser?.subscription_tier ||
-      sessionUser?.tier ||
-      sessionUser?.plan ||
-      localStorage.getItem("CP_RESULTS_TIER") ||
-      "free")
-      .toString()
-      .toLowerCase();
+  const resultsTier = (
+    sessionUser?.subscription_tier ||
+    sessionUser?.tier ||
+    sessionUser?.plan ||
+    localStorage.getItem("CP_RESULTS_TIER") ||
+    "free"
+  ).toString().toLowerCase();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -465,12 +464,11 @@ export default function StudentResultsPage() {
 
   const hasPremiumSignals = facetKeys.length > 0 || aqKeys.length > 0;
 
-  const isPaidOrPremium = useMemo(() => {
-    const premiumTiers = ["premium", "paid", "pro"];
-    const resultTier = (selectedResult?.tier || "").toString().toLowerCase();
-    if (premiumTiers.includes(resultTier)) return true;
-    return premiumTiers.includes(resultsTier);
-  }, [selectedResult?.tier, resultsTier]);
+  const isPaidOrPremium =
+    resultsTier === "paid" ||
+    resultsTier === "premium" ||
+    sessionUser?.role === "admin" ||
+    sessionUser?.role === "counsellor";
 
   useEffect(() => {
     setCtx(null);
