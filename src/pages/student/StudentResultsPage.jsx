@@ -93,81 +93,246 @@ function ResultsNotReadyView({ content }) {
     </div>
   );
 }
-function TopCareerCard({ career, fitBandsCopy, idx, t }) {
+function fmt(v) {
+  if (!v) return null;
+  return v >= 100000
+    ? `₹${(v / 100000).toFixed(0)}L`
+    : `₹${(v / 1000).toFixed(0)}K`;
+}
+
+const BAND_COLORS = {
+  high_potential: { bg: "#0b1f3a", text: "#fff",    border: "#0b1f3a" },
+  strong:         { bg: "#064e3b", text: "#fff",    border: "#064e3b" },
+  promising:      { bg: "#1e3a8a", text: "#fff",    border: "#1e3a8a" },
+  developing:     { bg: "#581c87", text: "#fff",    border: "#581c87" },
+  exploring:      { bg: "#374151", text: "#fff",    border: "#374151" },
+};
+
+const RISK_CFG = {
+  low:    { label: "Low automation risk", bg: "#ecfdf5", color: "#065f46", dot: "#10b981" },
+  medium: { label: "Medium risk",         bg: "#fffbeb", color: "#92400e", dot: "#f59e0b" },
+  high:   { label: "Higher risk",         bg: "#fef2f2", color: "#991b1b", dot: "#ef4444" },
+};
+
+const RANK_MEDALS = ["🥇", "🥈", "🥉", "4", "5", "6", "7", "8", "9"];
+
+function TopCareerCard({ career, fitBandsCopy, idx, t, isPremium }) {
+  const [open, setOpen] = React.useState(false);
+
   const band = fitBandsCopy?.[career?.fit_band_key] || null;
+  const bandLabel = band?.label || career?.fit_band_key || "Match";
+  const bandCfg = BAND_COLORS[career?.fit_band_key] || BAND_COLORS.exploring;
 
-  const bandLabel =
-    band?.label || career?.fit_band_key || t("studentResults.fitBandFallback", "Fit band");
-  const bandDesc = band?.desc || "";
-
-  const title =
-    career?.career_title ||
-    career?.title ||
-    career?.career_name ||
-    career?.name ||
-    `${t("studentResults.topCareerFallback", "Career")} #${idx + 1}`;
-
-  // Use career.cluster (from API) not career.cluster_title
+  const title = career?.title || career?.career_title || career?.name || `Career #${idx + 1}`;
   const cluster = career?.cluster || career?.cluster_title || "";
+  const stream = career?.recommended_stream || "";
+  const description = career?.description || "";
+  const prestige = career?.prestige_title || "";
+  const indianTitle = career?.indian_job_title || "";
+  const topTier = career?.top_tier_potential || "";
 
-  // matched_keyskills from API: [{ keyskill_name, keyskill_code }]
-  const matchedSkills = Array.isArray(career?.matched_keyskills)
-    ? career.matched_keyskills.slice(0, 3)
-    : [];
+  const riskKey = career?.automation_risk?.toLowerCase();
+  const riskCfg = RISK_CFG[riskKey] || null;
+  const outlook = career?.future_outlook || "";
+  const outlookLabel = outlook === "growing" ? "📈 Growing field" : outlook === "stable" ? "📊 Stable" : "";
 
-  // top_keyskills from explainability vars
-  const topKeyskills = career?.explainability
-    ?.find((e) => e?.key === "CAREER_KEYSKILL_ALIGNMENT")
-    ?.vars?.top_keyskills || [];
+  const salaryFmt = [fmt(career?.salary_entry_inr), fmt(career?.salary_mid_inr), fmt(career?.salary_peak_inr)].filter(Boolean);
+  const hasSalary = salaryFmt.length > 0;
 
-  const bandKey = career?.fit_band_key || "exploring";
-  const bandPillStyle = {
-    background:  `var(--fit-${bandKey}-bg, #f9fafb)`,
-    border:      `1px solid var(--fit-${bandKey}-border, #d1d5db)`,
-    color:       `var(--fit-${bandKey}-text, #374151)`,
-  };
+  const keyskills = Array.isArray(career?.matched_keyskills) ? career.matched_keyskills : [];
+  const hasPathway = career?.pathway_step1 || career?.pathway_accessible;
+
+  const isTopCard = idx === 0;
+  const medal = RANK_MEDALS[idx] || String(idx + 1);
 
   return (
-    <div className="career-card top-career-card" data-band={bandKey}>
-      {/* Header — title + cluster + fit band */}
-      <div className="top-career-card__header">
-        <div className="top-career-card__titleWrap">
-          <div className="top-career-card__title">{title}</div>
-          {cluster ? (
-            <div className="text-muted top-career-card__cluster">{cluster}</div>
-          ) : null}
-        </div>
-        <div
-          className="top-career-card__bandPill"
-          style={bandPillStyle}
-          aria-label={`${t("studentResults.fitBandAriaPrefix", "Fit band:")} ${bandLabel}`}
-        >
+    <div style={{
+      background: "#fff",
+      border: isTopCard ? "2px solid #0b1f3a" : "1px solid #e2e8f0",
+      borderRadius: 16,
+      overflow: "hidden",
+      boxShadow: isTopCard ? "0 4px 20px rgba(11,31,58,0.12)" : "0 1px 4px rgba(0,0,0,0.05)",
+    }}>
+      {/* Top bar */}
+      <div style={{
+        background: isTopCard ? "#0b1f3a" : "#f8fafc",
+        padding: "10px 16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: "1px solid #e2e8f0",
+      }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: isTopCard ? "rgba(255,255,255,0.85)" : "#64748b" }}>
+          {typeof medal === "string" && medal.length > 1 ? medal : `#${idx + 1}`} {isTopCard ? "Top Match" : idx === 1 ? "Strong Match" : idx === 2 ? "Great Fit" : `Match #${idx + 1}`}
+        </span>
+        <span style={{
+          background: bandCfg.bg, color: bandCfg.text,
+          borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 700,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+        }}>
           {bandLabel}
-        </div>
+        </span>
       </div>
 
-      {/* Fit band description */}
-      {bandDesc ? (
-        <div className="text-muted top-career-card__bandDesc">{bandDesc}</div>
-      ) : null}
+      {/* Body */}
+      <div style={{ padding: "14px 16px 16px" }}>
 
-      {/* Matched key skills — always shown, data always present */}
-      {matchedSkills.length > 0 ? (
-        <div className="top-career-card__skills">
-          <div className="top-career-card__skillsLabel text-muted">
-            {t("studentResults.card.matchedSkills", "Why this matches you")}
-          </div>
-          <div className="top-career-card__skillTags">
-            {matchedSkills.map((s, i) => (
-              <span key={i} className="top-career-card__skillTag">
-                {s.display_name || s.keyskill_name}
-              </span>
-            ))}
-          </div>
+        {/* Title + prestige */}
+        <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.25, color: "#0f172a" }}>
+          {title}
         </div>
-      ) : null}
+        {prestige && (
+          <div style={{ fontSize: 12, color: "#1a6b5a", fontWeight: 600, marginTop: 2, lineHeight: 1.4 }}>
+            {prestige}
+          </div>
+        )}
 
+        {/* Tags row */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+          {cluster && (
+            <span style={{ background: "#eff6ff", color: "#1e40af", borderRadius: 999, padding: "2px 9px", fontSize: 11, fontWeight: 600 }}>
+              {cluster}
+            </span>
+          )}
+          {stream && (
+            <span style={{ background: "#f0fdf4", color: "#166534", borderRadius: 999, padding: "2px 9px", fontSize: 11, fontWeight: 600 }}>
+              {stream}
+            </span>
+          )}
+          {indianTitle && (
+            <span style={{ background: "#f8fafc", color: "#475569", borderRadius: 999, padding: "2px 9px", fontSize: 11, border: "1px solid #e2e8f0" }}>
+              {indianTitle}
+            </span>
+          )}
+        </div>
 
+        {/* Description */}
+        {description && (
+          <div style={{ marginTop: 10, fontSize: 13, color: "#475569", lineHeight: 1.6 }}>
+            {description}
+          </div>
+        )}
+
+        {/* Salary range */}
+        {hasSalary && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Annual Salary Range
+            </div>
+            <div style={{ height: 7, borderRadius: 999, background: "linear-gradient(90deg, #0b1f3a 0%, #1a6b5a 55%, #10b981 100%)", marginBottom: 5 }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+              <span style={{ color: "#64748b" }}>{salaryFmt[0]} <span style={{ fontSize: 10 }}>entry</span></span>
+              {salaryFmt[1] && <span style={{ fontWeight: 700, color: "#0f172a" }}>{salaryFmt[1]}</span>}
+              {salaryFmt[2] && <span style={{ color: "#059669", fontWeight: 700 }}>{salaryFmt[2]} <span style={{ fontSize: 10, fontWeight: 400, color: "#64748b" }}>peak</span></span>}
+            </div>
+          </div>
+        )}
+
+        {/* Risk + Outlook badges */}
+        {(riskCfg || outlookLabel) && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+            {riskCfg && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: riskCfg.bg, color: riskCfg.color, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: riskCfg.dot, flexShrink: 0 }} />
+                {riskCfg.label}
+              </span>
+            )}
+            {outlookLabel && (
+              <span style={{ background: "#eff6ff", color: "#1e40af", borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600 }}>
+                {outlookLabel}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Why this matches you — keyskills */}
+        {keyskills.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Why this matches you
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {keyskills.slice(0, 4).map((ks, i) => (
+                <span key={i} style={{
+                  background: "#f0fdf4", color: "#166534",
+                  border: "1px solid #bbf7d0",
+                  borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600,
+                }}>
+                  ✓ {ks.keyskill_name || ks.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Pathway expand toggle */}
+        {hasPathway && (
+          <button
+            onClick={() => setOpen((o) => !o)}
+            style={{
+              marginTop: 12, width: "100%", background: "none",
+              border: "1px solid #e2e8f0", borderRadius: 10,
+              padding: "8px 14px", fontSize: 12, fontWeight: 600,
+              color: "#0b1f3a", cursor: "pointer",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}
+          >
+            <span>{open ? "Hide pathway" : "View your pathway →"}</span>
+            <span style={{ fontSize: 10 }}>{open ? "▲" : "▼"}</span>
+          </button>
+        )}
+
+        {/* Pathway expanded */}
+        {open && (
+          <div style={{ marginTop: 8 }}>
+            {/* Steps */}
+            {[career?.pathway_step1, career?.pathway_step2, career?.pathway_step3].filter(Boolean).map((step, i, arr) => (
+              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: "50%",
+                    background: i === 0 ? "#0b1f3a" : i === 1 ? "#1a6b5a" : "#10b981",
+                    color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 11, fontWeight: 700,
+                  }}>{i + 1}</div>
+                  {i < arr.length - 1 && <div style={{ width: 2, background: "#e2e8f0", minHeight: 14, margin: "3px 0" }} />}
+                </div>
+                <div style={{ paddingBottom: i < arr.length - 1 ? 10 : 0, paddingTop: 3 }}>
+                  <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.55 }}>{step}</div>
+                </div>
+              </div>
+            ))}
+
+            {/* Route cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 10 }}>
+              {career?.pathway_accessible && (
+                <div style={{ background: "#eff6ff", borderRadius: 10, padding: "9px 12px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1e40af", marginBottom: 2 }}>🎓 Accessible Route</div>
+                  <div style={{ fontSize: 12, color: "#1e3a8a", lineHeight: 1.5 }}>{career.pathway_accessible}</div>
+                </div>
+              )}
+              {career?.pathway_earn_learn && (
+                <div style={{ background: "#f0fdf4", borderRadius: 10, padding: "9px 12px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 2 }}>💼 Earn While You Learn</div>
+                  <div style={{ fontSize: 12, color: "#14532d", lineHeight: 1.5 }}>{career.pathway_earn_learn}</div>
+                </div>
+              )}
+              {career?.pathway_premium && (
+                <div style={{ background: "#fefce8", borderRadius: 10, padding: "9px 12px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#854d0e", marginBottom: 2 }}>⭐ Premium Route</div>
+                  <div style={{ fontSize: 12, color: "#713f12", lineHeight: 1.5 }}>{career.pathway_premium}</div>
+                </div>
+              )}
+              {topTier && (
+                <div style={{ background: "#0b1f3a", borderRadius: 10, padding: "9px 12px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", marginBottom: 2 }}>🚀 Top Tier Potential</div>
+                  <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.5 }}>{topTier}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -204,6 +369,9 @@ export default function StudentResultsPage() {
   const [deepCopy, setDeepCopy] = useState({}); // key -> resolved text
   const [deepLoading, setDeepLoading] = useState(false);
   const lang = language || "en";
+
+  const [recs, setRecs] = useState(null);
+  const [recsLoading, setRecsLoading] = useState(false);
 
   const lastExplainSigRef = useRef("");
   const lastDeepSigRef = useRef("");
@@ -253,6 +421,22 @@ export default function StudentResultsPage() {
 
     if (studentId) load();
   }, [studentId]);
+
+  useEffect(() => {
+    async function loadRecs() {
+      if (!studentId) return;
+      try {
+        setRecsLoading(true);
+        const res = await apiGet(`/v1/recommendations/${studentId}?lang=${lang}`);
+        setRecs(res);
+      } catch {
+        // silent — cards fall back to TOP_CAREERS block data
+      } finally {
+        setRecsLoading(false);
+      }
+    }
+    if (studentId) loadRecs();
+  }, [studentId, lang]);
 
   const selectedResult = useMemo(() => {
     if (!Array.isArray(data?.results) || data.results.length === 0) return null;
@@ -688,44 +872,89 @@ export default function StudentResultsPage() {
                       const clusterEntries = Object.entries(careersByCluster).slice(0, 3);
 
                       const renderTopCareersCards = () => {
-                        const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
-                        const items = Array.isArray(topBlock?.items)
-                          ? topBlock.items
-                          : selectedResult.top_careers || [];
+                        // Live recs with rich content (preferred) vs stored block fallback
+                        let items = [];
+                        if (recs?.recommended_careers?.length > 0) {
+                          items = recs.recommended_careers;
+                        } else {
+                          const topBlock = backendBlocks.find((b) => b?.block_type === "TOP_CAREERS");
+                          items = Array.isArray(topBlock?.items) ? topBlock.items : selectedResult?.top_careers || [];
+                        }
 
-                        if (!items || items.length === 0) {
+                        // Tier-based limit: free=5, premium=9
+                        const limit = isPaidOrPremium ? 9 : 5;
+                        const visible = items.slice(0, limit);
+
+                        if (recsLoading && items.length === 0) {
                           return (
-                            <div className="text-muted" style={{ padding: 12 }}>
+                            <div style={{ padding: "24px 0", textAlign: "center", color: "#64748b", fontSize: 13 }}>
+                              Loading your career matches…
+                            </div>
+                          );
+                        }
+
+                        if (visible.length === 0) {
+                          return (
+                            <div style={{ padding: 12, color: "#64748b", fontSize: 13 }}>
                               {t("studentResults.noRecommendations", "No recommendations available yet.")}
                             </div>
                           );
                         }
 
-                        const FIT_BAND_ORDER = {
-                          high_potential: 0,
-                          strong: 1,
-                          promising: 2,
-                          developing: 3,
-                          exploring: 4,
-                        };
-                        const sortedItems = [...items].sort((a, b) => {
-                          const ra = FIT_BAND_ORDER[a.fit_band_key] ?? 99;
-                          const rb = FIT_BAND_ORDER[b.fit_band_key] ?? 99;
-                          return ra - rb;
-                        });
-                        const displayItems = isPaidOrPremium
-                          ? sortedItems.slice(0, 9)
-                          : sortedItems.slice(0, 5);
+                        // For premium: group by cluster
+                        if (isPaidOrPremium && visible.length > 3) {
+                          const byCluster = {};
+                          visible.forEach((c) => {
+                            const cl = c.cluster || c.cluster_title || "Other";
+                            if (!byCluster[cl]) byCluster[cl] = [];
+                            byCluster[cl].push(c);
+                          });
+                          const clusters = Object.keys(byCluster);
 
+                          return (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                              {clusters.map((cl) => (
+                                <div key={cl}>
+                                  <div style={{
+                                    fontSize: 12, fontWeight: 700, color: "#64748b",
+                                    textTransform: "uppercase", letterSpacing: "0.06em",
+                                    marginBottom: 10, paddingBottom: 6,
+                                    borderBottom: "1px solid #e2e8f0",
+                                  }}>
+                                    {cl} Careers
+                                  </div>
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                                    {byCluster[cl].map((c, i) => {
+                                      const globalIdx = visible.indexOf(c);
+                                      return (
+                                        <TopCareerCard
+                                          key={c.career_id || c.career_code || i}
+                                          career={c}
+                                          fitBandsCopy={fitBandsCopy}
+                                          idx={globalIdx}
+                                          t={t}
+                                          isPremium={isPaidOrPremium}
+                                        />
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+
+                        // Free tier: single column list
                         return (
-                          <div className="career-grid">
-                            {displayItems.map((c, idx) => (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            {visible.map((c, idx) => (
                               <TopCareerCard
-                                key={c.career_id || c.career_code || c.career_title || idx}
+                                key={c.career_id || c.career_code || idx}
                                 career={c}
                                 fitBandsCopy={fitBandsCopy}
                                 idx={idx}
                                 t={t}
+                                isPremium={isPaidOrPremium}
                               />
                             ))}
                           </div>
@@ -1039,7 +1268,7 @@ export default function StudentResultsPage() {
                             .cp-detailsSummary { cursor: pointer; font-weight: 700; }
                             .cp-detailsBody { font-size: 13px; margin-top: 10px; line-height: 1.5; }
                             .cp-linkButton { text-decoration: underline; cursor: pointer; }
-                            .cp-cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+                            .cp-cards3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
                             .career-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
                             .cp-insights2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
                             .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
@@ -1074,6 +1303,10 @@ export default function StudentResultsPage() {
                               .top-career-card__bandPill { font-size: 11px; padding: 3px 8px; }
                               .cp-sectionCard { padding: 12px; }
                               .results-section__title { font-size: 15px; }
+                            }
+                            @media (max-width: 480px) {
+                              .cp-cards3 { grid-template-columns: 1fr; }
+                              .cp-insights2 { grid-template-columns: 1fr; }
                             }
                             @media (max-width: 400px) {
                               .cp-contextGrid { grid-template-columns: 1fr; }
