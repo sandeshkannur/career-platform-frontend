@@ -126,6 +126,51 @@ const CLUSTER_COLORS = {
   "Agriculture":  "#14532D",
 };
 
+// Interest inventory cluster weights
+// Each question option maps to clusters that receive a +15% boost
+export const INTEREST_CLUSTER_MAP = {
+  // Q1 — Science Exhibition
+  "q1_a": ["Manufacturing", "Architecture", "STEM"],
+  "q1_b": ["Arts & A/V", "Marketing"],
+  "q1_c": ["STEM", "Education", "Info Tech"],
+  // Q2 — Colony volunteer
+  "q2_a": ["Education", "Human Serv"],
+  "q2_b": ["Government", "Law/Safety"],
+  "q2_c": ["Health Sci", "Human Serv"],
+  // Q3 — School club
+  "q3_a": ["Info Tech", "STEM"],
+  "q3_b": ["Arts & A/V", "Marketing"],
+  "q3_c": ["Government", "Law/Safety", "Business"],
+  // Q4 — Free Saturday
+  "q4_a": ["Business", "Agriculture", "Hospitality"],
+  "q4_b": ["Agriculture", "Architecture", "Manufacturing"],
+  "q4_c": ["Arts & A/V", "Education", "Marketing"],
+  // Q5 — Career visit
+  "q5_a": ["Health Sci", "Human Serv"],
+  "q5_b": ["Government", "Law/Safety"],
+  "q5_c": ["Info Tech", "STEM", "Manufacturing"],
+  // Q6 — Friend support
+  "q6_a": ["Human Serv", "Health Sci", "Education"],
+  "q6_b": ["STEM", "Info Tech"],
+  "q6_c": ["Hospitality", "Marketing", "Arts & A/V"],
+  // Q7 — New subject
+  "q7_a": ["Agriculture", "STEM"],
+  "q7_b": ["Business", "Finance", "Marketing"],
+  "q7_c": ["Health Sci", "STEM"],
+  // Q8 — School problem
+  "q8_a": ["Manufacturing", "Architecture", "STEM", "Info Tech"],
+  "q8_b": ["Government", "Law/Safety", "Education"],
+  "q8_c": ["Business", "Human Serv", "Government"],
+  // Q9 — Family visit
+  "q9_a": ["Manufacturing", "Business", "Transport"],
+  "q9_b": ["Education", "Government", "Agriculture"],
+  "q9_c": ["Hospitality", "Marketing", "Arts & A/V"],
+  // Q10 — Class 10 project
+  "q10_a": ["Info Tech", "STEM", "Business"],
+  "q10_b": ["Government", "Law/Safety", "Education"],
+  "q10_c": ["Marketing", "Arts & A/V", "Human Serv"],
+};
+
 // ─── Inline language toggle ───────────────────────────────────────────────
 function InlineLanguageToggle({ lang, onChange, t }) {
   return (
@@ -145,9 +190,9 @@ function InlineLanguageToggle({ lang, onChange, t }) {
           key={l.code}
           onClick={() => onChange(l.code)}
           style={{
-            padding: "4px 12px", borderRadius: 999,
+            padding: "3px 10px", borderRadius: 999,
             border: "none", cursor: "pointer",
-            fontSize: 12, fontWeight: 600,
+            fontSize: 11, fontWeight: 600,
             background: lang === l.code ? "#0b1f3a" : "transparent",
             color: lang === l.code ? "#fff" : "#475569",
             transition: "all .15s",
@@ -1374,11 +1419,16 @@ export default function StudentResultsPage() {
                                 )}
                               </div>
                             </div>
-                            <InlineLanguageToggle
-                              lang={contentLang}
-                              onChange={(next) => setContentLang(next)}
-                              t={t}
-                            />
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                              <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 500, letterSpacing: ".04em", textTransform: "uppercase" }}>
+                                {t("studentResults.contentLang.label", "Career descriptions")}
+                              </span>
+                              <InlineLanguageToggle
+                                lang={contentLang}
+                                onChange={(next) => setContentLang(next)}
+                                t={t}
+                              />
+                            </div>
                           </div>
 
                           <div className="card" style={{ padding: 16 }}>
