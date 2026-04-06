@@ -1,4 +1,4 @@
-﻿{
+{
   "errorBoundary.title": "Something crashed",
   "errorBoundary.consoleHint": "Open DevTools Console for full stack trace.",
   "errorBoundary.resetSession": "Reset session",
@@ -610,5 +610,28 @@
   "student.assessmentChapters.milestone.q9": "Great start — you are halfway through Chapter 1!",
   "student.assessmentChapters.milestone.q18": "Chapter 2 halfway done — keep going!",
   "student.assessmentChapters.milestone.q27": "Almost through Chapter 3 — one more to go!",
-  "student.assessmentChapters.milestone.q36": "Final chapter — you are nearly there!"
+  "student.assessmentChapters.milestone.q36": "Final chapter — you are nearly there!",
+  "studentResults.clusterMap.title": "Your career world strengths",
+  "studentResults.clusterMap.sub": "A career world groups jobs sharing similar skills. The longer the bar, the stronger your fit.",
+  "studentResults.clusterMap.career": "career",
+  "studentResults.clusterMap.careers": "careers",
+  "studentResults.interestInventory.title": "Discover what you enjoy — coming next",
+  "studentResults.interestInventory.sub": "10 quick activity questions will show which career worlds excite you most. Research shows trait + interest together are 2x more predictive of career satisfaction.",
+  "studentResults.interestInventory.badge": "Coming soon",
+  "studentResults.topMatchLabel": "Top match",
+  "studentResults.whyMatches": "Why this matches you",
+  "studentResults.salaryRange": "Annual salary range",
+  "studentResults.salary.entry": "entry",
+  "studentResults.salary.peak": "peak",
+  "studentResults.outlook.growing": "Growing field",
+  "studentResults.outlook.stable": "Stable",
+  "studentResults.risk.low": "Low automation risk",
+  "studentResults.risk.medium": "Medium risk",
+  "studentResults.risk.high": "Higher risk",
+  "studentResults.pathway.toggle": "How to get there",
+  "studentResults.pathway.accessible": "Accessible route",
+  "studentResults.pathway.earnLearn": "Earn while you learn",
+  "studentResults.pathway.premium": "Premium route",
+  "studentResults.pathway.topTier": "Top tier potential",
+  "studentResults.clusterSuffix": "careers"
 }

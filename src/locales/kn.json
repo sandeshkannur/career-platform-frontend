@@ -162,7 +162,6 @@
   "nav.login": "ಲಾಗಿನ್",
   "nav.pricing": "ಬೆಲೆ",
   "nav.signup": "ನೋಂದಾಯಿಸಿ",
-
   "pricing.title": "ಬೆಲೆ ಯೋಜನೆಗಳು",
   "pricing.subtitle": "ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕ ಯೋಜನೆ ಆಯ್ಕೆ ಮಾಡಿ.",
   "pricing.free.title": "ಉಚಿತ",
@@ -220,8 +219,6 @@
   "student.assessmentIntro.language.en": "ಇಂಗ್ಲಿಷ್",
   "student.assessmentIntro.language.kn": "ಕನ್ನಡ",
   "student.assessmentIntro.activeErrorShort": "ಉಳಿಸಿದ ಪ್ರಗತಿಯನ್ನು ಈಗ ಪರಿಶೀಲಿಸಲಾಗಲಿಲ್ಲ.",
-
-
   "studentResults.title": "ನಿಮ್ಮ ವೃತ್ತಿ ಫಲಿತಾಂಶಗಳು",
   "studentResults.subtitle": "ನಿಮ್ಮ ಮೌಲ್ಯಮಾಪನದ ಆಧಾರದ ಮೇಲೆ ಉನ್ನತ ಶಿಫಾರಸುಗಳು.",
   "studentResults.actions.backToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ",
@@ -241,7 +238,6 @@
   "studentResults.recommendedStream": "ಶಿಫಾರಸು ಮಾಡಿದ ಸ್ಟ್ರೀಮ್",
   "studentResults.notSharedYet": "ಇನ್ನೂ ಹಂಚಿಲ್ಲ",
   "studentResults.comingSoon": "ಒಳನೋಟಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರುತ್ತವೆ.",
-
   "student.assessmentRun.title": "ಮೌಲ್ಯಮಾಪನ",
   "student.assessmentRun.subtitle": "ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ನಿಮಗೆ ಸೂಕ್ತವಾದ ಆಯ್ಕೆಯನ್ನು ಆರಿಸಿ.",
   "student.assessmentRun.language.ariaLabel": "ಭಾಷೆ",
@@ -283,8 +279,6 @@
   "student.assessmentRun.options.neutral": "ತಟಸ್ಥ",
   "student.assessmentRun.options.agree": "ಒಪ್ಪುತ್ತೇನೆ",
   "student.assessmentRun.options.stronglyAgree": "ತೀವ್ರವಾಗಿ ಒಪ್ಪುತ್ತೇನೆ",
-
-
   "contextImpact.title": "ಇದು ಶಿಫಾರಸುಗಳನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತದೆ",
   "contextImpact.intro.unknown": "ಕೆಲವು ಐಚ್ಛಿಕ ವಿವರಗಳನ್ನು ಹಂಚಿದರೆ, ನಾವು ಊಹೆಗಳನ್ನು ನ್ಯಾಯಯುತವಾಗಿ ಸರಿಹೊಂದಿಸುತ್ತೇವೆ. ಇದು ನಿಮ್ಮನ್ನು ಎಂದಿಗೂ ನಿರ್ಣಯಿಸುವುದಿಲ್ಲ.",
   "contextImpact.intro.known": "ಈ ವಿವರಗಳು ನಿಮ್ಮ ಕಲಿಕೆಯ ಪರಿಸರಕ್ಕೆ ಅನುಗುಣವಾಗಿ ಊಹೆಗಳನ್ನು ಸರಿಹೊಂದಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತವೆ. ಇದು ನಿಮ್ಮನ್ನು ಎಂದಿಗೂ ನಿರ್ಣಯಿಸುವುದಿಲ್ಲ.",
@@ -300,8 +294,6 @@
   "contextImpact.bullets.board": "ಶಿಕ್ಷಣ ಮಂಡಳಿ ಉದಾಹರಣೆಗಳನ್ನು ಹೊಂದಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ, ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ನಿರ್ಣಯಿಸದೆ.",
   "contextImpact.bullets.ses": "ಈ ವಿವರಗಳನ್ನು ಅನ್ಯಾಯದ ಊಹೆಗಳನ್ನು ತಪ್ಪಿಸಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ. ಇವು ನಿಮ್ಮ ಅವಕಾಶಗಳನ್ನು ಎಂದಿಗೂ ಕಡಿಮೆ ಮಾಡುವುದಿಲ್ಲ.",
   "contextImpact.footer": "ನೀವು ಇದನ್ನು ಯಾವಾಗ ಬೇಕಾದರೂ ಸಂದರ್ಭ ಪುಟದಿಂದ ನವೀಕರಿಸಬಹುದು.",
-
-
   "student.assessmentRun.errors.loadFailed": "ಮೌಲ್ಯಮಾಪನ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಯಿತು.",
   "student.assessmentRun.errors.saveFailed": "ಉತ್ತರಗಳನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಯಿತು.",
   "student.assessmentRun.errors.submitFailed": "ಮೌಲ್ಯಮಾಪನ ಸಲ್ಲಿಸಲು ವಿಫಲವಾಯಿತು.",
@@ -353,7 +345,6 @@
   "student.context.actions.skip": "ಬಿಟ್ಟುಬಿಡಿ",
   "student.context.options.common.other": "ಇತರೆ",
   "student.context.options.common.preferNotToSay": "ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲ",
-
   "student.context.options.educationBoard.cbse": "CBSE",
   "student.context.options.educationBoard.icse": "ICSE",
   "student.context.options.educationBoard.state": "ರಾಜ್ಯ ಮಂಡಳಿ",
@@ -408,7 +399,6 @@
   "student.dashboard.kpi.taken": "ತೆಗೆದುಕೊಂಡಿದೆ",
   "student.dashboard.kpi.strengthsNote": "ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಮೌಲ್ಯಮಾಪನದ ಆಧಾರದ ಮೇಲೆ. ನಿಮ್ಮ ಶಕ್ತಿಗಳು ಹೇಗೆ ಬದಲಾಗುತ್ತವೆ ಎಂದು ನೋಡಲು ಮತ್ತೊಂದನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ.",
   "student.dashboard.kpi.latestMatch": "ಇತ್ತೀಚಿನ ಉನ್ನತ ಹೊಂದಾಣಿಕೆ",
-
   "student.onboarding.title": "ವಿದ್ಯಾರ್ಥಿ ಆನ್‌ಬೋರ್ಡಿಂಗ್",
   "student.onboarding.subtitleNamed": "ನಮಸ್ಕಾರ {{name}}, ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ನಿಮ್ಮ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಹೇಳಿ.",
   "student.onboarding.subtitleDefault": "ನಿಮ್ಮ ಹಿನ್ನೆಲೆ ಮತ್ತು ಸಂದರ್ಭದ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಹೇಳಿ.",
@@ -447,12 +437,9 @@
   "student.onboarding.draftStored": "ಡ್ರಾಫ್ಟ್ ಸ್ಥಳೀಯವಾಗಿ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ. ಬ್ಯಾಕ್‌ಎಂಡ್ ಉಳಿಕೆ ನಂತರ ಸೇರಿಸಲಾಗುತ್ತದೆ.",
   "student.onboarding.stepPrefix": "ಹಂತ",
   "student.onboarding.stepOf": "ರಲ್ಲಿ",
-
-
   "student.results.title": "ಮೌಲ್ಯಮಾಪನ ಫಲಿತಾಂಶಗಳು",
   "student.results.subtitle": "ನಿಮ್ಮ ಶಿಫಾರಸು ಮಾಡಿದ ವೃತ್ತಿಗಳನ್ನು ಅನ್ವೇಷಿಸಿ.",
   "student.results.loading": "ಫಲಿತಾಂಶಗಳು ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
-
   "resultsBlocks.recommendations.title": "ಶಿಫಾರಸುಗಳು",
   "resultsBlocks.stream.notAvailable": "ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ",
   "resultsBlocks.stream.helper": "ನಿಮ್ಮ ಸ್ಟ್ರೀಮ್ ಮ್ಯಾಪಿಂಗ್ ರಚಿಸಿದ ನಂತರ ಇದು ಕಾಣಿಸುತ್ತದೆ.",
@@ -466,8 +453,6 @@
   "resultsNotReady.cta.assessment": "ಮೌಲ್ಯಮಾಪನಕ್ಕೆ ಹೋಗಿ",
   "resultsNotReady.cta.dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹೋಗಿ",
   "resultsNotReady.cta.note": "ಯಾವುದೇ ಒತ್ತಡವಿಲ್ಲ — ನಿಮ್ಮ ಸಮಯ ತೆಗೆದುಕೊಳ್ಳಿ. ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಮಾರ್ಗದರ್ಶನ ನೀಡಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.",
-
-
   "student.resultsHistory.title": "ಹಿಂದಿನ ಫಲಿತಾಂಶಗಳು",
   "student.resultsHistory.subtitle": "ಹಿಂದಿನ ಮೌಲ್ಯಮಾಪನ ಫಲಿತಾಂಶಗಳನ್ನು ವೀಕ್ಷಿಸಿ.",
   "student.resultsHistory.loading": "ಇತಿಹಾಸ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
@@ -525,10 +510,6 @@
   "student.results.context.resourceAccess": "ಸಂಪನ್ಮೂಲ ಪ್ರವೇಶ",
   "student.results.context.sesBand": "ಸಾಮಾಜಿಕ-ಆರ್ಥಿಕ ವರ್ಗ",
   "student.results.context.unknown": "ತಿಳಿದಿಲ್ಲ",
-
-
-
-
   "student.results.matches.title": "ಅತ್ಯುತ್ತಮ ಹೊಂದಾಣಿಕೆಗಳು",
   "student.results.matches.matchScore": "ಹೊಂದಾಣಿಕೆ ಅಂಕ",
   "student.results.matches.confidence": "ವಿಶ್ವಾಸ ಮಟ್ಟ",
@@ -548,15 +529,8 @@
   "student.results.nextSteps.exploreCareers": "ಶಿಫಾರಸು ಮಾಡಲಾದ ವೃತ್ತಿಗಳನ್ನು ಇನ್ನಷ್ಟು ಅನ್ವೇಷಿಸಿ.",
   "student.results.nextSteps.reviewHistory": "ಹಿಂದಿನ ಫಲಿತಾಂಶಗಳನ್ನು ಇತಿಹಾಸದಲ್ಲಿ ಹೋಲಿಸಿ.",
   "student.results.nextSteps.downloadReport": "ಹಂಚಿಕೊಳ್ಳಲು ಅಥವಾ ಸಂಗ್ರಹಿಸಲು ನಿಮ್ಮ ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
-
-
-
-
-
   "student.assessment.start": "ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸಿ",
   "student.assessment.resume": "ಮೌಲ್ಯಮಾಪನ ಮರುಪ್ರಾರಂಭಿಸಿ",
-
-
   "student.results.actions.viewDetails": "ವಿವರಗಳನ್ನು ನೋಡಿ",
   "student.results.actions.viewReport": "ವರದಿಯನ್ನು ನೋಡಿ",
   "student.results.facets.skills": "ಮುಖ್ಯ ಕೌಶಲ್ಯಗಳು",
@@ -573,10 +547,7 @@
   "student.assessment.progress.completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
   "student.assessment.navigation.previous": "ಹಿಂದಿನದು",
   "student.assessment.navigation.next": "ಮುಂದಿನದು",
-
-
   "student.assessment.validation.required": "ದಯವಿಟ್ಟು ಒಂದು ಆಯ್ಕೆಯನ್ನು ಆರಿಸಿ.",
-
   "student.assessment.submit.success": "ಮೌಲ್ಯಮಾಪನ ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
   "student.assessment.submit.failed": "ಮೌಲ್ಯಮಾಪನ ಸಲ್ಲಿಸಲು ವಿಫಲವಾಯಿತು.",
   "student.assessment.review.title": "ಸಲ್ಲಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಿ",
@@ -644,34 +615,30 @@
   "studentResults.notAvailable": "—",
   "studentResults.card.matchedSkills": "ಇದು ನಿಮಗೆ ಏಕೆ ಹೊಂದುತ್ತದೆ",
   "studentResults.card.careerNeeds": "ಈ ವೃತ್ತಿಗೆ ಮುಖ್ಯ ಕೌಶಲ್ಯಗಳು",
-
-  "home.hero.eyebrow":           "ಈಗ ಲೈವ್ · ಭಾರತದ ಮೊದಲ AQ ಆಧಾರಿತ ವೃತ್ತಿ ಮೌಲ್ಯಮಾಪನ",
-  "home.hero.headline":          "ನಿಮಗಾಗಿ ರೂಪಿತವಾದ ವೃತ್ತಿಯನ್ನು ಕಂಡುಹಿಡಿಯಿರಿ",
-  "home.hero.subtitle":          "MapYourCareer 25 ಸಂಬಂಧಿತ ಗುಣಗಳ ಮೂಲಕ ನಿಮ್ಮ ಅನನ್ಯ ಪ್ರತಿಭೆ ಪ್ರೊಫೈಲ್ ರಚಿಸುತ್ತದೆ — 16 ಕ್ಲಸ್ಟರ್‌ಗಳಲ್ಲಿ 343 ವೃತ್ತಿಗಳಿಗೆ ಹೊಂದಿಸುತ್ತದೆ.",
-  "home.hero.cta.start":         "ಉಚಿತ ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸಿ →",
-  "home.hero.cta.pricing":       "ಬೆಲೆ ವಿವರಗಳನ್ನು ನೋಡಿ",
-
-  "home.stats.questions":        "ಪ್ರಶ್ನೆಗಳು",
-  "home.stats.careers":          "ವೃತ್ತಿ ಮ್ಯಾಪಿಂಗ್",
-  "home.stats.qualities":        "ಸಂಬಂಧಿತ ಗುಣಗಳು",
-
-  "home.howItWorks.title":        "ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ",
-  "home.howItWorks.subtitle":     "ಮೂರು ಹಂತಗಳು. ಇಪ್ಪತ್ತು ನಿಮಿಷ. ಜೀವನಪರ್ಯಂತ ಸ್ಪಷ್ಟತೆ.",
-  "home.howItWorks.step1.title":  "ಮೌಲ್ಯಮಾಪನ ತೆಗೆದುಕೊಳ್ಳಿ",
-  "home.howItWorks.step1.desc":   "25 ಸಂಬಂಧಿತ ಗುಣಗಳನ್ನು ಅಳೆಯುವ 75 ಪ್ರಶ್ನೆಗಳು — ಕುತೂಹಲ, ವಿಶ್ಲೇಷಣಾ ಚಿಂತನೆ, ಸಹಾನುಭೂತಿ ಮತ್ತು ಹೆಚ್ಚಿನವು.",
-  "home.howItWorks.step2.title":  "ನಿಮ್ಮ AQ ಪ್ರೊಫೈಲ್ ಪಡೆಯಿರಿ",
-  "home.howItWorks.step2.desc":   "25 ಆಯಾಮಗಳಲ್ಲಿ ನಿಮ್ಮ ಅನನ್ಯ ಪ್ರತಿಭೆ ಪ್ರೊಫೈಲ್. ವಿವರಿಸಬಹುದಾದ, ವಿಜ್ಞಾನ ಆಧಾರಿತ.",
-  "home.howItWorks.step3.title":  "ನಿಮ್ಮ ವೃತ್ತಿಗಳನ್ನು ಕಂಡುಹಿಡಿಯಿರಿ",
-  "home.howItWorks.step3.desc":   "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಅನ್ನು 16 ಕ್ಲಸ್ಟರ್‌ಗಳಲ್ಲಿ 343 ವೃತ್ತಿಗಳಿಗೆ ಹೊಂದಿಸಲಾಗುತ್ತದೆ. ಏನು ಸರಿಹೊಂದುತ್ತದೆ ಎಂದು ನೋಡಿ.",
-
-  "home.features.title":              "ಭಿನ್ನವಾಗಿ ರಚಿಸಲಾಗಿದೆ",
-  "home.features.subtitle":           "ಕ್ವಿಜ್ ಅಲ್ಲ. ವ್ಯಕ್ತಿತ್ವ ಪ್ರಕಾರ ಅಲ್ಲ. ನಿಜವಾದ ಮೌಲ್ಯಮಾಪನ ಎಂಜಿನ್.",
-  "home.features.aq.title":           "25 ಸಂಬಂಧಿತ ಗುಣಗಳು",
-  "home.features.aq.desc":            "ಕುತೂಹಲ ಮತ್ತು ವಿಶ್ಲೇಷಣೆಯಿಂದ ಒತ್ತಡ ಸಹಿಷ್ಣುತೆ ವರೆಗೆ — ವೃತ್ತಿ ಯಶಸ್ಸನ್ನು ನಿರ್ಧರಿಸುವ ಅಂಶಗಳನ್ನು ನಾವು ಅಳೆಯುತ್ತೇವೆ.",
-  "home.features.careers.title":      "343 ವೃತ್ತಿಗಳು, 16 ಕ್ಲಸ್ಟರ್‌ಗಳು",
-  "home.features.careers.desc":       "ಕೃಷಿಯಿಂದ STEM ವರೆಗೆ — ಪ್ರತಿ ಪ್ರಮುಖ ಭಾರತೀಯ ಮತ್ತು ಜಾಗತಿಕ ವೃತ್ತಿ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ.",
-  "home.features.explainable.title":  "ವಿವರಿಸಬಹುದಾದ ಫಲಿತಾಂಶಗಳು",
-  "home.features.explainable.desc":   "ಪ್ರತಿ ಶಿಫಾರಸಿಗೆ ಸ್ಪಷ್ಟ ಕಾರಣ. ಕಪ್ಪು ಪೆಟ್ಟಿಗೆ ಇಲ್ಲ. ನಿಮ್ಮ ಸಲಹೆಗಾರರು ಓದಿ ಕ್ರಮ ತೆಗೆದುಕೊಳ್ಳಬಹುದು.",
+  "home.hero.eyebrow": "ಈಗ ಲೈವ್ · ಭಾರತದ ಮೊದಲ AQ ಆಧಾರಿತ ವೃತ್ತಿ ಮೌಲ್ಯಮಾಪನ",
+  "home.hero.headline": "ನಿಮಗಾಗಿ ರೂಪಿತವಾದ ವೃತ್ತಿಯನ್ನು ಕಂಡುಹಿಡಿಯಿರಿ",
+  "home.hero.subtitle": "MapYourCareer 25 ಸಂಬಂಧಿತ ಗುಣಗಳ ಮೂಲಕ ನಿಮ್ಮ ಅನನ್ಯ ಪ್ರತಿಭೆ ಪ್ರೊಫೈಲ್ ರಚಿಸುತ್ತದೆ — 16 ಕ್ಲಸ್ಟರ್‌ಗಳಲ್ಲಿ 343 ವೃತ್ತಿಗಳಿಗೆ ಹೊಂದಿಸುತ್ತದೆ.",
+  "home.hero.cta.start": "ಉಚಿತ ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸಿ →",
+  "home.hero.cta.pricing": "ಬೆಲೆ ವಿವರಗಳನ್ನು ನೋಡಿ",
+  "home.stats.questions": "ಪ್ರಶ್ನೆಗಳು",
+  "home.stats.careers": "ವೃತ್ತಿ ಮ್ಯಾಪಿಂಗ್",
+  "home.stats.qualities": "ಸಂಬಂಧಿತ ಗುಣಗಳು",
+  "home.howItWorks.title": "ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ",
+  "home.howItWorks.subtitle": "ಮೂರು ಹಂತಗಳು. ಇಪ್ಪತ್ತು ನಿಮಿಷ. ಜೀವನಪರ್ಯಂತ ಸ್ಪಷ್ಟತೆ.",
+  "home.howItWorks.step1.title": "ಮೌಲ್ಯಮಾಪನ ತೆಗೆದುಕೊಳ್ಳಿ",
+  "home.howItWorks.step1.desc": "25 ಸಂಬಂಧಿತ ಗುಣಗಳನ್ನು ಅಳೆಯುವ 75 ಪ್ರಶ್ನೆಗಳು — ಕುತೂಹಲ, ವಿಶ್ಲೇಷಣಾ ಚಿಂತನೆ, ಸಹಾನುಭೂತಿ ಮತ್ತು ಹೆಚ್ಚಿನವು.",
+  "home.howItWorks.step2.title": "ನಿಮ್ಮ AQ ಪ್ರೊಫೈಲ್ ಪಡೆಯಿರಿ",
+  "home.howItWorks.step2.desc": "25 ಆಯಾಮಗಳಲ್ಲಿ ನಿಮ್ಮ ಅನನ್ಯ ಪ್ರತಿಭೆ ಪ್ರೊಫೈಲ್. ವಿವರಿಸಬಹುದಾದ, ವಿಜ್ಞಾನ ಆಧಾರಿತ.",
+  "home.howItWorks.step3.title": "ನಿಮ್ಮ ವೃತ್ತಿಗಳನ್ನು ಕಂಡುಹಿಡಿಯಿರಿ",
+  "home.howItWorks.step3.desc": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಅನ್ನು 16 ಕ್ಲಸ್ಟರ್‌ಗಳಲ್ಲಿ 343 ವೃತ್ತಿಗಳಿಗೆ ಹೊಂದಿಸಲಾಗುತ್ತದೆ. ಏನು ಸರಿಹೊಂದುತ್ತದೆ ಎಂದು ನೋಡಿ.",
+  "home.features.title": "ಭಿನ್ನವಾಗಿ ರಚಿಸಲಾಗಿದೆ",
+  "home.features.subtitle": "ಕ್ವಿಜ್ ಅಲ್ಲ. ವ್ಯಕ್ತಿತ್ವ ಪ್ರಕಾರ ಅಲ್ಲ. ನಿಜವಾದ ಮೌಲ್ಯಮಾಪನ ಎಂಜಿನ್.",
+  "home.features.aq.title": "25 ಸಂಬಂಧಿತ ಗುಣಗಳು",
+  "home.features.aq.desc": "ಕುತೂಹಲ ಮತ್ತು ವಿಶ್ಲೇಷಣೆಯಿಂದ ಒತ್ತಡ ಸಹಿಷ್ಣುತೆ ವರೆಗೆ — ವೃತ್ತಿ ಯಶಸ್ಸನ್ನು ನಿರ್ಧರಿಸುವ ಅಂಶಗಳನ್ನು ನಾವು ಅಳೆಯುತ್ತೇವೆ.",
+  "home.features.careers.title": "343 ವೃತ್ತಿಗಳು, 16 ಕ್ಲಸ್ಟರ್‌ಗಳು",
+  "home.features.careers.desc": "ಕೃಷಿಯಿಂದ STEM ವರೆಗೆ — ಪ್ರತಿ ಪ್ರಮುಖ ಭಾರತೀಯ ಮತ್ತು ಜಾಗತಿಕ ವೃತ್ತಿ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ.",
+  "home.features.explainable.title": "ವಿವರಿಸಬಹುದಾದ ಫಲಿತಾಂಶಗಳು",
+  "home.features.explainable.desc": "ಪ್ರತಿ ಶಿಫಾರಸಿಗೆ ಸ್ಪಷ್ಟ ಕಾರಣ. ಕಪ್ಪು ಪೆಟ್ಟಿಗೆ ಇಲ್ಲ. ನಿಮ್ಮ ಸಲಹೆಗಾರರು ಓದಿ ಕ್ರಮ ತೆಗೆದುಕೊಳ್ಳಬಹುದು.",
   "results.upsell.title": "ಆಳವಾದ ವೃತ್ತಿ ಒಳನೋಟ ಅನ್ಲಾಕ್ ಮಾಡಿ",
   "results.upsell.body": "ಯಾವ ವೃತ್ತಿ ಕ್ಲಸ್ಟರ್ ನಿಮಗೆ ಹೊಂದುತ್ತದೆ ನೋಡಿ, ಪ್ರತಿ ವೃತ್ತಿ ನಿಮ್ಮ ಶಕ್ತಿಗೆ ಏಕೆ ಸರಿ ಹೊಂದುತ್ತದೆ ಅರ್ಥ ಮಾಡ್ಕೊಳ್ಳಿ, ಮುಂದೆ ಹೋಗಲು ಮಾರ್ಗದರ್ಶನ ಪಡೆಯಿರಿ.",
   "results.upsell.cta": "ಪ್ರೀಮಿಯಂ ಪಡೆಯಿರಿ",
@@ -753,5 +720,28 @@
   "student.assessmentChapters.milestone.q9": "ನೀವು ಚೆನ್ನಾಗಿ ಮಾಡುತ್ತಿದ್ದೀರಿ — ಅಧ್ಯಾಯ 1 ಮುಗಿದಿದೆ! ✓",
   "student.assessmentChapters.milestone.q18": "ಅತ್ಯುತ್ತಮ — ಅಧ್ಯಾಯ 2 ಮುಗಿದಿದೆ. ಅರ್ಧದಾರಿ ಆಯಿತು!",
   "student.assessmentChapters.milestone.q27": "ಮೂರು ಅಧ್ಯಾಯಗಳು ಮುಗಿದಿವೆ, ಇನ್ನೊಂದು ಮಾತ್ರ. ಬಹುತೇಕ ತಲುಪಿದ್ದೀರಿ!",
-  "student.assessmentChapters.milestone.q36": "ಅಂತಿಮ ಅಧ್ಯಾಯ — ನೀವು ತುಂಬಾ ಹತ್ತಿರದಲ್ಲಿದ್ದೀರಿ. ಬಲವಾಗಿ ಮುಗಿಸಿ!"
+  "student.assessmentChapters.milestone.q36": "ಅಂತಿಮ ಅಧ್ಯಾಯ — ನೀವು ತುಂಬಾ ಹತ್ತಿರದಲ್ಲಿದ್ದೀರಿ. ಬಲವಾಗಿ ಮುಗಿಸಿ!",
+  "studentResults.clusterMap.title": "ನಿಮ್ಮ ವೃತ್ತಿ ಜಗತ್ತಿನ ಶಕ್ತಿಗಳು",
+  "studentResults.clusterMap.sub": "ಒಂದು ವೃತ್ತಿ ಜಗತ್ತು ಒಂದೇ ರೀತಿಯ ಕೌಶಲ ಹೊಂದಿರುವ ಉದ್ಯೋಗಗಳನ್ನು ಒಟ್ಟುಗೂಡಿಸುತ್ತದೆ. ಉದ್ದವಾದ ಬಾರ್ ೎ಂದರೆ ಆ ಜಗತ್ತಿನಲ್ಲಿ ನಿಮ್ಮ ಹೊಂದಾణಿಕೆ ಹೆಚ್ಚು.",
+  "studentResults.clusterMap.career": "ವೃತ್ತಿ",
+  "studentResults.clusterMap.careers": "ವೃತ್ತಿಗಳು",
+  "studentResults.interestInventory.title": "ನಿಮ್ಮಗೆ ಮೆಚ್ಚಿನದು ಕಂಡುಹಿಡಿಯಿರಿ — ಶೀಘ್ರದಲ್ಲೇ",
+  "studentResults.interestInventory.sub": "10 ಚಟುವಟಿಕೆ ಪ್ರಶ್ನೆಗಳು ಯಾವ ವೃತ್ತಿ ಜಗತ್ತು ನಿಮ್ಮಗೆ ಉತ್ಸಾಹ ನೀಡುತ್ತದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ. ಗುಣ + ಆಸಕ್ತಿ ಒಟ್ಟಾಗಿ ವೃತ್ತಿ ತೃಪ್ತಿಯನ್ನು 2 ಪಟ್ಟು ಹೆಚ್ಚು ನಿರೀಕ್ಷಿಸುತ್ತದೆ.",
+  "studentResults.interestInventory.badge": "ಶೀಘ್ರದಲ್ಲೇ",
+  "studentResults.topMatchLabel": "ಅತ್ಯುತ್ತಮ ಹೊಂದಾణಿಕೆ",
+  "studentResults.whyMatches": "ಇದು ನಿಮ್ಮಗೆ ಏಕೆ ಹೊಂದುತ್ತದೆ",
+  "studentResults.salaryRange": "ವಾರ್ಷಿಕ ವೇತನ ಶ್ರೇಣಿ",
+  "studentResults.salary.entry": "ಪ್ರಾರಂಭ",
+  "studentResults.salary.peak": "ಗರಿಷ್ಟ",
+  "studentResults.outlook.growing": "ಬೆಳೆಯುತ್ತಿರುವ ಕ್ಷೇತ್ರ",
+  "studentResults.outlook.stable": "ಸ್ಥಿರ",
+  "studentResults.risk.low": "ಕಡಿಮೆ ಯಾಂತ್ರೀಕರಣ ಅಪಾಯ",
+  "studentResults.risk.medium": "ಮಧ್ಯಮ ಅಪಾಯ",
+  "studentResults.risk.high": "ಹೆಚ್ಚಿನ ಅಪಾಯ",
+  "studentResults.pathway.toggle": "ಅಲ್ಲಿಗೆ ತಲುಪುವ ದಾರಿ",
+  "studentResults.pathway.accessible": "ಕೈಗೆಟಕುವ ಮಾರ್ಗ",
+  "studentResults.pathway.earnLearn": "ಕಲಿಯುತ್ತಾ ಗಳಿಸಿ",
+  "studentResults.pathway.premium": "ಪ್ರೀಮಿಯಂ ಮಾರ್ಗ",
+  "studentResults.pathway.topTier": "ಉನ್ನತ ಮಟ್ಟದ ಸಾಧ್ಯತೆ",
+  "studentResults.clusterSuffix": "ವೃತ್ತಿಗಳು"
 }
