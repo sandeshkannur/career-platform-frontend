@@ -15,10 +15,10 @@ function NavItem({ to, label, onClick }) {
       onClick={onClick}
       className={({ isActive }) =>
         classNames(
-          "block rounded-lg px-3 py-2 text-sm font-medium transition",
+          "block rounded-xl px-3 py-2 text-sm font-medium transition",
           isActive
             ? "bg-[var(--brand-primary)] text-white"
-            : "text-[var(--text-primary)] hover:bg-white hover:border hover:border-[var(--border)]"
+            : "text-[var(--text-primary)] hover:bg-[var(--bg-app)]"
         )
       }
     >

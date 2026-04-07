@@ -232,44 +232,78 @@ export default function StudentAssessmentSubmitPage() {
           {t("student.assessmentSubmit.attemptId", "Attempt ID")}: <b>{attemptId || t("student.assessmentSubmit.unknown", "unknown")}</b>
         </div>
 
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+          <div style={{ fontWeight: 800, marginBottom: 12 }}>
             {t("student.assessmentSubmit.summary.title", "Completion summary")}
           </div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>
-            {t("student.assessmentSubmit.summary.selectedQuestions", "Selected questions")}: <b>{questionIds.length}</b> / {QUESTION_COUNT}
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
+            <span style={{ color: "var(--text-muted)" }}>
+              {t("student.assessmentSubmit.summary.answered", "Answered")}
+            </span>
+            <span style={{ fontWeight: 700 }}>
+              {answeredCount} / {QUESTION_COUNT}
+              {missingCount > 0 && (
+                <span style={{ marginLeft: 8, color: "var(--error-text)", fontWeight: 500 }}>
+                  ({missingCount} {t("student.assessmentSubmit.summary.missing", "missing")})
+                </span>
+              )}
+            </span>
           </div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>
-            {t("student.assessmentSubmit.summary.answered", "Answered")}: <b>{answeredCount}</b> / {QUESTION_COUNT}
-            {missingCount ? (
-              <span style={{ marginLeft: 8, opacity: 0.8 }}>
-                ({t("student.assessmentSubmit.summary.missing", "missing")} {missingCount})
-              </span>
-            ) : null}
+          <div style={{ height: 8, borderRadius: 999, background: "var(--bg-app)", overflow: "hidden" }}>
+            <div style={{
+              height: "100%",
+              width: `${Math.round((answeredCount / QUESTION_COUNT) * 100)}%`,
+              background: answeredCount === QUESTION_COUNT ? "var(--success-text)" : "var(--brand-primary)",
+              borderRadius: 999,
+              transition: "width 0.3s ease",
+            }} />
           </div>
+          {answeredCount === QUESTION_COUNT && (
+            <div style={{ marginTop: 10, fontSize: 13, color: "var(--success-text)", fontWeight: 600 }}>
+              ✓ {t("student.assessmentSubmit.summary.allAnswered", "All questions answered — ready to submit!")}
+            </div>
+          )}
         </div>
 
         {error ? (
           <div
             role="alert"
             style={{
-              padding: 10,
-              borderRadius: 8,
-              border: "1px solid #f0c36d",
-              background: "#fff9ef",
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid var(--error-border)",
+              background: "var(--error-bg)",
               fontSize: 13,
+              color: "var(--error-text)",
             }}
           >
             {error}
           </div>
         ) : null}
 
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          {t(
-            "student.assessmentSubmit.note",
-            "Note: Submitting sends exactly {{count}} responses to the backend for scoring. Scoring remains backend-owned.",
-            { count: QUESTION_COUNT }
-          )}
+        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>
+            {t("student.assessmentSubmit.whatsNext.title", "What happens next")}
+          </div>
+          <div style={{ display: "grid", gap: 8 }}>
+            {[
+              t("student.assessmentSubmit.whatsNext.step1", "Your 60 responses are sent securely to the scoring engine."),
+              t("student.assessmentSubmit.whatsNext.step2", "Career recommendations are generated based on your personality profile."),
+              t("student.assessmentSubmit.whatsNext.step3", "You'll land on your Results page instantly — no waiting."),
+            ].map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div style={{
+                  minWidth: 22, height: 22, borderRadius: "50%",
+                  background: "var(--brand-tint)", color: "var(--brand-primary)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 11, fontWeight: 700, flexShrink: 0,
+                }}>
+                  {i + 1}
+                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, paddingTop: 2, color: "var(--text-muted)" }}>{step}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </SkeletonPage>

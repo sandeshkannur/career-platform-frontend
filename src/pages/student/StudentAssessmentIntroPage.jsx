@@ -191,29 +191,40 @@ export default function StudentAssessmentIntroPage() {
           </div>
         ) : null}
 
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+          <div style={{ fontWeight: 800, marginBottom: 12 }}>
             {t("student.assessmentIntro.expect.title", "What to expect")}
           </div>
-          <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 6 }}>
-            <li>{t("student.assessmentIntro.expect.li1", "Answer honestly — there are no right or wrong answers.")}</li>
-            <li>{t("student.assessmentIntro.expect.li2", "Estimated time: ~10–15 minutes (placeholder).")}</li>
-            <li>{t("student.assessmentIntro.expect.li3", "You can resume later (progress saving will be wired next).")}</li>
-          </ul>
+          <div style={{ display: "grid", gap: 10 }}>
+            {[
+              t("student.assessmentIntro.expect.li1", "Answer honestly — there are no right or wrong answers."),
+              t("student.assessmentIntro.expect.li2", "Estimated time: ~10–15 minutes."),
+              t("student.assessmentIntro.expect.li3", "You can resume later — progress is saved automatically."),
+            ].map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <div style={{
+                  minWidth: 26, height: 26, borderRadius: "50%",
+                  background: "var(--brand-primary)", color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 12, fontWeight: 700, flexShrink: 0,
+                }}>
+                  {i + 1}
+                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, paddingTop: 4 }}>{step}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>
-            {t("student.assessmentIntro.privacy.title", "Privacy & disclaimer")}
-          </div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>
+        <details style={{ border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+          <summary style={{ padding: "12px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", userSelect: "none", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>{t("student.assessmentIntro.privacy.title", "Privacy & disclaimer")}</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>▾</span>
+          </summary>
+          <div style={{ padding: "0 16px 14px", fontSize: 13, lineHeight: 1.6, color: "var(--text-muted)", borderTop: "1px solid var(--border)", paddingTop: 12 }}>
             {t("student.assessmentIntro.privacy.body", "Your responses are used only to generate your recommendations and reports. This is a guidance tool and not a guaranteed predictor of outcomes.")}
           </div>
-        </div>
-
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          {t("student.assessmentIntro.note", "Note: Start creates a real assessment id via backend. Resume uses the last saved snapshot.")}
-        </div>
+        </details>
       </div>
     </SkeletonPage>
   );

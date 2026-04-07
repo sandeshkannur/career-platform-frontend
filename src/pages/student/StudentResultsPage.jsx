@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { apiGet } from "../../apiClient";
+import { apiGet, apiPost } from "../../apiClient";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
@@ -250,8 +250,7 @@ function ClusterStrengthMap({ careers, t }) {
 }
 
 // ─── Interest Inventory teaser ────────────────────────────────────────────
-function InterestInventoryTeaser({ t, interestData, studentId }) {
-  const navigate = useNavigate();
+function InterestInventoryTeaser({ t, interestData, navigate }) {
   // Student has completed interest inventory — show their top clusters
   if (interestData?.top_clusters?.length > 0) {
     return (
@@ -395,8 +394,9 @@ function PathwayDropdown({ career, t }) {
   );
 }
 
-// ─── Top career card (first card, full detail) ────────────────────────────
-function TopCareerCard({ career, fitBandsCopy, t }) {
+// ─── Career card (unified — full for idx 0, compact for rest) ────────────
+function TopCareerCard({ career, fitBandsCopy, idx, t }) {
+  const isTopMatch = idx === 0;
   const band      = fitBandsCopy?.[career?.fit_band_key] || null;
   const bandLabel = band?.label || career?.fit_band_key || t("studentResults.fitBandFallback", "Match");
   const bandStyle = BAND_STYLES[career?.fit_band_key] || BAND_STYLES.exploring;
@@ -419,29 +419,41 @@ function TopCareerCard({ career, fitBandsCopy, t }) {
 
   return (
     <div style={{
-      background: "#fff", border: "1.5px solid #0b1f3a",
-      borderRadius: 12, overflow: "hidden", marginBottom: 12,
+      background: "#fff",
+      border: isTopMatch ? "1.5px solid #0b1f3a" : "1px solid #e2e8f0",
+      borderRadius: 12, overflow: "hidden", marginBottom: isTopMatch ? 12 : 8,
     }}>
-      {/* Header bar — navy */}
-      <div style={{
-        background: "#0b1f3a", padding: "10px 16px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.75)" }}>
-          {t("studentResults.topMatchLabel", "Top match")}
-        </span>
-        <span style={{
-          background: "rgba(255,255,255,.15)", color: "#fff",
-          borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600,
+      {/* Navy header — top match only */}
+      {isTopMatch && (
+        <div style={{
+          background: "#0b1f3a", padding: "10px 16px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
-          {bandLabel}
-        </span>
-      </div>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.75)" }}>
+            {t("studentResults.topMatchLabel", "Top match")}
+          </span>
+          <span style={{
+            background: "rgba(255,255,255,.15)", color: "#fff",
+            borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600,
+          }}>
+            {bandLabel}
+          </span>
+        </div>
+      )}
 
       {/* Body */}
-      <div style={{ padding: "14px 16px" }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25 }}>{title}</div>
-        {prestige && <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 2 }}>{prestige}</div>}
+      <div style={{ padding: isTopMatch ? "14px 16px" : "12px 14px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: isTopMatch ? 0 : 6 }}>
+          <div>
+            <div style={{ fontSize: isTopMatch ? 17 : 15, fontWeight: isTopMatch ? 800 : 700, color: "#0f172a", lineHeight: 1.25 }}>{title}</div>
+            {prestige && <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 2 }}>{prestige}</div>}
+          </div>
+          {!isTopMatch && (
+            <span style={{ background: bandStyle.bg, color: bandStyle.color, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
+              {bandLabel}
+            </span>
+          )}
+        </div>
 
         {/* Tags */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
@@ -507,83 +519,6 @@ function TopCareerCard({ career, fitBandsCopy, t }) {
   );
 }
 
-// ─── Compact career card (cards 2–9) ──────────────────────────────────────
-function CompactCareerCard({ career, fitBandsCopy, t }) {
-  const band      = fitBandsCopy?.[career?.fit_band_key] || null;
-  const bandLabel = band?.label || career?.fit_band_key || t("studentResults.fitBandFallback", "Match");
-  const bandStyle = BAND_STYLES[career?.fit_band_key] || BAND_STYLES.exploring;
-  const title     = career?.title || career?.career_title || career?.name || "";
-  const prestige  = career?.prestige_title || "";
-  const cluster   = career?.cluster || career?.cluster_title || "";
-  const stream    = career?.recommended_stream || "";
-  const description = career?.description || "";
-  const riskKey   = (career?.automation_risk || "").toLowerCase();
-  const riskCfg   = RISK_CFG[riskKey] || null;
-  const outlook   = career?.future_outlook || "";
-  const outlookLabel = outlook === "growing"
-    ? t("studentResults.outlook.growing", "Growing field")
-    : outlook === "stable" ? t("studentResults.outlook.stable", "Stable") : "";
-  const e  = fmtInr(career?.salary_entry_inr);
-  const m  = fmtInr(career?.salary_mid_inr);
-  const pk = fmtInr(career?.salary_peak_inr);
-  const keyskills = Array.isArray(career?.matched_keyskills) ? career.matched_keyskills : [];
-
-  return (
-    <div style={{
-      background: "#fff", border: "1px solid #e2e8f0",
-      borderRadius: 12, overflow: "hidden", marginBottom: 10,
-    }}>
-      <div style={{ padding: "12px 14px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", lineHeight: 1.25 }}>{title}</div>
-            {prestige && <div style={{ fontSize: 11, color: "#059669", fontWeight: 600, marginTop: 1 }}>{prestige}</div>}
-          </div>
-          <span style={{ background: bandStyle.bg, color: bandStyle.color, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
-            {bandLabel}
-          </span>
-        </div>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-          {cluster && <span style={{ background: "#eff6ff", color: "#1e40af", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}>{cluster}</span>}
-          {stream  && <span style={{ background: "#f0fdf4", color: "#166534", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}>{stream}</span>}
-          {riskCfg && <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: riskCfg.bg, color: riskCfg.color, borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}><span style={{ width: 5, height: 5, borderRadius: "50%", background: riskCfg.dot, flexShrink: 0 }} />{t(`studentResults.risk.${riskKey}`, riskCfg.label)}</span>}
-          {outlookLabel && <span style={{ background: "#eff6ff", color: "#1e40af", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}>{outlookLabel}</span>}
-        </div>
-
-        {(e || m || pk) && (
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ height: 4, borderRadius: 999, background: "linear-gradient(90deg,#0b1f3a 0%,#0f6e56 55%,#16a34a 100%)", marginBottom: 3 }} />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b" }}>
-              {e  && <span>{e}</span>}
-              {m  && <span style={{ fontWeight: 700, color: "#0f172a" }}>{m}</span>}
-              {pk && <span style={{ color: "#059669", fontWeight: 600 }}>{pk}</span>}
-            </div>
-          </div>
-        )}
-
-        {description && <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.55, marginBottom: 8 }}>{description}</div>}
-
-        {keyskills.length > 0 && (
-          <div style={{ marginBottom: 6 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>
-              {t("studentResults.whyMatches", "Why this matches you")}
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {keyskills.slice(0, 3).map((ks, i) => (
-                <span key={i} style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 600 }}>
-                  ✓ {ks.keyskill_name || ks.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <PathwayDropdown career={career} t={t} />
-      </div>
-    </div>
-  );
-}
 export default function StudentResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1158,51 +1093,21 @@ export default function StudentResultsPage() {
                           ? <ClusterStrengthMap careers={items} t={t} />
                           : null;
 
-                        // Interest inventory teaser — always shown (remove when Layer 2 ships)
-                        const interestTeaser = <InterestInventoryTeaser t={t} interestData={interestData} studentId={studentId} />;
+                        const interestTeaser = <InterestInventoryTeaser t={t} interestData={interestData} navigate={navigate} />;
 
-                        // Premium — group by cluster
-                        if (isPaidOrPremium && visible.length > 1) {
-                          const byCluster = {};
-                          visible.forEach((c, i) => {
-                            const cl = c.cluster || c.cluster_title || "Other";
-                            if (!byCluster[cl]) byCluster[cl] = [];
-                            byCluster[cl].push({ career: c, idx: i });
-                          });
-
-                          return (
-                            <div>
-                              {strengthMap}
-                              {interestTeaser}
-                              {Object.entries(byCluster).map(([cl, entries]) => (
-                                <div key={cl} style={{ marginBottom: 6 }}>
-                                  <div style={{
-                                    fontSize: 10, fontWeight: 700, color: "#64748b",
-                                    textTransform: "uppercase", letterSpacing: ".07em",
-                                    paddingBottom: 6, borderBottom: "1px solid #e2e8f0", marginBottom: 10,
-                                  }}>
-                                    {cl} {t("studentResults.clusterSuffix", "careers")}
-                                  </div>
-                                  {entries.map(({ career, idx }) =>
-                                    idx === 0
-                                      ? <TopCareerCard key={career.career_id || career.career_code || idx} career={career} fitBandsCopy={fitBandsCopy} t={t} />
-                                      : <CompactCareerCard key={career.career_id || career.career_code || idx} career={career} fitBandsCopy={fitBandsCopy} t={t} />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        }
-
-                        // Free tier — single column, top card full, rest compact
                         return (
                           <div>
+                            {strengthMap}
                             {interestTeaser}
-                            {visible.map((c, idx) =>
-                              idx === 0
-                                ? <TopCareerCard key={c.career_id || c.career_code || idx} career={c} fitBandsCopy={fitBandsCopy} t={t} />
-                                : <CompactCareerCard key={c.career_id || c.career_code || idx} career={c} fitBandsCopy={fitBandsCopy} t={t} />
-                            )}
+                            {visible.map((c, idx) => (
+                              <TopCareerCard
+                                key={c.career_id || c.career_code || idx}
+                                career={c}
+                                fitBandsCopy={fitBandsCopy}
+                                idx={idx}
+                                t={t}
+                              />
+                            ))}
                           </div>
                         );
                       };
