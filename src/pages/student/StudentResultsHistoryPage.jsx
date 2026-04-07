@@ -95,7 +95,18 @@ export default function StudentResultsHistoryPage() {
       ) : (
         <div className="card">
           {items.length === 0 ? (
-            <p>{t("student.resultsHistory.empty", "No assessments found yet.")}</p>
+            <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div style={{ fontSize: 36, marginBottom: 12 }}>📋</div>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
+                {t("student.resultsHistory.emptyTitle", "No assessments yet")}
+              </div>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 320, margin: "0 auto 20px" }}>
+                {t("student.resultsHistory.emptyBody", "Complete your first assessment to see results and career recommendations here.")}
+              </p>
+              <Button onClick={() => navigate("/student/assessment")}>
+                {t("student.resultsHistory.emptyCta", "Start Assessment →")}
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2">
               {items.map((a) => (
