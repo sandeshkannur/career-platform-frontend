@@ -635,6 +635,8 @@ export default function AdminAnalyticsDashboardPage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
+  const [lastRefreshed, setLastRefreshed] = useState(null);
+
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -678,7 +680,7 @@ export default function AdminAnalyticsDashboardPage() {
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: C.navy }}>Platform Analytics</h1>
           <div style={{ fontSize: 13, color: C.muted, marginTop: 4, display: "flex", alignItems: "center", gap: 10 }}>
-            <span>Live from production DB</span>
+            <span>Live from production DB{lastRefreshed && <span style={{marginLeft:'10px',color:'#0d9488'}}> · {lastRefreshed.toLocaleTimeString()}</span>}</span>
             <RefreshButton onRefresh={load} loading={loading} />
           </div>
         </div>
