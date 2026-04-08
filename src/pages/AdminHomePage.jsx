@@ -53,6 +53,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>SME Tokens</Button>
         </Link>
 
+        <Link to="/admin/analytics">
+          <Button style={{ width: "100%" }}>Platform Analytics</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
