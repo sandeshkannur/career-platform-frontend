@@ -1,7 +1,14 @@
 // src/pages/admin/AdminAnalyticsDashboardPage.jsx
 import { useState, useEffect, useCallback, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { getPlatformAnalytics, getStudentAnalytics } from "../../api/adminAnalytics";
+import {
+  getPlatformAnalytics,
+  getStudentAnalytics,
+  getAQInfluence,
+  getWhatIf,
+  getReachability,
+  getCareerPathway,
+} from "../../api/adminAnalytics";
 
 // ── Design tokens (inline) ────────────────────────────────────────────────
 const C = {
@@ -675,6 +682,403 @@ function TabIssues({ data }) {
   );
 }
 
+// ── Graph Analytics Panel ─────────────────────────────────────────────────
+
+function GraphAnalyticsPanel({ studentId, topCareer }) {
+  const GC = {
+    navy: '#0b1f3a', teal: '#0d9488', amber: '#d97706',
+    red: '#dc2626', green: '#16a34a', muted: '#64748b',
+    border: '#e2e8f0', bg: '#f8fafc', card: '#ffffff',
+  };
+
+  const AQ_LIST = [
+    {code:'AQ_01',name:'Curiosity Drive'},{code:'AQ_02',name:'Inquiry Framing'},
+    {code:'AQ_03',name:'Numerical Reasoning'},{code:'AQ_04',name:'Systems Analysis'},
+    {code:'AQ_05',name:'Logical Deduction'},{code:'AQ_06',name:'Information Synthesis'},
+    {code:'AQ_07',name:'Spatial Reasoning'},{code:'AQ_08',name:'Abstract Creativity'},
+    {code:'AQ_09',name:'Idea Generation'},{code:'AQ_10',name:'Experimentation Mindset'},
+    {code:'AQ_11',name:'Applied Solutioning'},{code:'AQ_12',name:'Attention Regulation'},
+    {code:'AQ_13',name:'Precision & Accuracy'},{code:'AQ_14',name:'Planning & Prioritization'},
+    {code:'AQ_15',name:'Goal Commitment'},{code:'AQ_16',name:'Persistence & Grit'},
+    {code:'AQ_17',name:'Self-Discipline'},{code:'AQ_18',name:'Adaptive Flexibility'},
+    {code:'AQ_19',name:'Feedback Openness'},{code:'AQ_20',name:'Emotional Insight'},
+    {code:'AQ_21',name:'Stress Tolerance'},{code:'AQ_22',name:'Perspective Taking'},
+    {code:'AQ_23',name:'Cooperative Responsibility'},{code:'AQ_24',name:'Integrity & Fairness'},
+    {code:'AQ_25',name:'Communication Effectiveness'},
+  ];
+
+  const [activeTab, setActiveTab] = useState('influence');
+  const [influenceData, setInfluenceData] = useState(null);
+  const [whatifData, setWhatifData] = useState(null);
+  const [reachData, setReachData] = useState(null);
+  const [pathwayData, setPathwayData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedAQ, setSelectedAQ] = useState('AQ_01');
+  const [delta, setDelta] = useState(10);
+  const [targetCareer, setTargetCareer] = useState(topCareer || '');
+
+  const load = async (tab) => {
+    setActiveTab(tab);
+    setLoading(true);
+    try {
+      if (tab === 'influence' && !influenceData) {
+        const d = await getAQInfluence(studentId);
+        setInfluenceData(d);
+      } else if (tab === 'reachability' && !reachData) {
+        const d = await getReachability(studentId);
+        setReachData(d);
+      }
+    } catch(e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const runWhatIf = async () => {
+    setLoading(true);
+    try {
+      const d = await getWhatIf(studentId, selectedAQ, delta);
+      setWhatifData(d);
+    } catch(e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const runPathway = async () => {
+    if (!targetCareer.trim()) return;
+    setLoading(true);
+    try {
+      const d = await getCareerPathway(studentId, targetCareer);
+      setPathwayData(d);
+    } catch(e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load('influence'); }, [studentId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const tabStyle = (t) => ({
+    padding: '7px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+    borderBottom: activeTab === t ? `2px solid ${GC.teal}` : '2px solid transparent',
+    color: activeTab === t ? GC.teal : GC.muted,
+  });
+
+  const cardStyle = {
+    background: GC.card, border: `1px solid ${GC.border}`,
+    borderRadius: 8, padding: '14px 16px', marginTop: 12,
+  };
+
+  const bar = (val, max, color) => {
+    const pct = max > 0 ? Math.min(100, (val / max) * 100) : 0;
+    return (
+      <div style={{ flex: 1, background: '#e8eef5', borderRadius: 3, height: 8 }}>
+        <div style={{ width: `${pct}%`, height: 8, borderRadius: 3, background: color || GC.teal }} />
+      </div>
+    );
+  };
+
+  const secTitle = { fontSize: 12, fontWeight: 'bold', color: GC.navy, marginBottom: 10 };
+
+  return (
+    <div style={{ borderTop: `2px solid ${GC.teal}`, marginTop: 16, paddingTop: 16 }}>
+      <div style={{ fontSize: 13, fontWeight: 'bold', color: GC.teal, marginBottom: 10 }}>
+        H — Graph Analytics
+      </div>
+
+      {/* Tab bar */}
+      <div style={{ display: 'flex', borderBottom: `1px solid ${GC.border}`, gap: 0 }}>
+        {[
+          ['influence', 'AQ Influence'],
+          ['whatif', 'What-If Simulator'],
+          ['reachability', 'Cluster Reachability'],
+          ['pathway', 'Career Pathway'],
+        ].map(([t, label]) => (
+          <div key={t} style={tabStyle(t)} onClick={() => load(t)}>{label}</div>
+        ))}
+      </div>
+
+      {loading && (
+        <div style={{ padding: 20, textAlign: 'center', color: GC.muted, fontSize: 12 }}>
+          Loading...
+        </div>
+      )}
+
+      {/* AQ INFLUENCE TAB */}
+      {!loading && activeTab === 'influence' && influenceData && (
+        <div style={cardStyle}>
+          <div style={secTitle}>Which AQs most drive career recommendations for this student</div>
+          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+            {(influenceData.aq_influences || []).map(aq => {
+              const maxInf = Math.max(...(aq.top_careers || []).map(c => c.influence_weight || 0), 0.01);
+              return (
+                <div key={aq.aq_code} style={{
+                  marginBottom: 12, padding: '10px 12px',
+                  background: '#f8fafc', borderRadius: 6,
+                  borderLeft: `3px solid ${aq.student_score >= 70 ? GC.green : aq.student_score >= 50 ? GC.teal : GC.amber}`,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 'bold', color: GC.navy }}>
+                      {aq.aq_code} — {aq.aq_name}
+                    </span>
+                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: GC.muted }}>
+                      Student score: {aq.student_score}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: GC.muted, marginBottom: 4 }}>Top influenced careers:</div>
+                  {(aq.top_careers || []).slice(0, 3).map(c => (
+                    <div key={c.title} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <div style={{ fontSize: 11, minWidth: 180 }}>{c.title}</div>
+                      {bar(c.influence_weight, maxInf, GC.teal)}
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', minWidth: 36, textAlign: 'right', color: GC.muted }}>
+                        {c.influence_weight.toFixed(3)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* WHAT-IF TAB */}
+      {!loading && activeTab === 'whatif' && (
+        <div style={cardStyle}>
+          <div style={secTitle}>Simulate career changes if student improves an AQ</div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
+            <select
+              value={selectedAQ}
+              onChange={e => setSelectedAQ(e.target.value)}
+              style={{ fontSize: 12, padding: '6px 10px', border: `1px solid ${GC.border}`, borderRadius: 6 }}
+            >
+              {AQ_LIST.map(aq => (
+                <option key={aq.code} value={aq.code}>{aq.code} — {aq.name}</option>
+              ))}
+            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: GC.muted }}>Improve by:</span>
+              <input
+                type="range" min={1} max={30} step={1} value={delta}
+                onChange={e => setDelta(Number(e.target.value))}
+                style={{ width: 100 }}
+              />
+              <span style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 'bold', color: GC.teal }}>
+                +{delta} pts
+              </span>
+            </div>
+            <button
+              onClick={runWhatIf}
+              style={{
+                padding: '7px 16px', background: GC.teal, color: '#fff',
+                border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 'bold',
+              }}
+            >
+              Run simulation
+            </button>
+          </div>
+
+          {whatifData && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.muted, marginBottom: 6 }}>
+                  BEFORE (current ranking)
+                </div>
+                {(whatifData.before || []).map(c => (
+                  <div key={c.rank} style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '4px 8px', marginBottom: 3, borderRadius: 4,
+                    background: whatifData.left_top9?.some(l => l.title === c.title) ? '#fef2f2' : '#f8fafc',
+                    fontSize: 11,
+                  }}>
+                    <span style={{ color: GC.muted, minWidth: 20 }}>#{c.rank}</span>
+                    <span style={{ flex: 1 }}>{c.title}</span>
+                    <span style={{ fontFamily: 'monospace', color: GC.muted }}>{c.score}</span>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.muted, marginBottom: 6 }}>
+                  AFTER (+{delta} pts on {whatifData.aq_name})
+                </div>
+                {(whatifData.after || []).map(c => {
+                  const entered = whatifData.entered_top9?.some(e => e.title === c.title);
+                  const change = whatifData.rank_changes?.find(r => r.title === c.title);
+                  return (
+                    <div key={c.rank} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '4px 8px', marginBottom: 3, borderRadius: 4,
+                      background: entered ? '#f0fdf4' : '#f8fafc',
+                      fontSize: 11,
+                      border: entered ? '1px solid #bbf7d0' : '1px solid transparent',
+                    }}>
+                      <span style={{ color: GC.muted, minWidth: 20 }}>#{c.rank}</span>
+                      <span style={{ flex: 1 }}>{c.title}</span>
+                      {change && (
+                        <span style={{
+                          fontSize: 10, color: change.change > 0 ? GC.green : GC.red,
+                          marginRight: 6, fontWeight: 'bold',
+                        }}>
+                          {change.change > 0 ? `↑${change.change}` : `↓${Math.abs(change.change)}`}
+                        </span>
+                      )}
+                      {entered && <span style={{ fontSize: 9, color: GC.green, fontWeight: 'bold' }}>NEW</span>}
+                      <span style={{ fontFamily: 'monospace', color: GC.muted }}>{c.score}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* REACHABILITY TAB */}
+      {!loading && activeTab === 'reachability' && reachData && (
+        <div style={cardStyle}>
+          <div style={secTitle}>Career cluster reachability map</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+            {[
+              { key: 'reachable_now', label: 'Reachable now', color: GC.green, bg: '#f0fdf4', border: '#bbf7d0', desc: 'Score ≥ 50' },
+              { key: 'reachable_with_effort', label: 'With effort', color: GC.amber, bg: '#fffbeb', border: '#fde68a', desc: 'Score 35–50' },
+              { key: 'aspirational', label: 'Aspirational', color: GC.red, bg: '#fef2f2', border: '#fecaca', desc: 'Score < 35' },
+            ].map(zone => (
+              <div key={zone.key} style={{
+                background: zone.bg, border: `1px solid ${zone.border}`,
+                borderRadius: 8, padding: '12px 14px',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 'bold', color: zone.color, marginBottom: 2 }}>
+                  {zone.label}
+                </div>
+                <div style={{ fontSize: 10, color: GC.muted, marginBottom: 10 }}>{zone.desc}</div>
+                {(reachData[zone.key] || []).map(cl => (
+                  <div key={cl.cluster} style={{ marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                      <span style={{ fontWeight: 500 }}>{cl.cluster}</span>
+                      <span style={{ fontFamily: 'monospace', color: zone.color }}>{cl.score}</span>
+                    </div>
+                    <div style={{ fontSize: 10, color: GC.muted }}>{cl.top_career}</div>
+                    {cl.gap > 0 && (
+                      <div style={{ fontSize: 10, color: GC.muted }}>Gap to reachable: {cl.gap} pts</div>
+                    )}
+                  </div>
+                ))}
+                {(reachData[zone.key] || []).length === 0 && (
+                  <div style={{ fontSize: 11, color: GC.muted }}>None</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PATHWAY TAB */}
+      {!loading && activeTab === 'pathway' && (
+        <div style={cardStyle}>
+          <div style={secTitle}>What does this student need to reach a target career?</div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+            <input
+              type="text"
+              value={targetCareer}
+              onChange={e => setTargetCareer(e.target.value)}
+              placeholder="Enter career title e.g. Data Scientist"
+              style={{
+                flex: 1, fontSize: 12, padding: '7px 12px',
+                border: `1px solid ${GC.border}`, borderRadius: 6,
+              }}
+              onKeyDown={e => e.key === 'Enter' && runPathway()}
+            />
+            <button
+              onClick={runPathway}
+              style={{
+                padding: '7px 16px', background: GC.navy, color: '#fff',
+                border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 'bold',
+              }}
+            >
+              Analyse
+            </button>
+          </div>
+
+          {pathwayData && !pathwayData.error && (
+            <div>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+                {[
+                  { l: 'Target career', v: pathwayData.target_career },
+                  { l: 'Cluster', v: pathwayData.target_cluster },
+                  { l: 'Current score', v: pathwayData.current_score },
+                  { l: 'Target score', v: pathwayData.target_score },
+                  { l: 'Gap', v: pathwayData.gap, c: pathwayData.gap > 0 ? GC.red : GC.green },
+                  { l: 'Reachable now', v: pathwayData.reachable ? 'Yes' : 'No', c: pathwayData.reachable ? GC.green : GC.amber },
+                ].map((k, i) => (
+                  <div key={i} style={{
+                    background: '#f8fafc', padding: '10px 14px', borderRadius: 8,
+                    border: `1px solid ${GC.border}`, minWidth: 120,
+                  }}>
+                    <div style={{ fontSize: 10, color: GC.muted }}>{k.l}</div>
+                    <div style={{ fontSize: 15, fontWeight: 'bold', color: k.c || GC.navy, fontFamily: 'monospace' }}>
+                      {k.v}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.navy, marginBottom: 8 }}>
+                    Skill gaps to close
+                  </div>
+                  {(pathwayData.skill_gaps || []).map(sg => (
+                    <div key={sg.skill} style={{
+                      marginBottom: 8, padding: '8px 10px', background: '#fef9f0',
+                      borderRadius: 6, borderLeft: `3px solid ${GC.amber}`,
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.navy }}>{sg.skill}</div>
+                      <div style={{ fontSize: 11, color: GC.muted }}>
+                        Current: {sg.current_score} → Need: {sg.required_score}
+                        <span style={{ color: GC.red, marginLeft: 8 }}>gap: {sg.gap} pts</span>
+                      </div>
+                      <div style={{ fontSize: 10, color: GC.muted, marginTop: 3 }}>
+                        Career weight: {sg.career_weight}% · Driven by: {(sg.driving_aqs || []).slice(0, 2).map(a => a.aq_code).join(', ')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.navy, marginBottom: 8 }}>
+                    Recommended AQs to focus on
+                  </div>
+                  {(pathwayData.recommended_focus_aqs || []).map((aq, i) => (
+                    <div key={aq.aq_code} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '8px 10px', marginBottom: 6,
+                      background: i === 0 ? '#f0fdf4' : '#f8fafc',
+                      borderRadius: 6,
+                      border: `1px solid ${i === 0 ? '#bbf7d0' : GC.border}`,
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 'bold', color: GC.navy }}>{aq.aq_code}</div>
+                        <div style={{ fontSize: 10, color: GC.muted }}>{aq.aq_name}</div>
+                      </div>
+                      <div style={{
+                        fontSize: 11, fontFamily: 'monospace',
+                        color: i === 0 ? GC.green : GC.muted, fontWeight: i === 0 ? 'bold' : 'normal',
+                      }}>
+                        impact: {aq.impact_score}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {pathwayData?.error && (
+            <div style={{ color: GC.red, fontSize: 12 }}>
+              {pathwayData.error}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Student Drill-Down Panel ──────────────────────────────────────────────
 
 function StudentDrillDown({ studentId, data, loading }) {
@@ -976,6 +1380,12 @@ function StudentDrillDown({ studentId, data, loading }) {
         </div>
 
       </div>
+
+      {/* SECTION H — Graph Analytics */}
+      <GraphAnalyticsPanel
+        studentId={studentId}
+        topCareer={data?.section_c_career_stability?.rank1_history?.[0]?.rank1_career || ''}
+      />
     </div>
   );
 }
