@@ -1109,6 +1109,8 @@ function StudentDrillDown({ studentId, data, loading }) {
     </div>
   );
 
+  const [drillTab, setDrillTab] = useState('profile');
+
   const cardStyle = {
     background: DC.card, border: `1px solid ${DC.border}`,
     borderRadius: 8, padding: '16px 18px', marginBottom: 14,
@@ -1130,6 +1132,28 @@ function StudentDrillDown({ studentId, data, loading }) {
   const s = data.summary || {};
   return (
     <div style={{ padding: '20px 24px' }}>
+
+      {/* Drill-down tab bar */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', marginBottom: 16, gap: 0 }}>
+        {[
+          ['profile', 'Student Profile'],
+          ['advanced', 'Advanced Analytics'],
+        ].map(([t, label]) => (
+          <div
+            key={t}
+            onClick={() => setDrillTab(t)}
+            style={{
+              padding: '10px 20px', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+              borderBottom: drillTab === t ? '2px solid #0d9488' : '2px solid transparent',
+              color: drillTab === t ? '#0d9488' : '#64748b',
+            }}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {drillTab === 'profile' && (<>
 
       {/* Summary KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 10, marginBottom: 16 }}>
@@ -1381,11 +1405,14 @@ function StudentDrillDown({ studentId, data, loading }) {
 
       </div>
 
-      {/* SECTION H — Graph Analytics */}
-      <GraphAnalyticsPanel
-        studentId={studentId}
-        topCareer={data?.section_c_career_stability?.rank1_history?.[0]?.rank1_career || ''}
-      />
+      </>)}
+
+      {drillTab === 'advanced' && (
+        <GraphAnalyticsPanel
+          studentId={studentId}
+          topCareer={data?.section_c_career_stability?.rank1_history?.[0]?.rank1_career || ''}
+        />
+      )}
     </div>
   );
 }
