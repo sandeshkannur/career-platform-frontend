@@ -250,10 +250,11 @@ export default function AdminCareersPage() {
                           {career.content_en ? (
                             <>
                               <div style={{ color: C.muted }}>Indian title: {career.content_en.indian_job_title || '—'}</div>
-                              <div style={{ color: C.muted }}>Stream: {career.content_en.recommended_stream || '—'}</div>
-                              <div style={{ color: C.muted }}>Automation risk: {career.content_en.automation_risk || '—'}</div>
-                              <div style={{ color: C.muted }}>Future outlook: {career.content_en.future_outlook || '—'}</div>
-                              <div style={{ color: C.muted }}>Salary: ₹{((career.content_en.salary_entry_inr || 0) / 100000).toFixed(1)}L – ₹{((career.content_en.salary_peak_inr || 0) / 100000).toFixed(1)}L</div>
+                              <div style={{ color: C.muted }}>Stream: {career.recommended_stream || '—'}</div>
+                              <div style={{ color: C.muted }}>Automation risk: {career.automation_risk || '—'}</div>
+                              <div style={{ color: C.muted }}>Future outlook: {career.future_outlook || '—'}</div>
+                              <div style={{ color: C.muted }}>Salary entry: {career.salary_entry_inr ? `₹${(career.salary_entry_inr / 100000).toFixed(1)}L` : '—'}</div>
+                              <div style={{ color: C.muted }}>Salary peak: {career.salary_peak_inr ? `₹${(career.salary_peak_inr / 100000).toFixed(1)}L` : '—'}</div>
                             </>
                           ) : <div style={{ color: C.red }}>No content found</div>}
                         </div>
