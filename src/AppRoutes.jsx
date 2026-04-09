@@ -34,6 +34,7 @@ const AdminBulkUploadPage = lazy(() =>
 const AdminSMEPage = lazy(() => import("./pages/admin/AdminSMEPage"));
 const AdminSMETokensPage = lazy(() => import("./pages/admin/AdminSMETokensPage"));
 const AdminAnalyticsDashboardPage = lazy(() => import("./pages/admin/AdminAnalyticsDashboardPage"));
+const AdminStudentSkillsPage = lazy(() => import("./pages/admin/AdminStudentSkillsPage"));
 
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
@@ -179,6 +180,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminAnalyticsDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/student-skills"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminStudentSkillsPage />
             </ProtectedRoute>
           }
         />
