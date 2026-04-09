@@ -267,23 +267,23 @@ function TabFunnel({ data }) {
               {students.length === 0
                 ? <tr><td colSpan={9} style={{ padding: 12, color: C.muted, textAlign: "center" }}>No student data</td></tr>
                 : students.map((s) => (
-                  <Fragment key={s.id ?? s.student_name}>
+                  <Fragment key={s.student_id ?? s.student_name}>
                     <tr
-                      onClick={() => handleStudentClick(s.id)}
+                      onClick={() => handleStudentClick(s.student_id)}
                       style={{
                         cursor: 'pointer',
                         borderTop: `1px solid ${C.border}`,
-                        background: expandedStudent === s.id ? '#f0f9ff' : 'transparent',
-                        borderLeft: expandedStudent === s.id ? '3px solid #0d9488' : '3px solid transparent',
+                        background: expandedStudent === s.student_id ? '#f0f9ff' : 'transparent',
+                        borderLeft: expandedStudent === s.student_id ? '3px solid #0d9488' : '3px solid transparent',
                       }}
                     >
                       <td style={{ padding: "6px 10px", fontWeight: 600 }}>
                         {s.student_name ?? s.name ?? "—"}
                         <span style={{ fontSize: '10px', color: '#0d9488', marginLeft: '6px' }}>
-                          {expandedStudent === s.id ? '▲ collapse' : '▼ click to expand'}
+                          {expandedStudent === s.student_id ? '▲ collapse' : '▼ click to expand'}
                         </span>
                       </td>
-                      <td style={{ padding: "6px 10px" }}>{s.grade ?? s.id ?? "—"}</td>
+                      <td style={{ padding: "6px 10px" }}>{s.grade ?? "—"}</td>
                       <td style={{ padding: "6px 10px", color: C.muted }}>{s.email ?? "—"}</td>
                       <td style={{ padding: "6px 10px" }}>{s.subscription_tier ?? "—"}</td>
                       <td style={{ padding: "6px 10px", textAlign: "center" }}>{s.total_assessments ?? "—"}</td>
@@ -302,13 +302,13 @@ function TabFunnel({ data }) {
                           : <span style={{ color: C.muted }}>—</span>}
                       </td>
                     </tr>
-                    {expandedStudent === s.id && (
+                    {expandedStudent === s.student_id && (
                       <tr>
                         <td colSpan={9} style={{ padding: 0, background: '#f8fafc' }}>
                           <StudentDrillDown
-                            studentId={s.id}
-                            data={studentData[s.id]}
-                            loading={studentLoading && !studentData[s.id]}
+                            studentId={s.student_id}
+                            data={studentData[s.student_id]}
+                            loading={studentLoading && !studentData[s.student_id]}
                           />
                         </td>
                       </tr>
