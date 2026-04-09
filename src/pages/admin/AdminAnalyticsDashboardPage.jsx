@@ -1,7 +1,7 @@
 // src/pages/admin/AdminAnalyticsDashboardPage.jsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { getPlatformAnalytics } from "../../api/adminAnalytics";
+import { getPlatformAnalytics, getStudentAnalytics } from "../../api/adminAnalytics";
 
 // ── Design tokens (inline) ────────────────────────────────────────────────
 const C = {
@@ -222,6 +222,28 @@ function TabOverview({ data }) {
 // ── Tab: Funnel & Students ─────────────────────────────────────────────────
 
 function TabFunnel({ data }) {
+  const [expandedStudent, setExpandedStudent] = useState(null);
+  const [studentData, setStudentData] = useState({});
+  const [studentLoading, setStudentLoading] = useState(false);
+
+  const handleStudentClick = async (studentId) => {
+    if (expandedStudent === studentId) {
+      setExpandedStudent(null);
+      return;
+    }
+    setExpandedStudent(studentId);
+    if (studentData[studentId]) return;
+    setStudentLoading(true);
+    try {
+      const result = await getStudentAnalytics(studentId);
+      setStudentData(prev => ({ ...prev, [studentId]: result }));
+    } catch (err) {
+      console.error('Student analytics error:', err);
+    } finally {
+      setStudentLoading(false);
+    }
+  };
+
   const students = Array.isArray(data?.students) ? data.students : [];
   const careersPerAssessment = Array.isArray(data?.careers_per_assessment) ? data.careers_per_assessment : [];
   const streamDist = Array.isArray(data?.stream_distribution) ? data.stream_distribution : [];
@@ -244,28 +266,54 @@ function TabFunnel({ data }) {
             <tbody>
               {students.length === 0
                 ? <tr><td colSpan={9} style={{ padding: 12, color: C.muted, textAlign: "center" }}>No student data</td></tr>
-                : students.map((s, i) => (
-                  <tr key={i} style={{ borderTop: `1px solid ${C.border}` }}>
-                    <td style={{ padding: "6px 10px", fontWeight: 600 }}>{s.student_name ?? s.name ?? "—"}</td>
-                    <td style={{ padding: "6px 10px" }}>{s.grade ?? "—"}</td>
-                    <td style={{ padding: "6px 10px", color: C.muted }}>{s.email ?? "—"}</td>
-                    <td style={{ padding: "6px 10px" }}>{s.subscription_tier ?? "—"}</td>
-                    <td style={{ padding: "6px 10px", textAlign: "center" }}>{s.total_assessments ?? "—"}</td>
-                    <td style={{ padding: "6px 10px", textAlign: "center" }}>{s.assessments_with_results ?? "—"}</td>
-                    <td style={{ padding: "6px 10px", textAlign: "center", color: (s.assessments_no_results ?? 0) > 0 ? C.red : "inherit", fontWeight: (s.assessments_no_results ?? 0) > 0 ? 700 : 400 }}>
-                      {s.assessments_no_results ?? "—"}
-                    </td>
-                    <td style={{ padding: "6px 10px", textAlign: "center" }}>
-                      {s.has_keyskill_scores === true
-                        ? <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
-                        : <span style={{ color: C.red, fontWeight: 700 }}>✗</span>}
-                    </td>
-                    <td style={{ padding: "6px 10px", textAlign: "center" }}>
-                      {s.has_interest_inventory === true
-                        ? <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
-                        : <span style={{ color: C.muted }}>—</span>}
-                    </td>
-                  </tr>
+                : students.map((s) => (
+                  <Fragment key={s.id ?? s.student_name}>
+                    <tr
+                      onClick={() => handleStudentClick(s.id)}
+                      style={{
+                        cursor: 'pointer',
+                        borderTop: `1px solid ${C.border}`,
+                        background: expandedStudent === s.id ? '#f0f9ff' : 'transparent',
+                        borderLeft: expandedStudent === s.id ? '3px solid #0d9488' : '3px solid transparent',
+                      }}
+                    >
+                      <td style={{ padding: "6px 10px", fontWeight: 600 }}>
+                        {s.student_name ?? s.name ?? "—"}
+                        <span style={{ fontSize: '10px', color: '#0d9488', marginLeft: '6px' }}>
+                          {expandedStudent === s.id ? '▲ collapse' : '▼ click to expand'}
+                        </span>
+                      </td>
+                      <td style={{ padding: "6px 10px" }}>{s.grade ?? s.id ?? "—"}</td>
+                      <td style={{ padding: "6px 10px", color: C.muted }}>{s.email ?? "—"}</td>
+                      <td style={{ padding: "6px 10px" }}>{s.subscription_tier ?? "—"}</td>
+                      <td style={{ padding: "6px 10px", textAlign: "center" }}>{s.total_assessments ?? "—"}</td>
+                      <td style={{ padding: "6px 10px", textAlign: "center" }}>{s.assessments_with_results ?? "—"}</td>
+                      <td style={{ padding: "6px 10px", textAlign: "center", color: (s.assessments_no_results ?? 0) > 0 ? C.red : "inherit", fontWeight: (s.assessments_no_results ?? 0) > 0 ? 700 : 400 }}>
+                        {s.assessments_no_results ?? "—"}
+                      </td>
+                      <td style={{ padding: "6px 10px", textAlign: "center" }}>
+                        {s.has_keyskill_scores === true
+                          ? <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
+                          : <span style={{ color: C.red, fontWeight: 700 }}>✗</span>}
+                      </td>
+                      <td style={{ padding: "6px 10px", textAlign: "center" }}>
+                        {s.has_interest_inventory === true
+                          ? <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
+                          : <span style={{ color: C.muted }}>—</span>}
+                      </td>
+                    </tr>
+                    {expandedStudent === s.id && (
+                      <tr>
+                        <td colSpan={9} style={{ padding: 0, background: '#f8fafc' }}>
+                          <StudentDrillDown
+                            studentId={s.id}
+                            data={studentData[s.id]}
+                            loading={studentLoading && !studentData[s.id]}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))
               }
             </tbody>
@@ -627,6 +675,311 @@ function TabIssues({ data }) {
   );
 }
 
+// ── Student Drill-Down Panel ──────────────────────────────────────────────
+
+function StudentDrillDown({ studentId, data, loading }) {
+  const DC = {
+    navy: '#0b1f3a', teal: '#0d9488', amber: '#d97706',
+    red: '#dc2626', green: '#16a34a', muted: '#64748b',
+    border: '#e2e8f0', bg: '#f8fafc', card: '#ffffff',
+  };
+
+  const fitBandColor = (band) => ({
+    high_potential: '#16a34a', strong: '#0d9488',
+    promising: '#d97706', developing: '#f59e0b', exploring: '#dc2626',
+  }[band] || '#888');
+
+  const patternColor = (p) => ({
+    straight_liner: '#dc2626', acquiescence_bias: '#d97706',
+    central_tendency_bias: '#2563eb', normal: '#16a34a',
+  }[p] || '#888');
+
+  if (loading) return (
+    <div style={{ padding: '24px', textAlign: 'center', color: DC.muted }}>
+      Loading student analytics...
+    </div>
+  );
+  if (!data) return (
+    <div style={{ padding: '24px', textAlign: 'center', color: DC.muted }}>
+      No data available
+    </div>
+  );
+
+  const cardStyle = {
+    background: DC.card, border: `1px solid ${DC.border}`,
+    borderRadius: 8, padding: '16px 18px', marginBottom: 14,
+  };
+  const secTitle = {
+    fontSize: 12, fontWeight: 'bold', color: DC.navy,
+    textTransform: 'uppercase', letterSpacing: '0.04em',
+    marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${DC.border}`,
+  };
+  const bar = (val, max, color) => {
+    const pct = max > 0 ? Math.min(100, (val / max) * 100) : 0;
+    return (
+      <div style={{ flex: 1, background: '#e8eef5', borderRadius: 3, height: 10 }}>
+        <div style={{ width: `${pct}%`, height: 10, borderRadius: 3, background: color || DC.teal }} />
+      </div>
+    );
+  };
+
+  const s = data.summary || {};
+  return (
+    <div style={{ padding: '20px 24px' }}>
+
+      {/* Summary KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 10, marginBottom: 16 }}>
+        {[
+          { v: s.total_assessments, l: 'Total attempts' },
+          { v: s.assessments_with_results, l: 'With results', c: '#16a34a' },
+          { v: s.assessments_no_results, l: 'No results', c: s.assessments_no_results > 0 ? '#dc2626' : 'inherit' },
+          { v: s.bias_flag_count, l: 'Bias flags', c: s.bias_flag_count > 0 ? '#d97706' : 'inherit' },
+          { v: s.dominant_career_pct != null ? `${s.dominant_career_pct}%` : '—', l: 'Top career consistency' },
+          { v: s.interest_inventory_done ? 'Done' : 'Not done', l: 'Interest inventory', c: s.interest_inventory_done ? '#16a34a' : '#d97706' },
+        ].map((k, i) => (
+          <div key={i} style={{ background: DC.bg, borderRadius: 8, padding: '12px 14px', border: `1px solid ${DC.border}` }}>
+            <div style={{ fontSize: 20, fontWeight: 'bold', color: k.c || DC.navy, fontFamily: 'monospace', lineHeight: 1 }}>{k.v ?? '—'}</div>
+            <div style={{ fontSize: 11, color: DC.muted, marginTop: 4 }}>{k.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+
+        {/* SECTION A — Timeline */}
+        <div style={cardStyle}>
+          <div style={secTitle}>A — Assessment Timeline</div>
+          <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9' }}>
+                  {['ID', 'Date', 'Responses', 'Results', 'Pattern', 'Mean', 'Std'].map(h => (
+                    <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: DC.muted }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(data.section_a_timeline || []).map(row => (
+                  <tr key={row.assessment_id} style={{ borderBottom: `1px solid ${DC.border}` }}>
+                    <td style={{ padding: '5px 8px', fontFamily: 'monospace' }}>#{row.assessment_id}</td>
+                    <td style={{ padding: '5px 8px', fontSize: 10 }}>
+                      {row.submitted_at ? new Date(row.submitted_at).toLocaleDateString('en-IN') : '—'}
+                    </td>
+                    <td style={{ padding: '5px 8px', color: row.response_count < 45 ? '#dc2626' : 'inherit' }}>
+                      {row.response_count}
+                    </td>
+                    <td style={{ padding: '5px 8px', color: row.has_results ? '#16a34a' : '#dc2626' }}>
+                      {row.has_results ? '✓' : '✗'}
+                    </td>
+                    <td style={{ padding: '5px 8px' }}>
+                      <span style={{
+                        fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 'bold',
+                        background: patternColor(row.pattern) + '22', color: patternColor(row.pattern),
+                      }}>
+                        {row.pattern}
+                      </span>
+                    </td>
+                    <td style={{ padding: '5px 8px', fontFamily: 'monospace' }}>{row.mean_answer}</td>
+                    <td style={{ padding: '5px 8px', fontFamily: 'monospace' }}>{row.stddev_answer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION E — Bias Flags */}
+        <div style={cardStyle}>
+          <div style={secTitle}>E — Bias & Data Quality Flags</div>
+          {(data.section_e_bias_flags || []).length === 0 ? (
+            <div style={{ color: '#16a34a', fontSize: 12 }}>✓ No bias flags detected across all attempts</div>
+          ) : (
+            (data.section_e_bias_flags || []).map(flag => (
+              <div key={flag.assessment_id} style={{
+                borderLeft: `3px solid ${patternColor(flag.pattern)}`,
+                padding: '10px 12px', marginBottom: 8, background: '#fef9f0', borderRadius: '0 6px 6px 0',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 'bold', color: DC.navy }}>
+                  Assessment #{flag.assessment_id} — {flag.pattern.replace(/_/g, ' ')}
+                </div>
+                <div style={{ fontSize: 11, color: DC.muted, marginTop: 3 }}>
+                  Mean: {flag.mean_answer} | Std: {flag.stddev_answer} | Responses: {flag.response_count}
+                </div>
+                <div style={{ fontSize: 11, color: '#92400e', marginTop: 4, fontStyle: 'italic' }}>
+                  {flag.recommendation}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* SECTION B — Skill Profile */}
+        <div style={cardStyle}>
+          <div style={secTitle}>B — Skill Profile (HSI-adjusted mean)</div>
+          <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+            {(data.section_b_skill_profile || []).map(skill => {
+              const platAvg = (data.section_b_platform_avg || []).find(p => p.skill === skill.skill);
+              const pctColor = fitBandColor(skill.fit_band);
+              return (
+                <div key={skill.skill} style={{ marginBottom: 7 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 11, minWidth: 160 }}>{skill.skill}</div>
+                    {bar(skill.mean_hsi, 100, pctColor)}
+                    <div style={{ fontSize: 11, fontFamily: 'monospace', minWidth: 36, textAlign: 'right', color: pctColor }}>
+                      {skill.mean_hsi}
+                    </div>
+                    {platAvg && (
+                      <div style={{ fontSize: 10, color: DC.muted, minWidth: 50 }}>
+                        avg: {platAvg.platform_mean}
+                      </div>
+                    )}
+                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: pctColor + '22', color: pctColor }}>
+                      {skill.fit_band}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* SECTION C — Career Stability */}
+        <div style={cardStyle}>
+          <div style={secTitle}>C — Career Recommendation Stability</div>
+          <div style={{ fontSize: 11, color: DC.muted, marginBottom: 8 }}>
+            Based on {s.assessments_with_results} result sets
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 'bold', color: DC.navy, marginBottom: 6 }}>Stable (appears often)</div>
+          {(data.section_c_career_stability?.stable_careers || []).slice(0, 5).map(c => (
+            <div key={c.career_title} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+              <div style={{ fontSize: 11, minWidth: 160 }}>{c.career_title}</div>
+              {bar(c.stability_pct, 100, '#16a34a')}
+              <div style={{ fontSize: 11, fontFamily: 'monospace', minWidth: 40, color: '#16a34a' }}>
+                {c.stability_pct}%
+              </div>
+            </div>
+          ))}
+          <div style={{ fontSize: 11, fontWeight: 'bold', color: DC.navy, marginBottom: 6, marginTop: 10 }}>
+            Rank 1 career history
+          </div>
+          <div style={{ maxHeight: 120, overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9' }}>
+                  {['Date', 'Rank 1 Career', 'Cluster'].map(h => (
+                    <th key={h} style={{ padding: '4px 8px', textAlign: 'left', color: DC.muted }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(data.section_c_career_stability?.rank1_history || []).slice(0, 8).map(r => (
+                  <tr key={r.assessment_id} style={{ borderBottom: `1px solid ${DC.border}` }}>
+                    <td style={{ padding: '4px 8px', fontSize: 10 }}>
+                      {r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-IN') : '—'}
+                    </td>
+                    <td style={{ padding: '4px 8px' }}>{r.rank1_career}</td>
+                    <td style={{ padding: '4px 8px', color: DC.muted }}>{r.rank1_cluster}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION D — Keyskill Scores */}
+        <div style={cardStyle}>
+          <div style={secTitle}>D — Keyskill Scores</div>
+          {(data.section_d_keyskills || []).length === 0 ? (
+            <div style={{ color: DC.muted, fontSize: 12 }}>No keyskill scores computed for this student yet.</div>
+          ) : (
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {(data.section_d_keyskills || []).map(ks => (
+                <div key={ks.keyskill} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, minWidth: 200 }}>{ks.keyskill}</div>
+                  {bar(ks.score, 100, fitBandColor(ks.fit_band))}
+                  <div style={{ fontSize: 11, fontFamily: 'monospace', minWidth: 36, textAlign: 'right', color: fitBandColor(ks.fit_band) }}>
+                    {ks.score}
+                  </div>
+                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: fitBandColor(ks.fit_band) + '22', color: fitBandColor(ks.fit_band) }}>
+                    {ks.fit_band}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION F + G — Interest & Context */}
+        <div style={cardStyle}>
+          <div style={secTitle}>F — Interest Inventory</div>
+          {!data.section_f_interest?.completed ? (
+            <div style={{ color: '#d97706', fontSize: 12 }}>
+              ⚠ Interest inventory not completed. Career cluster boosts not applied.
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, color: DC.muted, marginBottom: 8 }}>
+                Completed: {data.section_f_interest?.completed_at
+                  ? new Date(data.section_f_interest.completed_at).toLocaleDateString('en-IN')
+                  : '—'} · Language: {data.section_f_interest?.lang || '—'}
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 'bold', color: DC.navy, marginBottom: 6 }}>Top clusters boosted</div>
+              {(data.section_f_interest?.top_clusters || []).map((cl, i) => (
+                <div key={cl} style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  padding: '4px 8px', background: i % 2 === 0 ? '#f8fafc' : 'white',
+                  fontSize: 11, borderRadius: 4,
+                }}>
+                  <span>{cl}</span>
+                  <span style={{ fontFamily: 'monospace', color: DC.teal }}>
+                    +{((data.section_f_interest?.cluster_boosts?.[cl] || 0) * 100).toFixed(0)}%
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+
+          <div style={{ ...secTitle, marginTop: 16 }}>G — Context Profile (HSI Fairness)</div>
+          {data.section_g_context ? (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 11, marginBottom: 10 }}>
+                {[
+                  ['SES Band', data.section_g_context.ses_band],
+                  ['Education Board', data.section_g_context.education_board],
+                  ['Support Level', data.section_g_context.support_level],
+                  ['Resource Access', data.section_g_context.resource_access],
+                ].map(([label, val]) => (
+                  <div key={label} style={{ background: '#f8fafc', padding: '6px 10px', borderRadius: 6 }}>
+                    <div style={{ color: DC.muted, fontSize: 10 }}>{label}</div>
+                    <div style={{ fontWeight: 'bold', color: val === 'unknown' ? '#d97706' : DC.navy }}>
+                      {val || 'unknown'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{
+                background: data.section_g_context.context_filled ? '#f0fdf4' : '#fffbeb',
+                border: `1px solid ${data.section_g_context.context_filled ? '#bbf7d0' : '#fde68a'}`,
+                borderRadius: 6, padding: '8px 12px', fontSize: 11,
+              }}>
+                <div style={{ fontWeight: 'bold', fontFamily: 'monospace', fontSize: 14, color: DC.navy }}>
+                  CPS: {data.section_g_context.cps_score ?? '—'}
+                </div>
+                <div style={{ color: DC.muted, marginTop: 3 }}>
+                  {data.section_g_context.cps_interpretation}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ color: DC.muted, fontSize: 12 }}>No context profile recorded.</div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────
 
 export default function AdminAnalyticsDashboardPage() {
@@ -641,7 +994,7 @@ export default function AdminAnalyticsDashboardPage() {
     setLoading(true);
     setError(null);
     getPlatformAnalytics()
-      .then(setData)
+      .then((result) => { setData(result); setLastRefreshed(new Date()); })
       .catch((err) => setError(err?.message ?? String(err)))
       .finally(() => setLoading(false));
   }, []);
@@ -679,9 +1032,27 @@ export default function AdminAnalyticsDashboardPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: C.navy }}>Platform Analytics</h1>
-          <div style={{ fontSize: 13, color: C.muted, marginTop: 4, display: "flex", alignItems: "center", gap: 10 }}>
-            <span>Live from production DB{lastRefreshed && <span style={{marginLeft:'10px',color:'#0d9488'}}> · {lastRefreshed.toLocaleTimeString()}</span>}</span>
-            <RefreshButton onRefresh={load} loading={loading} />
+          <div style={{ marginTop: 4 }}>
+            <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div>
+                Live from production DB
+                {lastRefreshed && (
+                  <span style={{ marginLeft: '10px', color: '#0d9488', fontFamily: 'monospace' }}>
+                    Last refreshed: {lastRefreshed.toLocaleTimeString('en-IN', {
+                      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    })} on {lastRefreshed.toLocaleDateString('en-IN', {
+                      day: '2-digit', month: 'short', year: 'numeric'
+                    })}
+                  </span>
+                )}
+              </div>
+              <RefreshButton onRefresh={load} loading={loading} />
+            </div>
+            {data?.generated_at && (
+              <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '1px', fontFamily: 'monospace' }}>
+                DB snapshot: {new Date(data.generated_at).toLocaleString('en-IN')}
+              </div>
+            )}
           </div>
         </div>
         <Link to="/admin" style={{ fontSize: 13, color: C.navy, textDecoration: "none", display: "flex", alignItems: "center", gap: 4, marginTop: 6 }}>
