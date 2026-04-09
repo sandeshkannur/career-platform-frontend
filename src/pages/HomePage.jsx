@@ -180,7 +180,7 @@ export default function HomePage() {
           </h1>
 
           <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 30px" }}>
-            {t("home.hero.subtitle", "MapYourCareer uses 25 Associated Qualities to build your unique talent fingerprint — then maps it to 343 careers across 16 industry clusters. Science-backed. Counsellor-verified.")}
+            {t("home.hero.subtitle", "MapYourCareer uses 25 Associated Qualities to build your unique talent fingerprint — then maps it to 335 careers across 15 industry clusters. Science-backed. Counsellor-verified.")}
           </p>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
@@ -195,8 +195,8 @@ export default function HomePage() {
             borderRadius: 16, padding: "20px 16px",
             maxWidth: 400, margin: "0 auto",
           }}>
-            <StatPill value="75"  label={t("home.stats.questions", "curated questions")} />
-            <StatPill value="343" label={t("home.stats.careers", "mapped careers")} />
+            <StatPill value="50"  label={t("home.stats.questions", "curated questions")} />
+            <StatPill value="335" label={t("home.stats.careers", "mapped careers")} />
             <StatPill value="25"  label={t("home.stats.qualities", "Associated Qualities")} />
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function HomePage() {
         <AutoGrid>
           <StepCard number="1"
             title={t("home.howItWorks.step1.title", "Take the assessment")}
-            desc={t("home.howItWorks.step1.desc", "75 carefully crafted questions measuring your 25 Associated Qualities — curiosity, analytical thinking, empathy, grit, and more.")}
+            desc={t("home.howItWorks.step1.desc", "50 carefully crafted questions measuring your 25 Associated Qualities — curiosity, analytical thinking, empathy, grit, and more.")}
           />
           <StepCard number="2"
             title={t("home.howItWorks.step2.title", "Get your AQ profile")}
@@ -219,7 +219,7 @@ export default function HomePage() {
           />
           <StepCard number="3"
             title={t("home.howItWorks.step3.title", "Discover your careers")}
-            desc={t("home.howItWorks.step3.desc", "Your profile is matched to 343 careers across 16 clusters. See what fits, what gaps exist, and what to do next.")}
+            desc={t("home.howItWorks.step3.desc", "Your profile is matched to 335 careers across 15 clusters. See what fits, what gaps exist, and what to do next.")}
           />
         </AutoGrid>
       </Section>
@@ -236,7 +236,7 @@ export default function HomePage() {
             desc={t("home.features.aq.desc", "From curiosity and analytical decomposition to stress tolerance and integrity — we measure what drives career success.")}
           />
           <FeatureCard icon="🎯"
-            title={t("home.features.careers.title", "343 careers, 16 clusters")}
+            title={t("home.features.careers.title", "335 careers, 15 clusters")}
             desc={t("home.features.careers.desc", "Agriculture to STEM, Health Science to Creative Arts — every major Indian and global career path is mapped.")}
           />
           <FeatureCard icon="🔍"
