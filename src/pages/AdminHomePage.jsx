@@ -57,6 +57,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Platform Analytics</Button>
         </Link>
 
+        <Link to="/admin/student-skills">
+          <Button style={{ width: "100%" }}>Student Skills (24)</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );

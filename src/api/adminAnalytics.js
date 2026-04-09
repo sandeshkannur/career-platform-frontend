@@ -1,5 +1,5 @@
 // src/api/adminAnalytics.js
-import { apiGet, apiPatch } from "../apiClient";
+import { apiGet, apiPatch, apiPost } from "../apiClient";
 
 export async function getPlatformAnalytics() {
   return apiGet("/v1/admin-analytics/platform");
@@ -62,4 +62,30 @@ export async function getMappingHealth() {
 
 export async function getCareerSkillWeights(careerId) {
   return apiGet(`/v1/admin-portal/mappings/career-skill-weights?career_id=${careerId}`);
+}
+
+// Individual record creation
+export async function createCluster(body) {
+  return apiPost('/v1/admin-portal/career-clusters', body);
+}
+
+export async function createCareer(body) {
+  return apiPost('/v1/admin-portal/careers', body);
+}
+
+export async function createKeySkill(body) {
+  return apiPost('/v1/admin-portal/key-skills', body);
+}
+
+export async function createMapping(body) {
+  return apiPost('/v1/admin-portal/mappings/career-keyskill', body);
+}
+
+// Student skills
+export async function getAdminStudentSkills() {
+  return apiGet('/v1/admin-portal/student-skills');
+}
+
+export async function updateStudentSkillDisplayName(skillId, body) {
+  return apiPatch(`/v1/admin-portal/student-skills/${skillId}`, body);
 }
