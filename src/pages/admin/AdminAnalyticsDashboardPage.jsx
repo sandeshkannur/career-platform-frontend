@@ -684,6 +684,51 @@ function TabIssues({ data }) {
 
   const order = ["critical", "warning", "info"];
 
+  const resolvedIssues = [
+    {
+      code: 'HSI_OVERFLOW',
+      title: '21 skill scores exceeded 100 — capped at 100.0',
+      detail: 'HSI formula produced scores above 100. Cap applied in compute_hsi_v1. 21 historical rows backfilled.',
+      fix_applied: 'min(100.0, raw * multiplier) in scoring service + SQL backfill',
+      fixed_on: '09 Apr 2026',
+    },
+    {
+      code: 'CAREER_SNAPSHOT_BUG',
+      title: '368 careers stored in results — reduced to 9',
+      detail: '26 assessments had full catalog (368 careers) stored instead of top 9. All 3 write sites confirmed at limit=9. Historical rows truncated.',
+      fix_applied: 'Confirmed limit=9 at all write sites + SQL backfill of 26 rows',
+      fixed_on: '09 Apr 2026',
+    },
+    {
+      code: 'MISSING_RESULTS_GATE',
+      title: 'No response count validation on submit — gate added',
+      detail: 'Assessments could be submitted with 0 responses. Minimum 45-response gate now enforced.',
+      fix_applied: 'POST /assessments/{id}/submit-assessment rejects with 422 if response_count < 45',
+      fixed_on: '09 Apr 2026',
+    },
+    {
+      code: 'CPS_DEFAULTS',
+      title: 'CPS unknown defaults set to low-resource rural baseline',
+      detail: 'All-unknown CPS was 69.5 (neutral mid-range). Lowered to 58.75 to give rural students stronger HSI fairness boost.',
+      fix_applied: 'ses=0.55, board=0.70, support=0.55, resource=0.55 in compute_cps_v1',
+      fixed_on: '09 Apr 2026',
+    },
+    {
+      code: 'ORPHAN_SKILLS',
+      title: '7 orphan skills zeroed — Education/Health Sci now reachable',
+      detail: '7 skills had no AQ feeding them, holding 25-29% dead weight per cluster. Zeroed and 1,635 rows rescaled. Education now top recommended cluster.',
+      fix_applied: 'UPDATE career_student_skill SET weight=0 for 7 skills + proportional rescale of 1,635 rows',
+      fixed_on: '09 Apr 2026',
+    },
+    {
+      code: 'INAPPROPRIATE_CAREERS',
+      title: '33 inappropriate careers deactivated from student recommendations',
+      detail: 'Manual labour, culturally stigmatised, and Western-irrelevant careers removed. Career catalogue: 368 → 335 active. 14 careers relabelled with Indian context.',
+      fix_applied: 'is_active=FALSE for 33 careers, career_tier classification added, scoring engine filters WHERE is_active=TRUE',
+      fixed_on: '09 Apr 2026',
+    },
+  ];
+
   return (
     <div style={{ display: "grid", gap: 20 }}>
       {issues.length === 0 && (
@@ -719,6 +764,43 @@ function TabIssues({ data }) {
           </div>
         );
       })}
+
+      {/* RESOLVED SECTION */}
+      <div style={{ marginTop: 24 }}>
+        <div style={{
+          fontSize: 13, fontWeight: 'bold', color: '#16a34a',
+          textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 12,
+        }}>
+          RESOLVED ({resolvedIssues.length})
+        </div>
+        {resolvedIssues.map(issue => (
+          <div key={issue.code} style={{
+            background: '#f0fdf4',
+            border: '0.5px solid #bbf7d0',
+            borderLeft: '4px solid #16a34a',
+            borderRadius: '0 8px 8px 0',
+            padding: '12px 16px',
+            marginBottom: 10,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ fontSize: 13, fontWeight: 'bold', color: '#15803d' }}>
+                {issue.title}
+              </div>
+              <div style={{
+                fontSize: 10, color: '#16a34a', fontFamily: 'monospace',
+                background: '#dcfce7', padding: '2px 8px', borderRadius: 4,
+                flexShrink: 0, marginLeft: 12,
+              }}>
+                Fixed {issue.fixed_on}
+              </div>
+            </div>
+            <div style={{ fontSize: 12, color: '#166534', marginTop: 4 }}>{issue.detail}</div>
+            <div style={{ fontSize: 11, color: '#15803d', marginTop: 4, fontStyle: 'italic' }}>
+              Fix applied: {issue.fix_applied}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
