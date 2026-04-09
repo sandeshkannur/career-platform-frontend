@@ -777,10 +777,6 @@ function GraphAnalyticsPanel({ studentId, topCareer }) {
 
   return (
     <div style={{ borderTop: `2px solid ${GC.teal}`, marginTop: 16, paddingTop: 16 }}>
-      <div style={{ fontSize: 13, fontWeight: 'bold', color: GC.teal, marginBottom: 10 }}>
-        H — Graph Analytics
-      </div>
-
       {/* Tab bar */}
       <div style={{ display: 'flex', borderBottom: `1px solid ${GC.border}`, gap: 0 }}>
         {[
