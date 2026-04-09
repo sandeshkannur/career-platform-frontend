@@ -1,5 +1,7 @@
 // src/pages/admin/AdminKeySkillsPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminNav from '../../components/AdminNav';
 import { getAdminKeySkills, getAdminClusters } from '../../api/adminAnalytics';
 
 export default function AdminKeySkillsPage() {
@@ -7,6 +9,7 @@ export default function AdminKeySkillsPage() {
     navy: '#0b1f3a', teal: '#0d9488', border: '#e2e8f0',
     muted: '#64748b', bg: '#f8fafc', card: '#fff', red: '#dc2626',
   };
+  const navigate = useNavigate();
   const [keyskills, setKeyskills] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,10 +35,18 @@ export default function AdminKeySkillsPage() {
   };
 
   return (
+    <>
+    <AdminNav title="Key Skills" subtitle="Skill to cluster mapping and weights" />
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Key Skills</h1>
-        <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{keyskills.length} keyskills</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Key Skills</h1>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{keyskills.length} keyskills</div>
+        </div>
+        <button style={{
+          fontSize: 12, padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
+          background: C.teal, color: '#fff', border: 'none', fontFamily: 'inherit',
+        }} onClick={() => navigate('/admin/bulk-upload')}>+ Upload CSV</button>
       </div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <input style={{ ...inputStyle, minWidth: 200 }} placeholder="Search skill name..."
@@ -85,5 +96,6 @@ export default function AdminKeySkillsPage() {
         </table>
       </div>
     </div>
+    </>
   );
 }

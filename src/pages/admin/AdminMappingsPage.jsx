@@ -1,5 +1,6 @@
 // src/pages/admin/AdminMappingsPage.jsx
 import React, { useState, useEffect } from 'react';
+import AdminNav from '../../components/AdminNav';
 import { getMappingHealth } from '../../api/adminAnalytics';
 
 export default function AdminMappingsPage() {
@@ -27,6 +28,8 @@ export default function AdminMappingsPage() {
   );
 
   return (
+    <>
+    <AdminNav title="Mappings & Weights" subtitle="Career ↔ KeySkill ↔ Student Skill weight health" />
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Mappings & Weights</h1>
@@ -77,5 +80,6 @@ export default function AdminMappingsPage() {
         Bulk weight updates are done via Bulk Upload → Upload CSV.
       </div>
     </div>
+    </>
   );
 }
