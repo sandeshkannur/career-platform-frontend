@@ -683,8 +683,9 @@ function TabIssues({ data }) {
   }, {});
 
   const order = ["critical", "warning", "info"];
+  const [resolvedOpen, setResolvedOpen] = useState(false);
 
-  const resolvedIssues = [
+  const hardcodedResolved = [
     {
       code: 'HSI_OVERFLOW',
       title: '21 skill scores exceeded 100 — capped at 100.0',
@@ -729,6 +730,8 @@ function TabIssues({ data }) {
     },
   ];
 
+  const resolvedIssues = data?.resolved_issues || hardcodedResolved;
+
   return (
     <div style={{ display: "grid", gap: 20 }}>
       {issues.length === 0 && (
@@ -765,41 +768,61 @@ function TabIssues({ data }) {
         );
       })}
 
-      {/* RESOLVED SECTION */}
+      {/* RESOLVED SECTION — collapsible */}
       <div style={{ marginTop: 24 }}>
-        <div style={{
-          fontSize: 13, fontWeight: 'bold', color: '#16a34a',
-          textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 12,
-        }}>
-          RESOLVED ({resolvedIssues.length})
-        </div>
-        {resolvedIssues.map(issue => (
-          <div key={issue.code} style={{
-            background: '#f0fdf4',
+        <div
+          onClick={() => setResolvedOpen(o => !o)}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            cursor: 'pointer', padding: '10px 14px',
+            background: resolvedOpen ? '#f0fdf4' : '#f8fafb',
             border: '0.5px solid #bbf7d0',
-            borderLeft: '4px solid #16a34a',
-            borderRadius: '0 8px 8px 0',
-            padding: '12px 16px',
-            marginBottom: 10,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: 13, fontWeight: 'bold', color: '#15803d' }}>
-                {issue.title}
-              </div>
-              <div style={{
-                fontSize: 10, color: '#16a34a', fontFamily: 'monospace',
-                background: '#dcfce7', padding: '2px 8px', borderRadius: 4,
-                flexShrink: 0, marginLeft: 12,
-              }}>
-                Fixed {issue.fixed_on}
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: '#166534', marginTop: 4 }}>{issue.detail}</div>
-            <div style={{ fontSize: 11, color: '#15803d', marginTop: 4, fontStyle: 'italic' }}>
-              Fix applied: {issue.fix_applied}
-            </div>
+            borderRadius: resolvedOpen ? '8px 8px 0 0' : '8px',
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 'bold', color: '#16a34a', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+            RESOLVED ({resolvedIssues.length})
           </div>
-        ))}
+          <div style={{ fontSize: 12, color: '#16a34a' }}>
+            {resolvedOpen ? '▲ collapse' : '▼ expand to view resolved issues'}
+          </div>
+        </div>
+
+        {resolvedOpen && (
+          <div style={{ border: '0.5px solid #bbf7d0', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '0 0 4px 0' }}>
+            {resolvedIssues.map(issue => (
+              <div key={issue.code} style={{
+                background: '#f0fdf4',
+                borderLeft: '4px solid #16a34a',
+                padding: '12px 16px',
+                margin: '4px 8px',
+                borderRadius: '0 6px 6px 0',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: 13, fontWeight: 'bold', color: '#15803d' }}>{issue.title}</div>
+                  <div style={{
+                    fontSize: 10, color: '#16a34a', fontFamily: 'monospace',
+                    background: '#dcfce7', padding: '2px 8px', borderRadius: 4,
+                    flexShrink: 0, marginLeft: 12,
+                  }}>
+                    Fixed {issue.fixed_on}
+                    {issue.still_resolved === true && ' ✓ verified'}
+                    {issue.still_resolved === false && ' ⚠ re-check needed'}
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: '#166534', marginTop: 4 }}>{issue.detail}</div>
+                <div style={{ fontSize: 11, color: '#15803d', marginTop: 4, fontStyle: 'italic' }}>
+                  Applied: {issue.fix_applied}
+                </div>
+                {issue.live_check && (
+                  <div style={{ fontSize: 10, color: '#16a34a', fontFamily: 'monospace', marginTop: 4 }}>
+                    Live check: {issue.live_check}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

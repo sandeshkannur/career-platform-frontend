@@ -198,3 +198,10 @@ export const apiPut = (url, body, options = {}) =>
 
 export const apiDelete = (url, options = {}) =>
   apiRequest(url, { ...options, method: "DELETE" });
+
+export const apiPatch = (url, body, options = {}) =>
+  apiRequest(url, {
+    ...options,
+    method: "PATCH",
+    body: body instanceof FormData ? body : JSON.stringify(body),
+  });
