@@ -550,6 +550,47 @@ function TabCareers({ data }) {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+
+      {/* Career Health Panel */}
+      <div style={{
+        background: '#fff', border: '1px solid #e2e8f0',
+        borderRadius: 8, padding: '16px 18px', marginBottom: 0,
+      }}>
+        <div style={{
+          fontSize: 12, fontWeight: 'bold', color: '#0b1f3a',
+          textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12,
+          paddingBottom: 8, borderBottom: '1px solid #e2e8f0',
+        }}>
+          Career Catalogue Health
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 10, marginBottom: 14 }}>
+          {[
+            { tier: 'Tier 1', label: 'Aspirational India',      count: data?.career_tier_stats?.find(t => t.career_tier === 1 && t.is_active)?.count  || 0, color: '#16a34a', bg: '#f0fdf4' },
+            { tier: 'Tier 2', label: 'Show with caution',       count: data?.career_tier_stats?.find(t => t.career_tier === 2 && t.is_active)?.count  || 0, color: '#d97706', bg: '#fffbeb' },
+            { tier: 'Tier 3', label: 'Deactivated (Western)',   count: data?.career_tier_stats?.find(t => t.career_tier === 3 && !t.is_active)?.count || 0, color: '#64748b', bg: '#f8fafc' },
+            { tier: 'Tier 4', label: 'Deactivated (Morale)',    count: data?.career_tier_stats?.find(t => t.career_tier === 4 && !t.is_active)?.count || 0, color: '#dc2626', bg: '#fef2f2' },
+          ].map(t => (
+            <div key={t.tier} style={{
+              background: t.bg, borderRadius: 8, padding: '12px 14px',
+              border: `1px solid ${t.color}22`,
+            }}>
+              <div style={{ fontSize: 11, color: t.color, fontWeight: 'bold' }}>{t.tier}</div>
+              <div style={{ fontSize: 22, fontWeight: 'bold', color: t.color, fontFamily: 'monospace', lineHeight: 1, margin: '4px 0' }}>{t.count}</div>
+              <div style={{ fontSize: 10, color: '#64748b' }}>{t.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          fontSize: 11, color: '#92400e', background: '#fffbeb',
+          border: '1px solid #fde68a', borderRadius: 6, padding: '8px 12px',
+        }}>
+          ⚠ Tier 2 careers (Telemarketer, Bookkeeper, Payroll Clerk etc.) are active but
+          should display an automation-risk warning on student results pages.
+        </div>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <Card>
           <SectionTitle>Top 20 Most Recommended Careers</SectionTitle>
