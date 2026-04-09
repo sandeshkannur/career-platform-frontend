@@ -112,7 +112,7 @@ export default function PricingPage() {
 
           <PriceCard
             title={t("pricing.premium.title", "Premium")}
-            price={t("pricing.premium.price", "₹799")}
+            price={t("pricing.premium.price", "₹599")}
             subtitle={t("pricing.premium.subtitle", "Deeper analytics + explainability")}
             highlight
             features={[
