@@ -1,5 +1,7 @@
 // src/pages/admin/AdminCareersPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminNav from '../../components/AdminNav';
 import { getAdminClusters, getAdminCareers, updateCareerTier } from '../../api/adminAnalytics';
 
 const TIER_LABELS = { 1: 'Aspirational', 2: 'Automation Risk', 3: 'Western/Irrelevant', 4: 'Low Aspiration' };
@@ -11,6 +13,7 @@ export default function AdminCareersPage() {
     bg: '#f8fafc', card: '#fff', red: '#dc2626', green: '#16a34a', amber: '#d97706',
   };
 
+  const navigate = useNavigate();
   const [careers, setCareers] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [total, setTotal] = useState(0);
@@ -63,6 +66,8 @@ export default function AdminCareersPage() {
   };
 
   return (
+    <>
+    <AdminNav title="Careers" subtitle="Manage career tiers and active status" />
     <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -72,6 +77,10 @@ export default function AdminCareersPage() {
             {total} careers · Page {page} of {Math.ceil(total / PAGE_SIZE)}
           </div>
         </div>
+        <button style={{
+          fontSize: 12, padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
+          background: C.teal, color: '#fff', border: 'none', fontFamily: 'inherit',
+        }} onClick={() => navigate('/admin/bulk-upload')}>+ Upload CSV</button>
       </div>
 
       {/* Filters */}
@@ -106,11 +115,11 @@ export default function AdminCareersPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
             <tr style={{ background: C.bg, borderBottom: `0.5px solid ${C.border}` }}>
-              {['Title', 'Cluster', 'Code', 'Active', 'Tier', 'KeySkills', 'Weights', 'Weight Sum', 'Actions'].map(h => (
+              {['Title', 'Cluster', 'Code', 'Active', 'Tier', 'KeySkills', 'Weights', 'Skill Wt Total', 'Actions'].map(h => (
                 <th key={h} style={{
-                  padding: '8px 12px', textAlign: h === 'Active' || h === 'KeySkills' || h === 'Weights' || h === 'Weight Sum' ? 'center' : 'left',
+                  padding: '8px 12px', textAlign: h === 'Active' || h === 'KeySkills' || h === 'Weights' || h === 'Skill Wt Total' ? 'center' : 'left',
                   color: C.muted, fontWeight: 500,
-                }}>{h}</th>
+                }}>{h}{h === 'Skill Wt Total' && <div style={{ fontSize: 9, fontWeight: 400 }}>(should be ~100)</div>}</th>
               ))}
             </tr>
           </thead>
@@ -166,10 +175,8 @@ export default function AdminCareersPage() {
                       {career.skill_weight_count}
                     </span>
                   </td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'monospace' }}>
-                    <span style={{ color: Math.abs((career.skill_weight_total || 0) - 100) > 2 ? C.red : C.green }}>
-                      {career.skill_weight_total?.toFixed(1) || '—'}
-                    </span>
+                  <td style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'monospace', color: C.navy }}>
+                    {career.skill_weight_total?.toFixed(1) || '—'}
                   </td>
                   <td style={{ padding: '8px 12px' }}>
                     <span style={{ cursor: 'pointer', color: C.teal, fontSize: 11 }}
@@ -230,5 +237,6 @@ export default function AdminCareersPage() {
         <button style={inputStyle} disabled={page >= Math.ceil(total / PAGE_SIZE)} onClick={() => setPage(p => p + 1)}>Next →</button>
       </div>
     </div>
+    </>
   );
 }

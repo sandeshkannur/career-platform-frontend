@@ -1,5 +1,7 @@
 // src/pages/admin/AdminCareerClustersPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminNav from '../../components/AdminNav';
 import { getAdminClusters } from '../../api/adminAnalytics';
 
 const C = {
@@ -8,6 +10,7 @@ const C = {
 };
 
 export default function AdminCareerClustersPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +21,8 @@ export default function AdminCareerClustersPage() {
   if (loading) return <div style={{ padding: 32, color: C.muted }}>Loading clusters...</div>;
 
   return (
+    <>
+    <AdminNav title="Career Clusters" subtitle="Cluster overview" />
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
@@ -26,6 +31,10 @@ export default function AdminCareerClustersPage() {
             {data?.total} clusters · {data?.clusters?.reduce((s, c) => s + c.active_career_count, 0)} active careers
           </div>
         </div>
+        <button style={{
+          fontSize: 12, padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
+          background: C.teal, color: '#fff', border: 'none', fontFamily: 'inherit',
+        }} onClick={() => navigate('/admin/bulk-upload')}>+ Upload CSV</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
@@ -60,5 +69,6 @@ export default function AdminCareerClustersPage() {
         ))}
       </div>
     </div>
+    </>
   );
 }
