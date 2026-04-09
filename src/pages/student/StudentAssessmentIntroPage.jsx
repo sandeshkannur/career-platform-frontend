@@ -198,7 +198,7 @@ export default function StudentAssessmentIntroPage() {
           <div style={{ display: "grid", gap: 10 }}>
             {[
               t("student.assessmentIntro.expect.li1", "Answer honestly — there are no right or wrong answers."),
-              t("student.assessmentIntro.expect.li2", "Estimated time: ~10–15 minutes."),
+              t("student.assessmentIntro.expect.li2", "Estimated time: ~20–25 minutes."),
               t("student.assessmentIntro.expect.li3", "You can resume later — progress is saved automatically."),
             ].map((step, i) => (
               <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
