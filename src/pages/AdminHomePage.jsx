@@ -69,6 +69,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Fit Band Thresholds</Button>
         </Link>
 
+        <Link to="/admin/compliance">
+          <Button style={{ width: "100%" }}>DPDP Compliance</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
