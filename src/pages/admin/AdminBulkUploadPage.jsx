@@ -1,385 +1,483 @@
 // src/pages/admin/AdminBulkUploadPage.jsx
-import React, { useState } from 'react';
-import AdminNav from '../../components/AdminNav';
-import { apiPost } from '../../apiClient';
+import { useState, useRef, useCallback } from "react";
+import { Link } from "react-router-dom";
+import SkeletonPage from "../../ui/SkeletonPage";
+import Button from "../../ui/Button";
+import Card from "../../ui/Card";
+import { getToken, apiBase } from "../../auth";
 
-const C = {
-  navy: '#0b1f3a', teal: '#0d9488', border: '#e2e8f0',
-  muted: '#64748b', bg: '#f8fafc', card: '#fff',
-  red: '#dc2626', green: '#16a34a', amber: '#d97706',
-};
-
-const UPLOAD_TYPES = [
-  {
-    id: 'careers',
-    label: 'Careers',
-    endpoint: '/v1/admin/bulk/careers',
-    description: 'Create or update career records (title, cluster, tier, active status).',
-    headers: ['career_code', 'title', 'cluster_id', 'career_tier', 'is_active'],
-    example: 'CAR001,Software Engineer,1,1,true',
-  },
-  {
-    id: 'career_content_en',
-    label: 'Career Content (EN)',
-    endpoint: '/v1/admin/bulk/career-content-en',
-    description: 'English content for careers: salary, pathways, streams, automation risk.',
-    headers: ['career_code', 'indian_job_title', 'recommended_stream', 'automation_risk', 'future_outlook', 'salary_entry_inr', 'salary_peak_inr', 'pathway_step1', 'pathway_step2', 'pathway_step3'],
-    example: 'CAR001,Software Developer,Science,Low,High,400000,2000000,B.Tech CS,Work at startup,Senior Engineer',
-  },
-  {
-    id: 'career_content_kn',
-    label: 'Career Content (KN)',
-    endpoint: '/v1/admin/bulk/career-content-kn',
-    description: 'Kannada content for careers (same columns as EN).',
-    headers: ['career_code', 'indian_job_title', 'recommended_stream', 'automation_risk', 'future_outlook', 'salary_entry_inr', 'salary_peak_inr', 'pathway_step1', 'pathway_step2', 'pathway_step3'],
-    example: 'CAR001,ಸಾಫ್ಟ್‌ವೇರ್ ಡೆವಲಪರ್,...',
-  },
-  {
-    id: 'clusters',
-    label: 'Career Clusters',
-    endpoint: '/v1/admin/bulk/clusters',
-    description: 'Create or update career cluster records.',
-    headers: ['id', 'name', 'description'],
-    example: '1,Technology,Careers in software and IT',
-  },
-  {
-    id: 'keyskills',
-    label: 'Key Skills',
-    endpoint: '/v1/admin/bulk/keyskills',
-    description: 'Create or update key skill records linked to clusters.',
-    headers: ['id', 'name', 'cluster_id', 'description'],
-    example: '1,Logical Reasoning,1,Ability to solve structured problems',
-  },
-  {
-    id: 'career_keyskill_weights',
-    label: 'Career ↔ KeySkill Weights',
-    endpoint: '/v1/admin/bulk/career-keyskill-weights',
-    description: 'Set weight_percentage for each career–keyskill pair. Sum per career should be ~100.',
-    headers: ['career_code', 'keyskill_id', 'weight_percentage'],
-    example: 'CAR001,1,35',
-  },
-  {
-    id: 'student_skills',
-    label: 'Student Skills (seed)',
-    endpoint: '/v1/admin/bulk/student-skills',
-    description: 'Seed or override student skill scores (use carefully — overwrites existing).',
-    headers: ['student_id', 'keyskill_id', 'score'],
-    example: 'STU001,1,75',
-  },
-  {
-    id: 'questions',
-    label: 'Assessment Questions',
-    endpoint: '/v1/admin/bulk/questions',
-    description: 'Create or update assessment questions (chapters 1–5).',
-    headers: ['id', 'chapter', 'question_text_en', 'question_text_kn', 'skill_id', 'reverse_scored'],
-    example: '1,1,I enjoy solving puzzles,ನಾನು ಒಗಟುಗಳನ್ನು ಪರಿಹರಿಸಲು ಇಷ್ಟಪಡುತ್ತೇನೆ,1,false',
-  },
-  {
-    id: 'interest_inventory',
-    label: 'Interest Inventory (Ch.5)',
-    endpoint: '/v1/admin/bulk/interest-inventory',
-    description: 'Update Chapter 5 interest questions and their cluster mappings.',
-    headers: ['id', 'question_text_en', 'question_text_kn', 'cluster_id'],
-    example: '51,I like designing things,ನಾನು ವಿನ್ಯಾಸ ಮಾಡಲು ಇಷ್ಟಪಡುತ್ತೇನೆ,3',
-  },
-  {
-    id: 'tier_reasons',
-    label: 'Career Tier Reasons',
-    endpoint: '/v1/admin/bulk/tier-reasons',
-    description: 'Bulk-set tier_reason text for careers.',
-    headers: ['career_code', 'tier_reason'],
-    example: 'CAR001,High demand in Indian market; strong salary growth',
-  },
-  {
-    id: 'deactivate_careers',
-    label: 'Deactivate Careers',
-    endpoint: '/v1/admin/bulk/deactivate-careers',
-    description: 'Deactivate a list of careers by code. Sets is_active=false.',
-    headers: ['career_code'],
-    example: 'CAR042',
-  },
+/* ─────────────────────────────────────────────────────────────────────────
+   CSV TEMPLATE
+   Add a column here and it appears in the downloaded CSV and example table.
+────────────────────────────────────────────────────────────────────────── */
+const CSV_HEADERS = [
+  "title", "career_code", "cluster_name", "description",
+  "recommended_stream", "salary_entry_inr", "salary_mid_inr", "salary_peak_inr",
+  "automation_risk", "future_outlook", "indian_job_title", "prestige_title",
 ];
 
-export default function AdminBulkUploadPage() {
-  const [step, setStep] = useState(1); // 1=select type, 2=choose file, 3=result
-  const [selectedType, setSelectedType] = useState(null);
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+const CSV_EXAMPLES = [
+  ["Agricultural Scientist", "AGR_001", "Agriculture", "Research and improve farming techniques",
+   "Science PCB", "450000", "900000", "1800000", "low", "growing",
+   "Krishi Vaigyanik", "Food Security Scientist"],
+  ["Software Engineer", "TECH_050", "Technology", "Design and build software systems",
+   "Science PCM", "600000", "1400000", "3500000", "medium", "growing",
+   "Software Engineer", "Principal Engineer"],
+];
 
-  const handleSelectType = (type) => {
-    setSelectedType(type);
-    setFile(null);
-    setResult(null);
-    setError(null);
-    setStep(2);
-  };
+function downloadTemplate() {
+  const rows = [CSV_HEADERS, ...CSV_EXAMPLES];
+  const csv  = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = "careers_bulk_import_template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-  const handleUpload = async () => {
-    if (!file || !selectedType) return;
-    setUploading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await apiPost(selectedType.endpoint, form);
-      setResult(res);
-      setStep(3);
-    } catch (e) {
-      setError(e?.message || 'Upload failed. Check the CSV format and try again.');
-    } finally {
-      setUploading(false);
-    }
-  };
+/* ─── state machine phases ─── */
+const PHASE = {
+  IDLE:           "idle",
+  READY:          "ready",        // file chosen, no run yet
+  DRY_LOADING:    "dry_loading",
+  DRY_DONE:       "dry_done",
+  IMPORT_LOADING: "import_loading",
+  IMPORT_DONE:    "import_done",
+};
 
-  const reset = () => {
-    setStep(1);
-    setSelectedType(null);
-    setFile(null);
-    setResult(null);
-    setError(null);
-  };
+function fmtBytes(bytes) {
+  if (bytes < 1024)       return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
-  const inputStyle = {
-    fontSize: 12, padding: '5px 8px',
-    border: `0.5px solid ${C.border}`, borderRadius: 6, background: C.card,
-  };
+/* ─── upload helper — uses fetch directly to send FormData ─── */
+async function uploadCSV(file, isDryRun) {
+  const base     = apiBase();
+  const token    = getToken();
+  const endpoint = `${base}/v1/admin/careers/bulk-import?dry_run=${isDryRun}`;
 
-  const btnPrimary = {
-    fontSize: 12, padding: '7px 14px', borderRadius: 6, cursor: 'pointer',
-    background: C.teal, color: '#fff', border: 'none', fontFamily: 'inherit',
-  };
+  const formData = new FormData();
+  formData.append("file", file);
 
-  const btnSecondary = {
-    fontSize: 12, padding: '7px 14px', borderRadius: 6, cursor: 'pointer',
-    background: C.bg, color: C.navy, border: `0.5px solid ${C.border}`, fontFamily: 'inherit',
-  };
+  const res = await fetch(endpoint, {
+    method:  "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body:    formData,
+    credentials: "include",
+  });
+
+  const contentType = res.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await res.json()
+    : await res.text();
+
+  if (!res.ok) {
+    const msg =
+      (data && typeof data === "object" && (data.detail || data.message)) ||
+      (typeof data === "string" ? data : null) ||
+      `Upload failed (${res.status})`;
+    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+  }
+
+  return data;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESULT CARD
+────────────────────────────────────────────────────────────────────────── */
+function ResultCard({ result, isDryRun }) {
+  if (!result) return null;
+
+  const { valid_rows, error_rows, errors = [], inserted, updated } = result;
+  const isDry = isDryRun;
 
   return (
-    <>
-    <AdminNav title="Bulk Upload" subtitle="Upload CSV files to update master data" />
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
-
-      {/* Step indicator */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center' }}>
-        {['Select type', 'Choose file', 'Result'].map((label, i) => {
-          const s = i + 1;
-          const active = step === s;
-          const done = step > s;
-          return (
-            <React.Fragment key={s}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                color: active ? C.teal : done ? C.green : C.muted,
-                fontWeight: active ? 600 : 400, fontSize: 12,
-              }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', fontSize: 10,
-                  background: active ? C.teal : done ? C.green : C.border,
-                  color: active || done ? '#fff' : C.muted,
-                }}>
-                  {done ? '✓' : s}
-                </div>
-                {label}
-              </div>
-              {i < 2 && <div style={{ flex: 1, height: 1, background: C.border }} />}
-            </React.Fragment>
-          );
-        })}
+    <Card className="mt-4">
+      <div style={{ marginBottom: 14 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+          {isDry ? "Dry Run Results" : "Import Results"}
+        </span>
       </div>
 
-      {/* STEP 1 — Select upload type */}
-      {step === 1 && (
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: C.navy, marginBottom: 14 }}>
-            What would you like to upload?
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 10 }}>
-            {UPLOAD_TYPES.map(type => (
-              <div key={type.id}
-                onClick={() => handleSelectType(type)}
-                style={{
-                  background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10,
-                  padding: '14px 16px', cursor: 'pointer',
-                  transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = C.teal}
-                onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
-              >
-                <div style={{ fontSize: 13, fontWeight: 500, color: C.navy, marginBottom: 4 }}>{type.label}</div>
-                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>{type.description}</div>
-              </div>
-            ))}
-          </div>
+      {/* Summary chips */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+        {isDry ? (
+          <>
+            <Chip label="Valid rows" value={valid_rows ?? "—"} color="green" />
+            <Chip label="Error rows" value={error_rows ?? errors?.length ?? 0} color={error_rows > 0 || errors?.length > 0 ? "red" : "green"} />
+          </>
+        ) : (
+          <>
+            <Chip label="Inserted" value={inserted ?? "—"} color="green" />
+            <Chip label="Updated"  value={updated  ?? "—"} color="blue"  />
+            <Chip label="Errors"   value={errors?.length ?? 0} color={errors?.length > 0 ? "red" : "green"} />
+          </>
+        )}
+      </div>
+
+      {/* Ready to import notice */}
+      {isDry && (errors?.length ?? error_rows ?? 0) === 0 && (
+        <div style={{
+          padding: "10px 14px", borderRadius: 8, marginBottom: 14,
+          background: "#dcfce7", border: "1px solid #86efac",
+          fontSize: 13, color: "#166534", fontWeight: 600,
+        }}>
+          ✓ No errors found — ready to import for real.
         </div>
       )}
 
-      {/* STEP 2 — Choose file */}
-      {step === 2 && selectedType && (
-        <div>
-          <button style={{ ...btnSecondary, marginBottom: 16 }} onClick={reset}>← Change type</button>
-
-          <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, padding: '20px 24px', marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 500, color: C.navy, marginBottom: 4 }}>{selectedType.label}</div>
-            <div style={{ fontSize: 12, color: C.muted, marginBottom: 16 }}>{selectedType.description}</div>
-
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: C.navy, marginBottom: 6 }}>Expected CSV columns:</div>
-              <div style={{
-                fontFamily: 'monospace', fontSize: 11, background: C.bg,
-                padding: '8px 12px', borderRadius: 6, border: `0.5px solid ${C.border}`,
-                color: C.teal, wordBreak: 'break-all',
-              }}>
-                {selectedType.headers.join(',')}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: C.navy, marginBottom: 6 }}>Example row:</div>
-              <div style={{
-                fontFamily: 'monospace', fontSize: 11, background: C.bg,
-                padding: '8px 12px', borderRadius: 6, border: `0.5px solid ${C.border}`,
-                color: C.muted, wordBreak: 'break-all',
-              }}>
-                {selectedType.example}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: C.navy, display: 'block', marginBottom: 8 }}>
-                Choose CSV file:
-              </label>
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                style={{ fontSize: 12 }}
-                onChange={e => setFile(e.target.files?.[0] || null)}
-              />
-              {file && (
-                <div style={{ fontSize: 11, color: C.green, marginTop: 6 }}>
-                  Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                </div>
-              )}
-            </div>
-
-            {error && (
-              <div style={{
-                fontSize: 12, color: C.red, background: '#fef2f2',
-                padding: '10px 14px', borderRadius: 6, marginBottom: 14,
-                border: `0.5px solid #fecaca`,
-              }}>
-                {error}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                style={{ ...btnPrimary, opacity: (!file || uploading) ? 0.6 : 1 }}
-                disabled={!file || uploading}
-                onClick={handleUpload}
-              >
-                {uploading ? 'Uploading...' : 'Upload CSV'}
-              </button>
-              <button style={btnSecondary} onClick={reset} disabled={uploading}>Cancel</button>
-            </div>
+      {/* Error table */}
+      {errors?.length > 0 && (
+        <div style={{ overflowX: "auto" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#dc2626", marginBottom: 8 }}>
+            Errors ({errors.length})
           </div>
-
-          <div style={{ fontSize: 11, color: C.muted }}>
-            Endpoint: <span style={{ fontFamily: 'monospace' }}>{selectedType.endpoint}</span>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3 — Result */}
-      {step === 3 && (
-        <div>
-          <div style={{
-            background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10,
-            padding: '20px 24px', marginBottom: 16,
-          }}>
-            <div style={{ fontSize: 15, fontWeight: 500, color: C.green, marginBottom: 12 }}>
-              Upload complete — {selectedType?.label}
-            </div>
-
-            {result && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 10, marginBottom: 16 }}>
-                {[
-                  { label: 'Rows processed', value: result.processed },
-                  { label: 'Inserted', value: result.inserted },
-                  { label: 'Updated', value: result.updated },
-                  { label: 'Skipped / errors', value: result.errors?.length ?? result.skipped },
-                ].filter(s => s.value !== undefined).map(stat => (
-                  <div key={stat.label} style={{
-                    background: C.bg, borderRadius: 8, padding: '10px 12px',
-                    border: `0.5px solid ${C.border}`,
-                  }}>
-                    <div style={{ fontSize: 20, fontWeight: 500, color: C.navy, fontFamily: 'monospace' }}>
-                      {stat.value ?? '—'}
-                    </div>
-                    <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {result?.errors?.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: C.red, marginBottom: 6 }}>
-                  Row errors ({result.errors.length}):
-                </div>
-                <div style={{
-                  fontFamily: 'monospace', fontSize: 11, background: '#fef2f2',
-                  padding: '10px 12px', borderRadius: 6, maxHeight: 200, overflowY: 'auto',
-                  border: `0.5px solid #fecaca`, color: C.red,
-                }}>
-                  {result.errors.map((e, i) => (
-                    <div key={i}>Row {e.row}: {e.message || e}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {result?.message && (
-              <div style={{ fontSize: 12, color: C.muted, marginBottom: 16 }}>{result.message}</div>
-            )}
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button style={btnPrimary} onClick={reset}>Upload another file</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reference table */}
-      <div style={{ marginTop: 32 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: C.navy, marginBottom: 10 }}>All upload types reference</div>
-        <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
-              <tr style={{ background: C.bg, borderBottom: `0.5px solid ${C.border}` }}>
-                {['Type', 'Endpoint', 'Key columns'].map(h => (
-                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: C.muted, fontWeight: 500 }}>{h}</th>
+              <tr style={{ background: "#fef2f2", borderBottom: "1px solid #fecaca" }}>
+                {["Row", "Field", "Message"].map(h => (
+                  <th key={h} style={{ padding: "6px 10px", textAlign: "left", color: "#991b1b", fontWeight: 700 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {UPLOAD_TYPES.map(type => (
-                <tr key={type.id} style={{ borderBottom: `0.5px solid ${C.border}` }}>
-                  <td style={{ padding: '7px 12px', fontWeight: 500, color: C.navy }}>{type.label}</td>
-                  <td style={{ padding: '7px 12px', fontFamily: 'monospace', color: C.teal }}>{type.endpoint}</td>
-                  <td style={{ padding: '7px 12px', color: C.muted, fontFamily: 'monospace' }}>
-                    {type.headers.slice(0, 4).join(', ')}{type.headers.length > 4 ? ` +${type.headers.length - 4} more` : ''}
+              {errors.map((err, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid #fee2e2" }}>
+                  <td style={{ padding: "5px 10px", fontFamily: "monospace", color: "#dc2626" }}>
+                    {err.row ?? err.line ?? i + 1}
+                  </td>
+                  <td style={{ padding: "5px 10px", color: "var(--text-muted)" }}>
+                    {err.field ?? "—"}
+                  </td>
+                  <td style={{ padding: "5px 10px", color: "var(--text-primary)" }}>
+                    {err.message ?? err.error ?? String(err)}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
+    </Card>
+  );
+}
+
+const CHIP_STYLES = {
+  green: { bg: "#dcfce7", color: "#166534", border: "#86efac" },
+  red:   { bg: "#fee2e2", color: "#991b1b", border: "#fca5a5" },
+  blue:  { bg: "#dbeafe", color: "#1e40af", border: "#93c5fd" },
+};
+
+function Chip({ label, value, color = "green" }) {
+  const s = CHIP_STYLES[color] ?? CHIP_STYLES.green;
+  return (
+    <div style={{
+      padding: "8px 14px", borderRadius: 8,
+      background: s.bg, border: `1px solid ${s.border}`,
+      minWidth: 90, textAlign: "center",
+    }}>
+      <div style={{ fontSize: 22, fontWeight: 700, color: s.color, fontFamily: "monospace", lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: 11, color: s.color, marginTop: 3 }}>{label}</div>
     </div>
-    </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE
+────────────────────────────────────────────────────────────────────────── */
+export default function AdminBulkUploadPage() {
+  const [phase,      setPhase]      = useState(PHASE.IDLE);
+  const [file,       setFile]       = useState(null);
+  const [dragOver,   setDragOver]   = useState(false);
+  const [dryResult,  setDryResult]  = useState(null);
+  const [realResult, setRealResult] = useState(null);
+  const [uploadErr,  setUploadErr]  = useState("");
+  const fileInputRef = useRef(null);
+
+  const dryErrorCount = dryResult
+    ? (dryResult.errors?.length ?? dryResult.error_rows ?? 0)
+    : null;
+  const dryPassed = dryResult !== null && dryErrorCount === 0;
+
+  /* ─── file selection ─── */
+
+  const selectFile = useCallback((f) => {
+    if (!f || !f.name.endsWith(".csv")) {
+      setUploadErr("Please select a .csv file.");
+      return;
+    }
+    setFile(f);
+    setPhase(PHASE.READY);
+    setDryResult(null);
+    setRealResult(null);
+    setUploadErr("");
+  }, []);
+
+  const handleFileInput = (e) => selectFile(e.target.files?.[0]);
+  const handleDrop      = (e) => { e.preventDefault(); setDragOver(false); selectFile(e.dataTransfer.files?.[0]); };
+  const handleDragOver  = (e) => { e.preventDefault(); setDragOver(true); };
+  const handleDragLeave = ()  => setDragOver(false);
+
+  /* ─── dry run ─── */
+
+  const runDry = async () => {
+    setPhase(PHASE.DRY_LOADING);
+    setDryResult(null);
+    setRealResult(null);
+    setUploadErr("");
+    try {
+      const result = await uploadCSV(file, true);
+      setDryResult(result);
+      setPhase(PHASE.DRY_DONE);
+    } catch (e) {
+      setUploadErr(e.message || "Dry run failed.");
+      setPhase(PHASE.READY);
+    }
+  };
+
+  /* ─── real import ─── */
+
+  const runImport = async () => {
+    setPhase(PHASE.IMPORT_LOADING);
+    setUploadErr("");
+    try {
+      const result = await uploadCSV(file, false);
+      setRealResult(result);
+      setPhase(PHASE.IMPORT_DONE);
+    } catch (e) {
+      setUploadErr(e.message || "Import failed.");
+      setPhase(PHASE.DRY_DONE);
+    }
+  };
+
+  const isLoading = phase === PHASE.DRY_LOADING || phase === PHASE.IMPORT_LOADING;
+
+  /* ─── shared input style ─── */
+  const inputCls = [
+    "w-full rounded-md border border-[var(--border)] bg-white px-3 py-2",
+    "text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]",
+    "focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-1",
+  ].join(" ");
+
+  return (
+    <SkeletonPage
+      title="Bulk Import — Careers"
+      subtitle="Upload a CSV to create or update career records in bulk"
+      footer={
+        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Admin Console
+          </Link>
+          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Home
+          </Link>
+        </div>
+      }
+    >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, alignItems: "start" }}>
+
+        {/* ── LEFT: Upload + actions ── */}
+        <div>
+          <Card>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14 }}>
+              1. Select CSV File
+            </div>
+
+            {/* Drag-and-drop zone */}
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                border: `2px dashed ${dragOver ? "var(--brand-primary)" : "var(--border)"}`,
+                borderRadius: 10,
+                padding: "28px 20px",
+                textAlign: "center",
+                cursor: "pointer",
+                background: dragOver ? "#eff6ff" : "var(--bg-app)",
+                transition: "border-color 0.15s, background 0.15s",
+                marginBottom: 12,
+              }}
+            >
+              <div style={{ fontSize: 28, marginBottom: 8 }}>📂</div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                Drag &amp; drop a CSV here, or{" "}
+                <span style={{ color: "var(--brand-primary)", fontWeight: 600 }}>click to browse</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                .csv files only
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                style={{ display: "none" }}
+                onChange={handleFileInput}
+              />
+            </div>
+
+            {/* Selected file info */}
+            {file && (
+              <div style={{
+                padding: "10px 12px", borderRadius: 8, marginBottom: 14,
+                background: "#f0fdf4", border: "1px solid #86efac",
+                fontSize: 13, color: "#166534",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                <span>📄 <strong>{file.name}</strong></span>
+                <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{fmtBytes(file.size)}</span>
+              </div>
+            )}
+
+            {/* Error message */}
+            {uploadErr && (
+              <div style={{
+                padding: "10px 12px", borderRadius: 8, marginBottom: 14,
+                background: "#fef2f2", border: "1px solid #fca5a5",
+                fontSize: 13, color: "#dc2626",
+              }}>
+                {uploadErr}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 12, marginTop: 4 }}>
+              2. Validate &amp; Import
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Button
+                onClick={runDry}
+                disabled={!file || isLoading || phase === PHASE.IMPORT_DONE}
+                style={{ justifyContent: "center" }}
+              >
+                {phase === PHASE.DRY_LOADING ? "Validating…" : "Validate (Dry Run)"}
+              </Button>
+
+              <Button
+                variant={dryPassed ? "primary" : "secondary"}
+                onClick={runImport}
+                disabled={!dryPassed || isLoading || phase === PHASE.IMPORT_DONE}
+                style={{ justifyContent: "center" }}
+              >
+                {phase === PHASE.IMPORT_LOADING ? "Importing…" : "Import for Real"}
+              </Button>
+
+              {!dryPassed && phase !== PHASE.IDLE && phase !== PHASE.IMPORT_DONE && (
+                <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0, textAlign: "center" }}>
+                  Run a successful dry run first to unlock Import.
+                </p>
+              )}
+            </div>
+
+            {/* Reset after import */}
+            {phase === PHASE.IMPORT_DONE && (
+              <Button
+                variant="ghost"
+                style={{ marginTop: 10, width: "100%", justifyContent: "center" }}
+                onClick={() => {
+                  setFile(null);
+                  setPhase(PHASE.IDLE);
+                  setDryResult(null);
+                  setRealResult(null);
+                  setUploadErr("");
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+              >
+                Start over
+              </Button>
+            )}
+          </Card>
+
+          {/* Results */}
+          {dryResult && (
+            <ResultCard result={dryResult} isDryRun={true} />
+          )}
+          {realResult && (
+            <ResultCard result={realResult} isDryRun={false} />
+          )}
+        </div>
+
+        {/* ── RIGHT: Template + format reference ── */}
+        <div>
+          <Card>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
+              CSV Template
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14 }}>
+              Download the template and fill in your data. The first row must be the header row exactly as shown.
+            </div>
+
+            <Button variant="secondary" onClick={downloadTemplate} style={{ marginBottom: 18 }}>
+              ⬇ Download Template CSV
+            </Button>
+
+            {/* Column reference */}
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Expected columns
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                <thead>
+                  <tr style={{ background: "var(--bg-app)", borderBottom: "1px solid var(--border)" }}>
+                    <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 700, color: "var(--text-muted)", whiteSpace: "nowrap" }}>Column</th>
+                    <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 700, color: "var(--text-muted)" }}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["title",              "Required. Career title."],
+                    ["career_code",        "Required. Unique code e.g. AGR_001."],
+                    ["cluster_name",       "Cluster name (must match exactly)."],
+                    ["description",        "Optional. Short description."],
+                    ["recommended_stream", "Science PCM / Science PCB / Commerce / Arts/Humanities / Any"],
+                    ["salary_entry_inr",   "Annual salary in ₹ e.g. 450000"],
+                    ["salary_mid_inr",     "Mid-career salary in ₹"],
+                    ["salary_peak_inr",    "Peak salary in ₹"],
+                    ["automation_risk",    "low / medium / high"],
+                    ["future_outlook",     "growing / stable / declining"],
+                    ["indian_job_title",   "Localised job title for India."],
+                    ["prestige_title",     "Aspirational / prestige framing."],
+                  ].map(([col, note], i) => (
+                    <tr key={col} style={{ borderBottom: "1px solid var(--border)", background: i % 2 ? "var(--bg-app)" : "transparent" }}>
+                      <td style={{ padding: "5px 8px", fontFamily: "monospace", fontWeight: 600, color: "#0d9488", whiteSpace: "nowrap" }}>{col}</td>
+                      <td style={{ padding: "5px 8px", color: "var(--text-muted)" }}>{note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Example rows */}
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", margin: "16px 0 8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Example rows
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ borderCollapse: "collapse", fontSize: 10, width: "100%" }}>
+                <thead>
+                  <tr style={{ background: "var(--bg-app)", borderBottom: "1px solid var(--border)" }}>
+                    {CSV_HEADERS.map(h => (
+                      <th key={h} style={{ padding: "4px 6px", fontFamily: "monospace", color: "var(--text-muted)", whiteSpace: "nowrap", textAlign: "left" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {CSV_EXAMPLES.map((row, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid var(--border)", background: i % 2 ? "var(--bg-app)" : "transparent" }}>
+                      {row.map((cell, j) => (
+                        <td key={j} style={{ padding: "4px 6px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </SkeletonPage>
   );
 }
