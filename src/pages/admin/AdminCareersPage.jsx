@@ -1,385 +1,469 @@
 // src/pages/admin/AdminCareersPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AdminNav from '../../components/AdminNav';
-import AdminModal from '../../components/AdminModal';
-import FormField from '../../components/FormField';
-import { getAdminClusters, getAdminCareers, updateCareerTier, createCareer } from '../../api/adminAnalytics';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
+import SkeletonPage from "../../ui/SkeletonPage";
+import Button from "../../ui/Button";
+import Card from "../../ui/Card";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../apiClient";
 
-const TIER_LABELS = { 1: 'Aspirational', 2: 'Automation Risk', 3: 'Western/Irrelevant', 4: 'Low Aspiration' };
-const TIER_COLORS = { 1: '#16a34a', 2: '#d97706', 3: '#64748b', 4: '#dc2626' };
+const PAGE_SIZE = 50;
 
-const fieldStyle = {
-  width: '100%', fontSize: 13, padding: '8px 10px',
-  border: '0.5px solid #e2e8f0', borderRadius: 6, fontFamily: 'inherit', boxSizing: 'border-box',
+const EMPTY_FORM = {
+  title: "", career_code: "", description: "", cluster_id: "",
+  recommended_stream: "", salary_entry_inr: "", salary_mid_inr: "",
+  salary_peak_inr: "", automation_risk: "", future_outlook: "",
 };
 
+const STREAM_OPTIONS = [
+  "", "Science PCM", "Science PCB", "Commerce", "Arts/Humanities", "Any",
+];
+const AUTOMATION_OPTIONS = ["", "low", "medium", "high"];
+const OUTLOOK_OPTIONS    = ["", "growing", "stable", "declining"];
+
+function trunc(str, n = 60) {
+  if (!str) return "—";
+  return str.length > n ? str.slice(0, n) + "…" : str;
+}
+
+function inrLakh(val) {
+  const n = parseFloat(val);
+  if (!n) return "—";
+  return `₹${(n / 100000).toFixed(1)}L`;
+}
+
 export default function AdminCareersPage() {
-  const C = {
-    navy: '#0b1f3a', teal: '#0d9488', border: '#e2e8f0', muted: '#64748b',
-    bg: '#f8fafc', card: '#fff', red: '#dc2626', green: '#16a34a', amber: '#d97706',
-  };
-
-  const navigate = useNavigate();
-  const [careers, setCareers] = useState([]);
+  const [careers,  setCareers]  = useState([]);
   const [clusters, setClusters] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({ cluster_id: '', is_active: '', tier: '', search: '' });
-  const [expandedId, setExpandedId] = useState(null);
-  const [updating, setUpdating] = useState(null);
-  const PAGE_SIZE = 50;
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState("");
+  const [formError, setFormError] = useState("");
 
-  // Create modal state
-  const [showCreate, setShowCreate] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [createResult, setCreateResult] = useState(null);
-  const [form, setForm] = useState({ title: '', career_code: '', cluster_id: '', description: '', career_tier: '1' });
-  const [formError, setFormError] = useState('');
-  const [history, setHistory] = useState([]);
+  // filters (client-side)
+  const [search,    setSearch]    = useState("");
+  const [clusterFilter, setClusterFilter] = useState("");
+  const [showAll,   setShowAll]   = useState(false);
 
-  const load = useCallback(async () => {
+  // form: null = closed | "create" | career object
+  const [formMode, setFormMode] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+
+  // delete confirmation
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleting,   setDeleting]   = useState(false);
+
+  /* ─── load ─── */
+
+  const loadAll = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
-      const params = { page, page_size: PAGE_SIZE };
-      if (filters.cluster_id) params.cluster_id = filters.cluster_id;
-      if (filters.is_active !== '') params.is_active = filters.is_active;
-      if (filters.tier) params.tier = filters.tier;
-      if (filters.search) params.search = `%${filters.search}%`;
-      const d = await getAdminCareers(params);
-      setCareers(d.careers || []);
-      setTotal(d.total || 0);
-    } finally { setLoading(false); }
-  }, [page, filters]);
-
-  useEffect(() => {
-    getAdminClusters().then(d => setClusters(d.clusters || []));
+      const [careersData, clustersData] = await Promise.all([
+        apiGet("/v1/careers"),
+        apiGet("/v1/career-clusters"),
+      ]);
+      setCareers( Array.isArray(careersData)  ? careersData  : (careersData?.careers   ?? []));
+      setClusters(Array.isArray(clustersData) ? clustersData : (clustersData?.clusters ?? []));
+    } catch (e) {
+      setError(e.message || "Failed to load careers.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadAll(); }, [loadAll]);
 
-  const handleTierChange = async (careerId, field, value) => {
-    setUpdating(careerId);
+  /* ─── filtered + paginated view ─── */
+
+  const filtered = useMemo(() => {
+    let list = careers;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(c => c.title?.toLowerCase().includes(q) || c.career_code?.toLowerCase().includes(q));
+    }
+    if (clusterFilter) {
+      list = list.filter(c => String(c.cluster_id) === clusterFilter);
+    }
+    return list;
+  }, [careers, search, clusterFilter]);
+
+  const displayed = showAll ? filtered : filtered.slice(0, PAGE_SIZE);
+
+  const clusterName = (id) => clusters.find(c => String(c.id) === String(id))?.name ?? "—";
+
+  const subtitleText = () => {
+    if (loading) return "Loading…";
+    const total = filtered.length;
+    const clName = clusterFilter ? clusters.find(c => String(c.id) === clusterFilter)?.name : null;
+    return clName
+      ? `${total} career${total !== 1 ? "s" : ""} in ${clName}`
+      : `${total} career${total !== 1 ? "s" : ""}`;
+  };
+
+  /* ─── form helpers ─── */
+
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setFormMode("create");
+    setShowAll(false);
+  };
+
+  const openEdit = (career) => {
+    setForm({
+      title:              career.title              ?? "",
+      career_code:        career.career_code        ?? "",
+      description:        career.description        ?? "",
+      cluster_id:         career.cluster_id != null ? String(career.cluster_id) : "",
+      recommended_stream: career.recommended_stream ?? "",
+      salary_entry_inr:   career.salary_entry_inr   != null ? String(career.salary_entry_inr) : "",
+      salary_mid_inr:     career.salary_mid_inr     != null ? String(career.salary_mid_inr)   : "",
+      salary_peak_inr:    career.salary_peak_inr    != null ? String(career.salary_peak_inr)  : "",
+      automation_risk:    career.automation_risk    ?? "",
+      future_outlook:     career.future_outlook     ?? "",
+    });
+    setFormError("");
+    setFormMode(career);
+  };
+
+  const closeForm = () => {
+    setFormMode(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+  };
+
+  const buildBody = () => ({
+    title:              form.title.trim(),
+    career_code:        form.career_code.trim().toUpperCase(),
+    description:        form.description.trim() || null,
+    cluster_id:         form.cluster_id ? Number(form.cluster_id) : null,
+    recommended_stream: form.recommended_stream || null,
+    salary_entry_inr:   form.salary_entry_inr ? Number(form.salary_entry_inr) : null,
+    salary_mid_inr:     form.salary_mid_inr   ? Number(form.salary_mid_inr)   : null,
+    salary_peak_inr:    form.salary_peak_inr  ? Number(form.salary_peak_inr)  : null,
+    automation_risk:    form.automation_risk  || null,
+    future_outlook:     form.future_outlook   || null,
+  });
+
+  const handleSave = async () => {
+    if (!form.title.trim())       { setFormError("Title is required.");        return; }
+    if (!form.career_code.trim()) { setFormError("Career code is required.");  return; }
+    setSaving(true);
+    setFormError("");
     try {
-      const career = careers.find(c => c.id === careerId);
-      const body = {
-        is_active: field === 'is_active' ? value : career.is_active,
-        career_tier: field === 'career_tier' ? parseInt(value) : career.career_tier,
-        tier_reason: career.tier_reason || '',
-      };
-      await updateCareerTier(careerId, body);
-      await load();
+      if (formMode === "create") {
+        await apiPost("/v1/careers", buildBody());
+      } else {
+        await apiPut(`/v1/careers/${formMode.id}`, buildBody());
+      }
+      closeForm();
+      await loadAll();
     } catch (e) {
-      console.error(e);
-    } finally { setUpdating(null); }
+      setFormError(e.message || "Save failed.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const closeModal = () => {
-    setShowCreate(false);
-    setForm({ title: '', career_code: '', cluster_id: '', description: '', career_tier: '1' });
-    setFormError('');
-    setCreateResult(null);
-  };
+  /* ─── delete ─── */
 
-  const handleCreate = async () => {
-    if (!form.title.trim()) { setFormError('Career title is required'); return; }
-    if (!form.career_code.trim()) { setFormError('Career code is required'); return; }
-    if (!form.cluster_id) { setFormError('Cluster is required'); return; }
-    setCreating(true);
-    setFormError('');
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
     try {
-      const result = await createCareer({ ...form, career_tier: parseInt(form.career_tier) });
-      setCreateResult(result);
-      const clusterName = clusters.find(c => String(c.id) === String(form.cluster_id))?.name || form.cluster_id;
-      setHistory(h => [{
-        action: 'Created', type: 'Career', name: result.title,
-        id: result.id, at: new Date().toLocaleTimeString('en-IN'),
-        extra: `${result.career_code} · ${clusterName} · T${result.career_tier}`,
-      }, ...h].slice(0, 10));
-      load();
+      await apiDelete(`/v1/careers/${deletingId}`);
+      setDeletingId(null);
+      await loadAll();
     } catch (e) {
-      setFormError(e?.message || 'Failed to create career');
-    } finally { setCreating(false); }
+      setError(e.message || "Delete failed.");
+      setDeletingId(null);
+    } finally {
+      setDeleting(false);
+    }
   };
 
-  const inputStyle = {
-    fontSize: 12, padding: '5px 8px',
-    border: `0.5px solid ${C.border}`, borderRadius: 6, background: C.card,
+  /* ─── shared input style ─── */
+
+  const inputCls = [
+    "w-full rounded-md border border-[var(--border)] bg-white px-3 py-2",
+    "text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]",
+    "focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-1",
+  ].join(" ");
+
+  const labelStyle = {
+    display: "block", fontSize: 12, fontWeight: 600,
+    marginBottom: 4, color: "var(--text-primary)",
   };
+
+  /* ─── form field groups ─── */
+
+  const isEditing = formMode && formMode !== "create";
+
+  /* ─── render ─── */
 
   return (
-    <>
-    <AdminNav title="Careers" subtitle="Manage career tiers and active status" />
-    <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Careers</h1>
-          <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
-            {total} careers · Page {page} of {Math.ceil(total / PAGE_SIZE)}
-          </div>
+    <SkeletonPage
+      title="Careers"
+      subtitle={subtitleText()}
+      loading={loading}
+      error={!loading ? error : ""}
+      onRetry={loadAll}
+      actions={
+        !loading && !error && (
+          <Button onClick={openCreate} disabled={formMode !== null}>+ New Career</Button>
+        )
+      }
+      footer={
+        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Admin Console
+          </Link>
+          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Home
+          </Link>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setShowCreate(true)} style={{
-            background: C.teal, color: '#fff', border: 'none',
-            borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
-          }}>+ New Career</button>
-          <button onClick={() => navigate('/admin/bulk-upload')} style={{
-            background: C.navy, color: '#fff', border: 'none',
-            borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12,
-          }}>+ Upload CSV</button>
-        </div>
-      </div>
+      }
+    >
+      {/* ── Create / Edit form ── */}
+      {formMode !== null && (
+        <Card className="mb-6">
+          <h2 style={{ margin: "0 0 16px", fontSize: "var(--font-size-lg)", fontWeight: 700 }}>
+            {isEditing ? `Edit — ${formMode.title}` : "Create Career"}
+          </h2>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-        <input style={{ ...inputStyle, minWidth: 200 }} placeholder="Search career title..."
-          value={filters.search}
-          onChange={e => { setFilters(f => ({ ...f, search: e.target.value })); setPage(1); }}
+          {/* Row 1: Title + Code */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={labelStyle}>Title <span style={{ color: "#dc2626" }}>*</span></label>
+              <input className={inputCls} value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Agricultural Scientist" autoFocus />
+            </div>
+            <div>
+              <label style={labelStyle}>Career Code <span style={{ color: "#dc2626" }}>*</span></label>
+              <input className={inputCls} value={form.career_code}
+                onChange={e => setForm(f => ({ ...f, career_code: e.target.value.toUpperCase() }))}
+                placeholder="e.g. AGR_030" />
+            </div>
+          </div>
+
+          {/* Row 2: Cluster + Stream */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={labelStyle}>Cluster</label>
+              <select className={inputCls} value={form.cluster_id}
+                onChange={e => setForm(f => ({ ...f, cluster_id: e.target.value }))}>
+                <option value="">— No cluster —</option>
+                {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Recommended Stream</label>
+              <select className={inputCls} value={form.recommended_stream}
+                onChange={e => setForm(f => ({ ...f, recommended_stream: e.target.value }))}>
+                {STREAM_OPTIONS.map(s => <option key={s} value={s}>{s || "— Any —"}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: Description */}
+          <div style={{ marginBottom: 12 }}>
+            <label style={labelStyle}>Description</label>
+            <textarea className={inputCls} rows={3} value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Brief description of this career (optional)"
+              style={{ resize: "vertical" }} />
+          </div>
+
+          {/* Row 4: Salary trio */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={labelStyle}>Salary Entry (₹ INR)</label>
+              <input type="number" className={inputCls} value={form.salary_entry_inr}
+                onChange={e => setForm(f => ({ ...f, salary_entry_inr: e.target.value }))}
+                placeholder="e.g. 400000" />
+            </div>
+            <div>
+              <label style={labelStyle}>Salary Mid (₹ INR)</label>
+              <input type="number" className={inputCls} value={form.salary_mid_inr}
+                onChange={e => setForm(f => ({ ...f, salary_mid_inr: e.target.value }))}
+                placeholder="e.g. 800000" />
+            </div>
+            <div>
+              <label style={labelStyle}>Salary Peak (₹ INR)</label>
+              <input type="number" className={inputCls} value={form.salary_peak_inr}
+                onChange={e => setForm(f => ({ ...f, salary_peak_inr: e.target.value }))}
+                placeholder="e.g. 2000000" />
+            </div>
+          </div>
+
+          {/* Row 5: Automation risk + Future outlook */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>Automation Risk</label>
+              <select className={inputCls} value={form.automation_risk}
+                onChange={e => setForm(f => ({ ...f, automation_risk: e.target.value }))}>
+                {AUTOMATION_OPTIONS.map(o => <option key={o} value={o}>{o || "— Not set —"}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Future Outlook</label>
+              <select className={inputCls} value={form.future_outlook}
+                onChange={e => setForm(f => ({ ...f, future_outlook: e.target.value }))}>
+                {OUTLOOK_OPTIONS.map(o => <option key={o} value={o}>{o || "— Not set —"}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {formError && (
+            <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{formError}</p>
+          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : isEditing ? "Save changes" : "Create career"}
+            </Button>
+            <Button variant="secondary" onClick={closeForm} disabled={saving}>Cancel</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Delete confirmation ── */}
+      {deletingId !== null && (
+        <Card className="mb-6">
+          <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--text-primary)" }}>
+            Delete career <strong>{careers.find(c => c.id === deletingId)?.title}</strong>?
+            This cannot be undone.
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="danger" onClick={handleDeleteConfirm} disabled={deleting}>
+              {deleting ? "Deleting…" : "Yes, delete"}
+            </Button>
+            <Button variant="secondary" onClick={() => setDeletingId(null)} disabled={deleting}>Cancel</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Filters ── */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+        <input
+          className={inputCls}
+          style={{ maxWidth: 280 }}
+          placeholder="Search by title or code…"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setShowAll(false); }}
         />
-        <select style={inputStyle} value={filters.cluster_id}
-          onChange={e => { setFilters(f => ({ ...f, cluster_id: e.target.value })); setPage(1); }}>
+        <select
+          className={inputCls}
+          style={{ maxWidth: 220 }}
+          value={clusterFilter}
+          onChange={e => { setClusterFilter(e.target.value); setShowAll(false); }}
+        >
           <option value="">All Clusters</option>
           {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select style={inputStyle} value={filters.is_active}
-          onChange={e => { setFilters(f => ({ ...f, is_active: e.target.value })); setPage(1); }}>
-          <option value="">All (active + inactive)</option>
-          <option value="true">Active only</option>
-          <option value="false">Inactive only</option>
-        </select>
-        <select style={inputStyle} value={filters.tier}
-          onChange={e => { setFilters(f => ({ ...f, tier: e.target.value })); setPage(1); }}>
-          <option value="">All Tiers</option>
-          <option value="1">Tier 1 — Aspirational India</option>
-          <option value="2">Tier 2 — Automation Risk</option>
-          <option value="3">Tier 3 — Western/Irrelevant</option>
-          <option value="4">Tier 4 — Low Aspiration</option>
-        </select>
+        {(search || clusterFilter) && (
+          <Button size="sm" variant="ghost" onClick={() => { setSearch(""); setClusterFilter(""); setShowAll(false); }}>
+            Clear filters
+          </Button>
+        )}
       </div>
 
-      {/* Table */}
-      <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr style={{ background: C.bg, borderBottom: `0.5px solid ${C.border}` }}>
-              {['Title', 'Cluster', 'Code', 'Active', 'Tier', 'KeySkills', 'Weights', 'Skill Wt Total', 'Actions'].map(h => (
-                <th key={h} style={{
-                  padding: '8px 12px', textAlign: h === 'Active' || h === 'KeySkills' || h === 'Weights' || h === 'Skill Wt Total' ? 'center' : 'left',
-                  color: C.muted, fontWeight: 500,
-                }}>{h}{h === 'Skill Wt Total' && <div style={{ fontSize: 9, fontWeight: 400 }}>(should be ~100)</div>}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={9} style={{ padding: 24, textAlign: 'center', color: C.muted }}>Loading...</td></tr>
-            ) : careers.map(career => (
-              <React.Fragment key={career.id}>
-                <tr style={{
-                  borderBottom: `0.5px solid ${C.border}`,
-                  background: !career.is_active ? '#fef9f9' : 'transparent',
-                  opacity: updating === career.id ? 0.5 : 1,
-                }}>
-                  <td style={{ padding: '8px 12px', fontWeight: 500, color: career.is_active ? C.navy : C.muted }}>
-                    <span style={{ cursor: 'pointer', color: C.teal }}
-                      onClick={() => setExpandedId(expandedId === career.id ? null : career.id)}>
-                      {career.title}
-                    </span>
-                    {!career.is_active && (
-                      <span style={{
-                        marginLeft: 6, fontSize: 10, color: C.red,
-                        background: '#fef2f2', padding: '1px 5px', borderRadius: 3,
-                      }}>inactive</span>
-                    )}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: C.muted }}>{career.cluster_name}</td>
-                  <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontSize: 10, color: C.muted }}>{career.career_code}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                    <input type="checkbox" checked={career.is_active}
-                      onChange={e => handleTierChange(career.id, 'is_active', e.target.checked)}
-                      disabled={updating === career.id}
-                    />
-                  </td>
-                  <td style={{ padding: '8px 12px' }}>
-                    <select style={{ ...inputStyle, fontSize: 11 }}
-                      value={career.career_tier}
-                      onChange={e => handleTierChange(career.id, 'career_tier', e.target.value)}
-                      disabled={updating === career.id}>
-                      {[1, 2, 3, 4].map(t => (
-                        <option key={t} value={t} style={{ color: TIER_COLORS[t] }}>
-                          T{t} — {TIER_LABELS[t]}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'monospace' }}>
-                    <span style={{ color: career.keyskill_count === 0 ? C.red : C.navy }}>
-                      {career.keyskill_count}
-                    </span>
-                  </td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'monospace' }}>
-                    <span style={{ color: career.skill_weight_count === 0 ? C.red : C.navy }}>
-                      {career.skill_weight_count}
-                    </span>
-                  </td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'monospace', color: C.navy }}>
-                    {career.skill_weight_total?.toFixed(1) || '—'}
-                  </td>
-                  <td style={{ padding: '8px 12px' }}>
-                    <span style={{ cursor: 'pointer', color: C.teal, fontSize: 11 }}
-                      onClick={() => setExpandedId(expandedId === career.id ? null : career.id)}>
-                      {expandedId === career.id ? '▲ hide' : '▼ details'}
-                    </span>
-                  </td>
+      {/* ── Table ── */}
+      {filtered.length === 0 ? (
+        <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
+          No careers match the current filters.
+        </p>
+      ) : (
+        <>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left" }}>
+                  {["ID", "Title", "Code", "Cluster", "Description", "Stream", "Salary Entry", "Risk", "Actions"].map(h => (
+                    <th key={h} style={{
+                      padding: "8px 10px", fontWeight: 700,
+                      color: "var(--text-muted)", whiteSpace: "nowrap",
+                    }}>{h}</th>
+                  ))}
                 </tr>
-                {expandedId === career.id && (
-                  <tr>
-                    <td colSpan={9} style={{ background: C.bg, padding: '12px 16px', borderBottom: `0.5px solid ${C.border}` }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, fontSize: 11 }}>
-                        <div>
-                          <div style={{ fontWeight: 500, color: C.navy, marginBottom: 4 }}>Tier info</div>
-                          <div style={{ color: C.muted }}>Tier: <strong style={{ color: TIER_COLORS[career.career_tier] }}>T{career.career_tier} — {TIER_LABELS[career.career_tier]}</strong></div>
-                          {career.tier_reason && <div style={{ color: C.muted, marginTop: 2 }}>Reason: {career.tier_reason}</div>}
-                          {career.deactivated_by && <div style={{ color: C.muted, marginTop: 2 }}>By: {career.deactivated_by}</div>}
-                          {career.deactivated_at && <div style={{ color: C.muted, marginTop: 2 }}>At: {new Date(career.deactivated_at).toLocaleDateString('en-IN')}</div>}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 500, color: C.navy, marginBottom: 4 }}>Content (EN)</div>
-                          {career.content_en ? (
-                            <>
-                              <div style={{ color: C.muted }}>Indian title: {career.content_en.indian_job_title || '—'}</div>
-                              <div style={{ color: C.muted }}>Stream: {career.recommended_stream || '—'}</div>
-                              <div style={{ color: C.muted }}>Automation risk: {career.automation_risk || '—'}</div>
-                              <div style={{ color: C.muted }}>Future outlook: {career.future_outlook || '—'}</div>
-                              <div style={{ color: C.muted }}>Salary entry: {career.salary_entry_inr ? `₹${(career.salary_entry_inr / 100000).toFixed(1)}L` : '—'}</div>
-                              <div style={{ color: C.muted }}>Salary peak: {career.salary_peak_inr ? `₹${(career.salary_peak_inr / 100000).toFixed(1)}L` : '—'}</div>
-                            </>
-                          ) : <div style={{ color: C.red }}>No content found</div>}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 500, color: C.navy, marginBottom: 4 }}>Pathways</div>
-                          {career.content_en ? (
-                            <>
-                              <div style={{ color: C.muted }}>Step 1: {career.content_en.pathway_step1 || '—'}</div>
-                              <div style={{ color: C.muted }}>Step 2: {career.content_en.pathway_step2 || '—'}</div>
-                              <div style={{ color: C.muted }}>Step 3: {career.content_en.pathway_step3 || '—'}</div>
-                            </>
-                          ) : null}
-                        </div>
+              </thead>
+              <tbody>
+                {displayed.map((career, idx) => (
+                  <tr
+                    key={career.id}
+                    style={{
+                      borderBottom: "1px solid var(--border)",
+                      background: idx % 2 === 0 ? "transparent" : "var(--bg-app)",
+                    }}
+                  >
+                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", fontFamily: "monospace", fontSize: 11 }}>
+                      {career.id}
+                    </td>
+                    <td style={{ padding: "9px 10px", fontWeight: 600, color: "var(--text-primary)", maxWidth: 220 }}>
+                      {career.title}
+                    </td>
+                    <td style={{ padding: "9px 10px", fontFamily: "monospace", fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      {career.career_code || "—"}
+                    </td>
+                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      {clusterName(career.cluster_id)}
+                    </td>
+                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", maxWidth: 260 }}>
+                      {trunc(career.description)}
+                    </td>
+                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      {career.recommended_stream || "—"}
+                    </td>
+                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      {inrLakh(career.salary_entry_inr)}
+                    </td>
+                    <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                      {career.automation_risk
+                        ? <span style={{
+                            fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+                            background: career.automation_risk === "high" ? "#fee2e2" : career.automation_risk === "medium" ? "#fef9c3" : "#dcfce7",
+                            color:      career.automation_risk === "high" ? "#991b1b" : career.automation_risk === "medium" ? "#854d0e" : "#166534",
+                          }}>{career.automation_risk}</span>
+                        : <span style={{ color: "var(--text-muted)" }}>—</span>
+                      }
+                    </td>
+                    <td style={{ padding: "9px 10px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <Button size="sm" variant="secondary"
+                          onClick={() => openEdit(career)}
+                          disabled={formMode !== null || deletingId !== null}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="danger"
+                          onClick={() => setDeletingId(career.id)}
+                          disabled={formMode !== null || deletingId !== null}>
+                          Delete
+                        </Button>
                       </div>
                     </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 14 }}>
-        <button style={inputStyle} disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-        <span style={{ fontSize: 12, color: C.muted, padding: '5px 8px' }}>
-          Page {page} of {Math.ceil(total / PAGE_SIZE)}
-        </span>
-        <button style={inputStyle} disabled={page >= Math.ceil(total / PAGE_SIZE)} onClick={() => setPage(p => p + 1)}>Next →</button>
-      </div>
-
-      {/* Session activity */}
-      {history.length > 0 && (
-        <div style={{ marginTop: 20, background: C.bg, borderRadius: 8, padding: '12px 16px' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: C.navy, marginBottom: 8 }}>
-            Session activity ({history.length})
+                ))}
+              </tbody>
+            </table>
           </div>
-          {history.map((h, i) => (
-            <div key={i} style={{
-              fontSize: 11, color: C.muted, padding: '3px 0',
-              borderBottom: `0.5px solid ${C.border}`,
-            }}>
-              <span style={{ color: C.green, fontWeight: 500 }}>{h.action}</span>
-              {' '}{h.type}: <strong>{h.name}</strong> (ID: {h.id}){h.extra ? ` · ${h.extra}` : ''} at {h.at}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
 
-    {/* Create modal */}
-    {showCreate && (
-      <AdminModal title="Create Career" onClose={closeModal}>
-        {createResult ? (
-          <div style={{
-            background: '#f0fdf4', border: '0.5px solid #bbf7d0',
-            borderRadius: 8, padding: '16px',
-          }}>
-            <div style={{ color: C.green, fontWeight: 500, marginBottom: 8 }}>✓ Career created</div>
-            <div style={{ fontSize: 12, color: '#166534' }}>
-              ID: {createResult.id} | Code: {createResult.career_code} | Tier: T{createResult.career_tier}
-            </div>
-            <button onClick={() => { setCreateResult(null); setForm({ title: '', career_code: '', cluster_id: '', description: '', career_tier: '1' }); }}
-              style={{
-                marginTop: 12, background: C.teal, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 12,
-              }}>
-              Create another
-            </button>
-          </div>
-        ) : (
-          <>
-            {formError && (
-              <div style={{
-                fontSize: 12, color: C.red, background: '#fef2f2', padding: '8px 12px',
-                borderRadius: 6, marginBottom: 12, border: '0.5px solid #fecaca',
-              }}>{formError}</div>
+          {/* Pagination footer */}
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              Showing {displayed.length} of {filtered.length} careers
+            </span>
+            {!showAll && filtered.length > PAGE_SIZE && (
+              <Button size="sm" variant="secondary" onClick={() => setShowAll(true)}>
+                Show all {filtered.length}
+              </Button>
             )}
-            <FormField label="Career Title" required>
-              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Wildlife Conservationist" style={fieldStyle} />
-            </FormField>
-            <FormField label="Career Code" required hint="Unique code, auto-uppercased. e.g. AGR_030">
-              <input value={form.career_code}
-                onChange={e => setForm(f => ({ ...f, career_code: e.target.value.toUpperCase() }))}
-                placeholder="AGR_030" style={fieldStyle} />
-            </FormField>
-            <FormField label="Career Cluster" required>
-              <select value={form.cluster_id} onChange={e => setForm(f => ({ ...f, cluster_id: e.target.value }))}
-                style={fieldStyle}>
-                <option value="">— Select cluster —</option>
-                {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </FormField>
-            <FormField label="Description" hint="Optional — brief description of this career">
-              <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                rows={2} placeholder="Brief description..."
-                style={{ ...fieldStyle, resize: 'vertical' }} />
-            </FormField>
-            <FormField label="Career Tier" hint="Tier 1 = Aspirational India (default for new careers)">
-              <select value={form.career_tier} onChange={e => setForm(f => ({ ...f, career_tier: e.target.value }))}
-                style={fieldStyle}>
-                <option value="1">Tier 1 — Aspirational India</option>
-                <option value="2">Tier 2 — Automation Risk</option>
-                <option value="3">Tier 3 — Western/Irrelevant</option>
-                <option value="4">Tier 4 — Low Aspiration</option>
-              </select>
-            </FormField>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={closeModal} style={{
-                background: 'none', border: `0.5px solid ${C.border}`,
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12,
-              }}>Cancel</button>
-              <button onClick={handleCreate} disabled={creating} style={{
-                background: C.navy, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
-              }}>
-                {creating ? 'Creating...' : 'Create Career'}
-              </button>
-            </div>
-          </>
-        )}
-      </AdminModal>
-    )}
-    </>
+            {showAll && filtered.length > PAGE_SIZE && (
+              <Button size="sm" variant="ghost" onClick={() => setShowAll(false)}>
+                Collapse to first {PAGE_SIZE}
+              </Button>
+            )}
+          </div>
+        </>
+      )}
+    </SkeletonPage>
   );
 }
