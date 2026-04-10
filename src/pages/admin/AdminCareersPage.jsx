@@ -1,5 +1,5 @@
 // src/pages/admin/AdminCareersPage.jsx
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import { Link } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
@@ -8,18 +8,164 @@ import { apiGet, apiPost, apiPut, apiDelete } from "../../apiClient";
 
 const PAGE_SIZE = 50;
 
-const EMPTY_FORM = {
-  title: "", career_code: "", description: "", cluster_id: "",
-  recommended_stream: "", salary_entry_inr: "", salary_mid_inr: "",
-  salary_peak_inr: "", automation_risk: "", future_outlook: "",
-};
-
-const STREAM_OPTIONS = [
-  "", "Science PCM", "Science PCB", "Commerce", "Arts/Humanities", "Any",
+/* ─────────────────────────────────────────────────────────────────────────
+   DETAIL PANEL CONFIG
+   To add a new read-only field to the detail panel: add one entry below.
+   format options: "inr" | "badge" | undefined (plain text)
+   fullWidth: renders the field spanning all columns in its section
+────────────────────────────────────────────────────────────────────────── */
+const DETAIL_SECTIONS = [
+  { title: "Identity", fields: [
+    { key: "indian_job_title",   label: "Indian Job Title" },
+    { key: "prestige_title",     label: "Prestige Title" },
+    { key: "description",        label: "Description", fullWidth: true },
+    { key: "domain_category",    label: "Domain Category" },
+  ]},
+  { title: "Salary & Market", fields: [
+    { key: "salary_entry_inr",   label: "Salary Entry",    format: "inr" },
+    { key: "salary_mid_inr",     label: "Salary Mid",      format: "inr" },
+    { key: "salary_peak_inr",    label: "Salary Peak",     format: "inr" },
+    { key: "automation_risk",    label: "Automation Risk", format: "badge" },
+    { key: "future_outlook",     label: "Future Outlook",  format: "badge" },
+  ]},
+  { title: "Career Pathways", fields: [
+    { key: "pathway_step1",      label: "Step 1" },
+    { key: "pathway_step2",      label: "Step 2" },
+    { key: "pathway_step3",      label: "Step 3" },
+    { key: "pathway_accessible", label: "Accessible Route" },
+    { key: "pathway_premium",    label: "Premium Route" },
+    { key: "pathway_earn_learn", label: "Earn & Learn" },
+  ]},
 ];
-const AUTOMATION_OPTIONS = ["", "low", "medium", "high"];
-const OUTLOOK_OPTIONS    = ["", "growing", "stable", "declining"];
 
+/* ─────────────────────────────────────────────────────────────────────────
+   FORM FIELDS CONFIG
+   To add a new editable field to the create/edit form: add one entry below.
+   type: "text" | "textarea" | "number" | "select"
+   options: array of strings, or "CLUSTERS" (resolved at render time)
+   gridSpan: 1 | 2 | 3  (out of a 3-column grid)
+   transform: optional fn applied on change (e.g. toUpperCase)
+────────────────────────────────────────────────────────────────────────── */
+const FORM_FIELDS = [
+  { key: "title",              label: "Title",              type: "text",     required: true,  placeholder: "e.g. Agricultural Scientist",  gridSpan: 2 },
+  { key: "career_code",        label: "Career Code",        type: "text",     required: true,  placeholder: "e.g. AGR_030",                 gridSpan: 1, transform: v => v.toUpperCase() },
+  { key: "cluster_id",         label: "Cluster",            type: "select",   required: false, options: "CLUSTERS",                         gridSpan: 1 },
+  { key: "recommended_stream", label: "Recommended Stream", type: "select",   required: false, options: ["", "Science PCM", "Science PCB", "Commerce", "Arts/Humanities", "Any"], gridSpan: 1 },
+  { key: "domain_category",    label: "Domain Category",    type: "text",     required: false, placeholder: "e.g. Technology",              gridSpan: 1 },
+  { key: "description",        label: "Description",        type: "textarea", required: false, placeholder: "Brief description (optional)", gridSpan: 3 },
+  { key: "indian_job_title",   label: "Indian Job Title",   type: "text",     required: false, placeholder: "e.g. Software Engineer",       gridSpan: 1 },
+  { key: "prestige_title",     label: "Prestige Title",     type: "text",     required: false, placeholder: "e.g. AI Researcher",           gridSpan: 2 },
+  { key: "salary_entry_inr",   label: "Salary Entry (₹)",  type: "number",   required: false, placeholder: "e.g. 400000",                  gridSpan: 1 },
+  { key: "salary_mid_inr",     label: "Salary Mid (₹)",    type: "number",   required: false, placeholder: "e.g. 800000",                  gridSpan: 1 },
+  { key: "salary_peak_inr",    label: "Salary Peak (₹)",   type: "number",   required: false, placeholder: "e.g. 2000000",                 gridSpan: 1 },
+  { key: "automation_risk",    label: "Automation Risk",    type: "select",   required: false, options: ["", "low", "medium", "high"],      gridSpan: 1 },
+  { key: "future_outlook",     label: "Future Outlook",     type: "select",   required: false, options: ["", "growing", "stable", "declining"], gridSpan: 1 },
+  { key: "pathway_step1",      label: "Pathway Step 1",     type: "text",     required: false, placeholder: "e.g. Complete B.Tech CS",      gridSpan: 3 },
+  { key: "pathway_step2",      label: "Pathway Step 2",     type: "text",     required: false, placeholder: "e.g. Gain internship experience", gridSpan: 3 },
+  { key: "pathway_step3",      label: "Pathway Step 3",     type: "text",     required: false, placeholder: "e.g. Join as junior engineer", gridSpan: 3 },
+  { key: "pathway_accessible", label: "Accessible Route",   type: "textarea", required: false, placeholder: "Low-barrier entry path…",      gridSpan: 3 },
+  { key: "pathway_premium",    label: "Premium Route",      type: "textarea", required: false, placeholder: "Competitive / elite path…",    gridSpan: 3 },
+  { key: "pathway_earn_learn", label: "Earn & Learn",       type: "textarea", required: false, placeholder: "Work while studying path…",    gridSpan: 3 },
+];
+
+const EMPTY_FORM = Object.fromEntries(FORM_FIELDS.map(f => [f.key, ""]));
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FIELD VALUE RENDERER
+   Used by the detail panel. Controls how each field's value is displayed.
+────────────────────────────────────────────────────────────────────────── */
+function renderFieldValue(value, format) {
+  if (value == null || value === "") {
+    return <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>—</span>;
+  }
+  if (format === "inr") {
+    const n = parseFloat(value);
+    if (!n) return <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>—</span>;
+    return <span style={{ fontWeight: 600 }}>₹{(n / 100000).toFixed(1)}L</span>;
+  }
+  if (format === "badge") {
+    const v = String(value).toLowerCase();
+    const isRed    = v === "high" || v === "declining";
+    const isYellow = v === "medium" || v === "stable";
+    const isGreen  = v === "low"  || v === "growing";
+    const bg    = isRed ? "#fee2e2" : isYellow ? "#fef9c3" : isGreen ? "#dcfce7" : "#f1f5f9";
+    const color = isRed ? "#991b1b" : isYellow ? "#854d0e" : isGreen ? "#166534" : "var(--text-muted)";
+    return (
+      <span style={{
+        display: "inline-block", fontSize: 11, fontWeight: 600,
+        padding: "2px 8px", borderRadius: 4, background: bg, color,
+      }}>
+        {value}
+      </span>
+    );
+  }
+  return <span style={{ lineHeight: 1.5 }}>{String(value)}</span>;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DETAIL PANEL
+   Renders DETAIL_SECTIONS config as a 3-column card panel.
+────────────────────────────────────────────────────────────────────────── */
+function DetailPanel({ career, onEdit }) {
+  return (
+    <tr>
+      <td colSpan={9} style={{
+        padding: 0,
+        borderBottom: "2px solid var(--border)",
+      }}>
+        <div style={{
+          background: "#f0f7ff",
+          borderTop: "2px solid #bfdbfe",
+          padding: "16px 20px",
+        }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+              {career.title}
+              {career.career_code && (
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 400, color: "var(--text-muted)", marginLeft: 8 }}>
+                  {career.career_code}
+                </span>
+              )}
+            </span>
+            <Button size="sm" onClick={() => onEdit(career)}>Edit this career</Button>
+          </div>
+
+          {/* Three-column sections */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+            {DETAIL_SECTIONS.map(section => (
+              <div key={section.title}>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
+                  textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10,
+                  paddingBottom: 4, borderBottom: "1px solid #bfdbfe",
+                }}>
+                  {section.title}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {section.fields.map(field => (
+                    <div key={field.key}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                        {field.label}
+                      </div>
+                      <div style={{ fontSize: 13 }}>
+                        {renderFieldValue(career[field.key], field.format)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   HELPERS
+────────────────────────────────────────────────────────────────────────── */
 function trunc(str, n = 60) {
   if (!str) return "—";
   return str.length > n ? str.slice(0, n) + "…" : str;
@@ -31,6 +177,9 @@ function inrLakh(val) {
   return `₹${(n / 100000).toFixed(1)}L`;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE COMPONENT
+────────────────────────────────────────────────────────────────────────── */
 export default function AdminCareersPage() {
   const [careers,  setCareers]  = useState([]);
   const [clusters, setClusters] = useState([]);
@@ -39,14 +188,17 @@ export default function AdminCareersPage() {
   const [formError, setFormError] = useState("");
 
   // filters (client-side)
-  const [search,    setSearch]    = useState("");
+  const [search,        setSearch]        = useState("");
   const [clusterFilter, setClusterFilter] = useState("");
-  const [showAll,   setShowAll]   = useState(false);
+  const [showAll,       setShowAll]       = useState(false);
 
-  // form: null = closed | "create" | career object
+  // expand
+  const [expandedId, setExpandedId] = useState(null);
+
+  // form: null = closed | "create" | career object (editing)
   const [formMode, setFormMode] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
+  const [form, setForm]         = useState(EMPTY_FORM);
+  const [saving, setSaving]     = useState(false);
 
   // delete confirmation
   const [deletingId, setDeletingId] = useState(null);
@@ -93,7 +245,7 @@ export default function AdminCareersPage() {
 
   const subtitleText = () => {
     if (loading) return "Loading…";
-    const total = filtered.length;
+    const total  = filtered.length;
     const clName = clusterFilter ? clusters.find(c => String(c.id) === clusterFilter)?.name : null;
     return clName
       ? `${total} career${total !== 1 ? "s" : ""} in ${clName}`
@@ -106,24 +258,18 @@ export default function AdminCareersPage() {
     setForm(EMPTY_FORM);
     setFormError("");
     setFormMode("create");
-    setShowAll(false);
+    setExpandedId(null);
   };
 
   const openEdit = (career) => {
-    setForm({
-      title:              career.title              ?? "",
-      career_code:        career.career_code        ?? "",
-      description:        career.description        ?? "",
-      cluster_id:         career.cluster_id != null ? String(career.cluster_id) : "",
-      recommended_stream: career.recommended_stream ?? "",
-      salary_entry_inr:   career.salary_entry_inr   != null ? String(career.salary_entry_inr) : "",
-      salary_mid_inr:     career.salary_mid_inr     != null ? String(career.salary_mid_inr)   : "",
-      salary_peak_inr:    career.salary_peak_inr    != null ? String(career.salary_peak_inr)  : "",
-      automation_risk:    career.automation_risk    ?? "",
-      future_outlook:     career.future_outlook     ?? "",
+    const f = {};
+    FORM_FIELDS.forEach(({ key }) => {
+      f[key] = career[key] != null ? String(career[key]) : "";
     });
+    setForm(f);
     setFormError("");
     setFormMode(career);
+    setExpandedId(null);
   };
 
   const closeForm = () => {
@@ -132,22 +278,26 @@ export default function AdminCareersPage() {
     setFormError("");
   };
 
-  const buildBody = () => ({
-    title:              form.title.trim(),
-    career_code:        form.career_code.trim().toUpperCase(),
-    description:        form.description.trim() || null,
-    cluster_id:         form.cluster_id ? Number(form.cluster_id) : null,
-    recommended_stream: form.recommended_stream || null,
-    salary_entry_inr:   form.salary_entry_inr ? Number(form.salary_entry_inr) : null,
-    salary_mid_inr:     form.salary_mid_inr   ? Number(form.salary_mid_inr)   : null,
-    salary_peak_inr:    form.salary_peak_inr  ? Number(form.salary_peak_inr)  : null,
-    automation_risk:    form.automation_risk  || null,
-    future_outlook:     form.future_outlook   || null,
-  });
+  const buildBody = () => {
+    const body = {};
+    FORM_FIELDS.forEach(({ key, type }) => {
+      const raw = form[key];
+      if (type === "number") {
+        body[key] = raw !== "" ? Number(raw) : null;
+      } else {
+        body[key] = raw.trim() !== "" ? raw.trim() : null;
+      }
+    });
+    // career_code always uppercase
+    if (body.career_code) body.career_code = body.career_code.toUpperCase();
+    // cluster_id as integer
+    if (body.cluster_id) body.cluster_id = Number(body.cluster_id);
+    return body;
+  };
 
   const handleSave = async () => {
-    if (!form.title.trim())       { setFormError("Title is required.");        return; }
-    if (!form.career_code.trim()) { setFormError("Career code is required.");  return; }
+    if (!form.title.trim())       { setFormError("Title is required.");       return; }
+    if (!form.career_code.trim()) { setFormError("Career code is required."); return; }
     setSaving(true);
     setFormError("");
     try {
@@ -181,7 +331,7 @@ export default function AdminCareersPage() {
     }
   };
 
-  /* ─── shared input style ─── */
+  /* ─── shared styles ─── */
 
   const inputCls = [
     "w-full rounded-md border border-[var(--border)] bg-white px-3 py-2",
@@ -194,7 +344,48 @@ export default function AdminCareersPage() {
     marginBottom: 4, color: "var(--text-primary)",
   };
 
-  /* ─── form field groups ─── */
+  /* ─── form field renderer (driven by FORM_FIELDS config) ─── */
+
+  const renderFormField = (field) => {
+    const { key, label, type, required, placeholder, options, transform } = field;
+    const value = form[key];
+    const onChange = e => {
+      const v = transform ? transform(e.target.value) : e.target.value;
+      setForm(f => ({ ...f, [key]: v }));
+    };
+
+    let input;
+    if (type === "textarea") {
+      input = (
+        <textarea className={inputCls} rows={2} value={value}
+          onChange={onChange} placeholder={placeholder}
+          style={{ resize: "vertical" }} />
+      );
+    } else if (type === "select") {
+      const opts = options === "CLUSTERS"
+        ? [{ value: "", label: "— No cluster —" }, ...clusters.map(c => ({ value: String(c.id), label: c.name }))]
+        : (options || []).map(o => ({ value: o, label: o || "— Not set —" }));
+      input = (
+        <select className={inputCls} value={value} onChange={onChange}>
+          {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      );
+    } else {
+      input = (
+        <input type={type} className={inputCls} value={value}
+          onChange={onChange} placeholder={placeholder} />
+      );
+    }
+
+    return (
+      <div key={key} style={{ gridColumn: `span ${field.gridSpan}` }}>
+        <label style={labelStyle}>
+          {label}{required && <span style={{ color: "#dc2626", marginLeft: 3 }}>*</span>}
+        </label>
+        {input}
+      </div>
+    );
+  };
 
   const isEditing = formMode && formMode !== "create";
 
@@ -223,97 +414,15 @@ export default function AdminCareersPage() {
         </div>
       }
     >
-      {/* ── Create / Edit form ── */}
+      {/* ── Create / Edit form (config-driven) ── */}
       {formMode !== null && (
         <Card className="mb-6">
           <h2 style={{ margin: "0 0 16px", fontSize: "var(--font-size-lg)", fontWeight: 700 }}>
             {isEditing ? `Edit — ${formMode.title}` : "Create Career"}
           </h2>
-
-          {/* Row 1: Title + Code */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={labelStyle}>Title <span style={{ color: "#dc2626" }}>*</span></label>
-              <input className={inputCls} value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Agricultural Scientist" autoFocus />
-            </div>
-            <div>
-              <label style={labelStyle}>Career Code <span style={{ color: "#dc2626" }}>*</span></label>
-              <input className={inputCls} value={form.career_code}
-                onChange={e => setForm(f => ({ ...f, career_code: e.target.value.toUpperCase() }))}
-                placeholder="e.g. AGR_030" />
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            {FORM_FIELDS.map(renderFormField)}
           </div>
-
-          {/* Row 2: Cluster + Stream */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={labelStyle}>Cluster</label>
-              <select className={inputCls} value={form.cluster_id}
-                onChange={e => setForm(f => ({ ...f, cluster_id: e.target.value }))}>
-                <option value="">— No cluster —</option>
-                {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Recommended Stream</label>
-              <select className={inputCls} value={form.recommended_stream}
-                onChange={e => setForm(f => ({ ...f, recommended_stream: e.target.value }))}>
-                {STREAM_OPTIONS.map(s => <option key={s} value={s}>{s || "— Any —"}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Row 3: Description */}
-          <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>Description</label>
-            <textarea className={inputCls} rows={3} value={form.description}
-              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              placeholder="Brief description of this career (optional)"
-              style={{ resize: "vertical" }} />
-          </div>
-
-          {/* Row 4: Salary trio */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={labelStyle}>Salary Entry (₹ INR)</label>
-              <input type="number" className={inputCls} value={form.salary_entry_inr}
-                onChange={e => setForm(f => ({ ...f, salary_entry_inr: e.target.value }))}
-                placeholder="e.g. 400000" />
-            </div>
-            <div>
-              <label style={labelStyle}>Salary Mid (₹ INR)</label>
-              <input type="number" className={inputCls} value={form.salary_mid_inr}
-                onChange={e => setForm(f => ({ ...f, salary_mid_inr: e.target.value }))}
-                placeholder="e.g. 800000" />
-            </div>
-            <div>
-              <label style={labelStyle}>Salary Peak (₹ INR)</label>
-              <input type="number" className={inputCls} value={form.salary_peak_inr}
-                onChange={e => setForm(f => ({ ...f, salary_peak_inr: e.target.value }))}
-                placeholder="e.g. 2000000" />
-            </div>
-          </div>
-
-          {/* Row 5: Automation risk + Future outlook */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-            <div>
-              <label style={labelStyle}>Automation Risk</label>
-              <select className={inputCls} value={form.automation_risk}
-                onChange={e => setForm(f => ({ ...f, automation_risk: e.target.value }))}>
-                {AUTOMATION_OPTIONS.map(o => <option key={o} value={o}>{o || "— Not set —"}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Future Outlook</label>
-              <select className={inputCls} value={form.future_outlook}
-                onChange={e => setForm(f => ({ ...f, future_outlook: e.target.value }))}>
-                {OUTLOOK_OPTIONS.map(o => <option key={o} value={o}>{o || "— Not set —"}</option>)}
-              </select>
-            </div>
-          </div>
-
           {formError && (
             <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{formError}</p>
           )}
@@ -349,19 +458,20 @@ export default function AdminCareersPage() {
           style={{ maxWidth: 280 }}
           placeholder="Search by title or code…"
           value={search}
-          onChange={e => { setSearch(e.target.value); setShowAll(false); }}
+          onChange={e => { setSearch(e.target.value); setShowAll(false); setExpandedId(null); }}
         />
         <select
           className={inputCls}
           style={{ maxWidth: 220 }}
           value={clusterFilter}
-          onChange={e => { setClusterFilter(e.target.value); setShowAll(false); }}
+          onChange={e => { setClusterFilter(e.target.value); setShowAll(false); setExpandedId(null); }}
         >
           <option value="">All Clusters</option>
           {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         {(search || clusterFilter) && (
-          <Button size="sm" variant="ghost" onClick={() => { setSearch(""); setClusterFilter(""); setShowAll(false); }}>
+          <Button size="sm" variant="ghost"
+            onClick={() => { setSearch(""); setClusterFilter(""); setShowAll(false); setExpandedId(null); }}>
             Clear filters
           </Button>
         )}
@@ -388,59 +498,78 @@ export default function AdminCareersPage() {
               </thead>
               <tbody>
                 {displayed.map((career, idx) => (
-                  <tr
-                    key={career.id}
-                    style={{
-                      borderBottom: "1px solid var(--border)",
-                      background: idx % 2 === 0 ? "transparent" : "var(--bg-app)",
-                    }}
-                  >
-                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", fontFamily: "monospace", fontSize: 11 }}>
-                      {career.id}
-                    </td>
-                    <td style={{ padding: "9px 10px", fontWeight: 600, color: "var(--text-primary)", maxWidth: 220 }}>
-                      {career.title}
-                    </td>
-                    <td style={{ padding: "9px 10px", fontFamily: "monospace", fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                      {career.career_code || "—"}
-                    </td>
-                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                      {clusterName(career.cluster_id)}
-                    </td>
-                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", maxWidth: 260 }}>
-                      {trunc(career.description)}
-                    </td>
-                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                      {career.recommended_stream || "—"}
-                    </td>
-                    <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                      {inrLakh(career.salary_entry_inr)}
-                    </td>
-                    <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
-                      {career.automation_risk
-                        ? <span style={{
-                            fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
-                            background: career.automation_risk === "high" ? "#fee2e2" : career.automation_risk === "medium" ? "#fef9c3" : "#dcfce7",
-                            color:      career.automation_risk === "high" ? "#991b1b" : career.automation_risk === "medium" ? "#854d0e" : "#166534",
-                          }}>{career.automation_risk}</span>
-                        : <span style={{ color: "var(--text-muted)" }}>—</span>
-                      }
-                    </td>
-                    <td style={{ padding: "9px 10px" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <Button size="sm" variant="secondary"
-                          onClick={() => openEdit(career)}
-                          disabled={formMode !== null || deletingId !== null}>
-                          Edit
-                        </Button>
-                        <Button size="sm" variant="danger"
-                          onClick={() => setDeletingId(career.id)}
-                          disabled={formMode !== null || deletingId !== null}>
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
+                  <Fragment key={career.id}>
+                    <tr style={{
+                      borderBottom: expandedId === career.id ? "none" : "1px solid var(--border)",
+                      background: expandedId === career.id
+                        ? "#dbeafe"
+                        : idx % 2 === 0 ? "transparent" : "var(--bg-app)",
+                    }}>
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", fontFamily: "monospace", fontSize: 11 }}>
+                        {career.id}
+                      </td>
+                      <td style={{ padding: "9px 10px", fontWeight: 600, maxWidth: 220 }}>
+                        {/* Clickable title toggles detail panel */}
+                        <span
+                          onClick={() => setExpandedId(expandedId === career.id ? null : career.id)}
+                          style={{
+                            color: "#0d9488", cursor: "pointer",
+                            textDecoration: expandedId === career.id ? "underline" : "none",
+                          }}
+                          title="Click to expand details"
+                        >
+                          {career.title}
+                        </span>
+                        {expandedId === career.id && (
+                          <span style={{ fontSize: 10, color: "var(--text-muted)", marginLeft: 6 }}>▲</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "9px 10px", fontFamily: "monospace", fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {career.career_code || "—"}
+                      </td>
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {clusterName(career.cluster_id)}
+                      </td>
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", maxWidth: 260 }}>
+                        {trunc(career.description)}
+                      </td>
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {career.recommended_stream || "—"}
+                      </td>
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {inrLakh(career.salary_entry_inr)}
+                      </td>
+                      <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                        {career.automation_risk
+                          ? <span style={{
+                              fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+                              background: career.automation_risk === "high" ? "#fee2e2" : career.automation_risk === "medium" ? "#fef9c3" : "#dcfce7",
+                              color:      career.automation_risk === "high" ? "#991b1b" : career.automation_risk === "medium" ? "#854d0e" : "#166534",
+                            }}>{career.automation_risk}</span>
+                          : <span style={{ color: "var(--text-muted)" }}>—</span>
+                        }
+                      </td>
+                      <td style={{ padding: "9px 10px" }}>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <Button size="sm" variant="secondary"
+                            onClick={() => openEdit(career)}
+                            disabled={formMode !== null || deletingId !== null}>
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="danger"
+                            onClick={() => setDeletingId(career.id)}
+                            disabled={formMode !== null || deletingId !== null}>
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* ── Detail panel (only when expanded) ── */}
+                    {expandedId === career.id && (
+                      <DetailPanel career={career} onEdit={openEdit} />
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
