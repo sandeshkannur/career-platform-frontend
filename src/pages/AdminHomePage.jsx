@@ -65,6 +65,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Associated Qualities (AQs)</Button>
         </Link>
 
+        <Link to="/admin/fit-bands">
+          <Button style={{ width: "100%" }}>Fit Band Thresholds</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
