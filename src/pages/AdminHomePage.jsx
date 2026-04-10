@@ -25,6 +25,14 @@ export default function AdminHomePage() {
       }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <Link to="/admin/sme">
+          <Button style={{ width: "100%" }}>SME Registry</Button>
+        </Link>
+
+        <Link to="/admin/sme-tokens">
+          <Button style={{ width: "100%" }}>SME Tokens</Button>
+        </Link>
+
         <Link to="/admin/career-clusters">
           <Button style={{ width: "100%" }}>Career Clusters</Button>
         </Link>
@@ -43,14 +51,6 @@ export default function AdminHomePage() {
 
         <Link to="/admin/bulk-upload">
           <Button style={{ width: "100%" }}>Bulk Upload</Button>
-        </Link>
-
-        <Link to="/admin/sme">
-          <Button style={{ width: "100%" }}>SME Registry</Button>
-        </Link>
-
-        <Link to="/admin/sme-tokens">
-          <Button style={{ width: "100%" }}>SME Tokens</Button>
         </Link>
 
         <Link to="/admin/analytics">

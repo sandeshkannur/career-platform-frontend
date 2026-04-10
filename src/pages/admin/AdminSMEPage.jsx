@@ -1,368 +1,645 @@
-/**
- * src/pages/admin/AdminSMEPage.jsx
- *
- * ADM-B01: SME Registry — list, create, and deactivate Subject Matter Experts.
- *
- * i18n: uses useAdminContent from AdminLanguageProvider (admin-only translations).
- *       Never imports from student LanguageProvider or en.json.
- *
- * What this page does:
- *   - Loads all SME profiles from GET /v1/admin/sme on mount
- *   - Shows a filterable table of SMEs (All / Active / Inactive)
- *   - "Add SME" opens an inline form to create a new profile
- *   - "Deactivate" soft-deletes an SME (status = inactive, row never deleted)
- *
- * What this page does NOT do:
- *   - No student data access
- *   - No scoring or assessment logic
- *   - No hard deletes
- */
-
-import { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+// src/pages/admin/AdminSMEPage.jsx
+import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
+import { Link } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
-import { listSMEs, createSME, deactivateSME } from "../../api/admin";
-import { useAdminContent } from "../../locales/AdminLanguageProvider";
+import Card from "../../ui/Card";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../apiClient";
 
-// ── Status badge ──────────────────────────────────────────────────────────
-function StatusBadge({ status, t }) {
-  const isActive = status === "active";
-  return (
-    <span style={{
-      display: "inline-block", padding: "2px 10px", borderRadius: 12,
-      fontSize: 12, fontWeight: 500,
-      background: isActive ? "#E2EFDA" : "#F2F2F2",
-      color: isActive ? "#375623" : "#666",
-    }}>
-      {isActive
-        ? t("admin.sme.status.active", "Active")
-        : t("admin.sme.status.inactive", "Inactive")}
-    </span>
-  );
-}
+/* ─────────────────────────────────────────────────────────────────────────
+   CONSTANTS
+────────────────────────────────────────────────────────────────────────── */
+const DOMAIN_OPTIONS = [
+  "STEM", "Business", "Healthcare", "Education",
+  "Arts", "Law", "Finance", "Government", "Other",
+];
 
-// ── Score cell (shows — when null) ────────────────────────────────────────
-function Score({ value }) {
-  return (
-    <span style={{ fontFamily: "monospace", fontSize: 13 }}>
-      {value != null ? value.toFixed(3) : "—"}
-    </span>
-  );
-}
+/* ─────────────────────────────────────────────────────────────────────────
+   DETAIL PANEL CONFIG
+────────────────────────────────────────────────────────────────────────── */
+const DETAIL_SECTIONS = [
+  { title: "Contact", fields: [
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Phone" },
+  ]},
+  { title: "Organization", fields: [
+    { key: "organization",     label: "Organization" },
+    { key: "designation",      label: "Designation" },
+    { key: "expertise_domain", label: "Domain",           format: "domain" },
+    { key: "years_experience", label: "Years Experience", format: "years" },
+    { key: "max_careers",      label: "Max Careers" },
+  ]},
+  { title: "Notes & Dates", fields: [
+    { key: "notes",      label: "Notes",   fullWidth: true },
+    { key: "created_at", label: "Created", format: "date" },
+    { key: "updated_at", label: "Updated", format: "date" },
+  ]},
+];
 
-// ── Empty form state ──────────────────────────────────────────────────────
-const EMPTY_FORM = {
-  full_name: "", email: "", career_assignments: "",
-  years_experience: "", seniority_score: "", education_score: "",
-  sector_relevance: "", sector: "", education: "",
-};
+/* ─────────────────────────────────────────────────────────────────────────
+   FORM FIELDS CONFIG
+────────────────────────────────────────────────────────────────────────── */
+const FORM_FIELDS = [
+  { key: "full_name",        label: "Full Name",        type: "text",     required: true,  placeholder: "e.g. Dr. Priya Sharma",         gridSpan: 2 },
+  { key: "email",            label: "Email",            type: "text",     required: true,  placeholder: "e.g. priya@example.com",        gridSpan: 1 },
+  { key: "phone",            label: "Phone",            type: "text",     required: false, placeholder: "e.g. +91 98765 43210",          gridSpan: 1 },
+  { key: "organization",     label: "Organization",     type: "text",     required: false, placeholder: "e.g. IIT Bombay",               gridSpan: 2 },
+  { key: "designation",      label: "Designation",      type: "text",     required: false, placeholder: "e.g. Professor",                gridSpan: 2 },
+  { key: "expertise_domain", label: "Expertise Domain", type: "select",   required: false, options: ["", ...DOMAIN_OPTIONS],             gridSpan: 1 },
+  { key: "years_experience", label: "Years Experience", type: "number",   required: false, placeholder: "e.g. 12",                       gridSpan: 1 },
+  { key: "max_careers",      label: "Max Careers",      type: "number",   required: false, placeholder: "e.g. 3",                        gridSpan: 1 },
+  { key: "notes",            label: "Notes",            type: "textarea", required: false, placeholder: "Internal notes about this SME…", gridSpan: 3 },
+];
 
-// ── Main page ─────────────────────────────────────────────────────────────
-export default function AdminSMEPage() {
-  const { t } = useAdminContent();
+const EMPTY_FORM = Object.fromEntries(
+  FORM_FIELDS.map(f => [f.key, f.key === "max_careers" ? "3" : ""])
+);
 
-  const [smes, setSmes]               = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState(null);
-  const [filter, setFilter]           = useState("all");
-  const [showForm, setShowForm]       = useState(false);
-  const [form, setForm]               = useState(EMPTY_FORM);
-  const [submitting, setSubmitting]   = useState(false);
-  const [formError, setFormError]     = useState(null);
-
-  // ── Load SMEs ────────────────────────────────────────────────────────
-  const loadSMEs = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+/* ─────────────────────────────────────────────────────────────────────────
+   FIELD VALUE RENDERER
+────────────────────────────────────────────────────────────────────────── */
+function renderFieldValue(value, format) {
+  if (value == null || value === "") {
+    return <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>—</span>;
+  }
+  if (format === "domain") {
+    return (
+      <span style={{
+        display: "inline-block", fontSize: 11, fontWeight: 600,
+        padding: "2px 8px", borderRadius: 4,
+        background: "#dbeafe", color: "#1e40af",
+      }}>
+        {value}
+      </span>
+    );
+  }
+  if (format === "years") {
+    return <span style={{ fontWeight: 600 }}>{value} yr{value !== 1 ? "s" : ""}</span>;
+  }
+  if (format === "date") {
     try {
-      const status = filter === "all" ? null : filter;
-      const data = await listSMEs(status);
-      setSmes(Array.isArray(data) ? data : []);
+      return (
+        <span style={{ color: "var(--text-muted)" }}>
+          {new Date(value).toLocaleString("en-IN", {
+            day: "2-digit", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          })}
+        </span>
+      );
     } catch {
-      setError(t("admin.sme.error.loadFailed", "Failed to load SME profiles."));
+      return <span>{String(value)}</span>;
+    }
+  }
+  return <span style={{ lineHeight: 1.5 }}>{String(value)}</span>;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DETAIL PANEL
+────────────────────────────────────────────────────────────────────────── */
+function DetailPanel({ sme, onEdit }) {
+  const assignments = Array.isArray(sme.career_assignments) ? sme.career_assignments : [];
+
+  return (
+    <tr>
+      <td colSpan={8} style={{ padding: 0, borderBottom: "2px solid var(--border)" }}>
+        <div style={{ background: "#f0f7ff", borderTop: "2px solid #bfdbfe", padding: "16px 20px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+              {sme.full_name}
+              {sme.expertise_domain && (
+                <span style={{
+                  display: "inline-block", marginLeft: 10, fontSize: 11, fontWeight: 600,
+                  padding: "2px 8px", borderRadius: 4, background: "#dbeafe", color: "#1e40af",
+                }}>
+                  {sme.expertise_domain}
+                </span>
+              )}
+              {sme.is_active === false && (
+                <span style={{
+                  display: "inline-block", marginLeft: 8, fontSize: 11, fontWeight: 600,
+                  padding: "2px 8px", borderRadius: 4, background: "#fee2e2", color: "#991b1b",
+                }}>
+                  Inactive
+                </span>
+              )}
+            </span>
+            <Button size="sm" onClick={() => onEdit(sme)}>Edit this SME</Button>
+          </div>
+
+          {/* Three-column sections */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20,
+            marginBottom: assignments.length > 0 ? 16 : 0,
+          }}>
+            {DETAIL_SECTIONS.map(section => (
+              <div key={section.title}>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
+                  textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10,
+                  paddingBottom: 4, borderBottom: "1px solid #bfdbfe",
+                }}>
+                  {section.title}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {section.fields.map(field => (
+                    <div key={field.key}>
+                      <div style={{
+                        fontSize: 10, fontWeight: 700, color: "var(--text-muted)",
+                        marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.04em",
+                      }}>
+                        {field.label}
+                      </div>
+                      <div style={{ fontSize: 13 }}>
+                        {renderFieldValue(sme[field.key], field.format)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Career assignments list */}
+          {assignments.length > 0 && (
+            <div style={{ borderTop: "1px solid #bfdbfe", paddingTop: 12 }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
+                textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8,
+              }}>
+                Assigned Careers ({assignments.length}/{sme.max_careers ?? 3})
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {assignments.map((a, i) => (
+                  <span key={i} style={{
+                    fontSize: 12, padding: "3px 10px", borderRadius: 4,
+                    background: "#fff", border: "1px solid #bfdbfe",
+                    color: "var(--text-primary)",
+                  }}>
+                    {a.career_title ?? a.career_id ?? String(a)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE
+────────────────────────────────────────────────────────────────────────── */
+export default function AdminSMEPage() {
+  const [smes,      setSmes]      = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState("");
+  const [formError, setFormError] = useState("");
+
+  // filters
+  const [search,       setSearch]       = useState("");
+  const [domainFilter, setDomainFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all"); // "all" | "active" | "inactive"
+
+  // expand
+  const [expandedId, setExpandedId] = useState(null);
+
+  // form: null = closed | "create" | sme object (editing)
+  const [formMode, setFormMode] = useState(null);
+  const [form,     setForm]     = useState(EMPTY_FORM);
+  const [saving,   setSaving]   = useState(false);
+
+  // deactivate confirmation
+  const [deactivatingId, setDeactivatingId] = useState(null);
+  const [deactivating,   setDeactivating]   = useState(false);
+
+  /* ─── load ─── */
+
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiGet("/v1/admin/sme");
+      setSmes(Array.isArray(data) ? data : (data?.smes ?? []));
+    } catch (e) {
+      setError(e.message || "Failed to load SME profiles.");
     } finally {
       setLoading(false);
     }
-  }, [filter, t]);
+  }, []);
 
-  useEffect(() => { loadSMEs(); }, [loadSMEs]);
+  useEffect(() => { loadAll(); }, [loadAll]);
 
-  // ── Form field change ────────────────────────────────────────────────
-  function handleField(e) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+  /* ─── derived domain options from live data ─── */
 
-  // ── Create SME ───────────────────────────────────────────────────────
-  async function handleCreate(e) {
-    e.preventDefault();
-    setFormError(null);
+  const domainOptions = useMemo(() => {
+    const seen = new Set();
+    smes.forEach(s => { if (s.expertise_domain) seen.add(s.expertise_domain); });
+    return Array.from(seen).sort();
+  }, [smes]);
 
-    if (!form.full_name.trim() || !form.email.trim()) {
-      setFormError(t("admin.sme.form.errorRequired", "Full name and email are required."));
-      return;
+  /* ─── filtered list ─── */
+
+  const filtered = useMemo(() => {
+    let list = smes;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(s =>
+        s.full_name?.toLowerCase().includes(q) ||
+        s.email?.toLowerCase().includes(q)
+      );
     }
+    if (domainFilter) {
+      list = list.filter(s => s.expertise_domain === domainFilter);
+    }
+    if (activeFilter === "active") {
+      list = list.filter(s => s.is_active !== false);
+    } else if (activeFilter === "inactive") {
+      list = list.filter(s => s.is_active === false);
+    }
+    return list;
+  }, [smes, search, domainFilter, activeFilter]);
 
-    const payload = {
-      full_name: form.full_name.trim(),
-      email: form.email.trim(),
-    };
-    if (form.career_assignments.trim()) payload.career_assignments = form.career_assignments.trim();
-    if (form.years_experience)  payload.years_experience = parseInt(form.years_experience, 10);
-    if (form.seniority_score)   payload.seniority_score  = parseFloat(form.seniority_score);
-    if (form.education_score)   payload.education_score  = parseFloat(form.education_score);
-    if (form.sector_relevance)  payload.sector_relevance = parseFloat(form.sector_relevance);
-    if (form.sector.trim())     payload.sector           = form.sector.trim();
-    if (form.education.trim())  payload.education        = form.education.trim();
+  const subtitleText = () => {
+    if (loading) return "Loading…";
+    const n = filtered.length;
+    if (activeFilter === "active" && domainFilter) return `${n} active ${domainFilter} expert${n !== 1 ? "s" : ""}`;
+    if (activeFilter === "active") return `${n} active expert${n !== 1 ? "s" : ""}`;
+    if (domainFilter) return `${n} ${domainFilter} expert${n !== 1 ? "s" : ""}`;
+    return `${n} SME profile${n !== 1 ? "s" : ""}`;
+  };
 
-    setSubmitting(true);
+  /* ─── form helpers ─── */
+
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setFormMode("create");
+    setExpandedId(null);
+  };
+
+  const openEdit = (sme) => {
+    const f = {};
+    FORM_FIELDS.forEach(({ key }) => {
+      f[key] = sme[key] != null ? String(sme[key]) : "";
+    });
+    setForm(f);
+    setFormError("");
+    setFormMode(sme);
+    setExpandedId(null);
+  };
+
+  const closeForm = () => {
+    setFormMode(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+  };
+
+  const buildBody = () => {
+    const body = {};
+    FORM_FIELDS.forEach(({ key, type }) => {
+      const raw = form[key];
+      if (type === "number") {
+        body[key] = raw !== "" ? Number(raw) : null;
+      } else {
+        body[key] = raw.trim() !== "" ? raw.trim() : null;
+      }
+    });
+    return body;
+  };
+
+  const handleSave = async () => {
+    if (!form.full_name.trim()) { setFormError("Full name is required."); return; }
+    if (!form.email.trim())     { setFormError("Email is required.");     return; }
+    setSaving(true);
+    setFormError("");
     try {
-      await createSME(payload);
-      setForm(EMPTY_FORM);
-      setShowForm(false);
-      await loadSMEs();
-    } catch {
-      setFormError(t("admin.sme.error.createFailed", "Failed to create SME. Check the details and try again."));
+      if (formMode === "create") {
+        await apiPost("/v1/admin/sme", buildBody());
+      } else {
+        await apiPut(`/v1/admin/sme/${formMode.id}`, buildBody());
+      }
+      closeForm();
+      await loadAll();
+    } catch (e) {
+      setFormError(e.message || "Save failed.");
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
-  }
+  };
 
-  // ── Deactivate SME ───────────────────────────────────────────────────
-  async function handleDeactivate(sme) {
-    const msg = t(
-      "admin.sme.action.deactivateConfirm",
-      "Deactivate {{name}}? This is a soft delete — the record is kept for audit purposes.",
-      { name: sme.full_name }
-    );
-    if (!window.confirm(msg)) return;
+  /* ─── deactivate (soft delete) ─── */
+
+  const handleDeactivateConfirm = async () => {
+    setDeactivating(true);
     try {
-      await deactivateSME(sme.id);
-      await loadSMEs();
-    } catch {
-      alert(t("admin.sme.error.deactivateFailed", "Failed to deactivate SME."));
+      await apiDelete(`/v1/admin/sme/${deactivatingId}`);
+      setDeactivatingId(null);
+      await loadAll();
+    } catch (e) {
+      setError(e.message || "Deactivate failed.");
+      setDeactivatingId(null);
+    } finally {
+      setDeactivating(false);
     }
-  }
+  };
 
-  // ── Counts for filter tabs ───────────────────────────────────────────
-  const activeCount   = smes.filter((s) => s.status === "active").length;
-  const inactiveCount = smes.filter((s) => s.status === "inactive").length;
+  /* ─── shared styles ─── */
 
-  // ── Render ───────────────────────────────────────────────────────────
+  const inputCls = [
+    "rounded-md border border-[var(--border)] bg-white px-3 py-2",
+    "text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]",
+    "focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-1",
+  ].join(" ");
+
+  const labelStyle = {
+    display: "block", fontSize: 12, fontWeight: 600,
+    marginBottom: 4, color: "var(--text-primary)",
+  };
+
+  /* ─── form field renderer (driven by FORM_FIELDS config) ─── */
+
+  const renderFormField = (field) => {
+    const { key, label, type, required, placeholder, options } = field;
+    const value = form[key];
+    const onChange = e => setForm(f => ({ ...f, [key]: e.target.value }));
+
+    let input;
+    if (type === "textarea") {
+      input = (
+        <textarea className={inputCls} rows={2} value={value}
+          onChange={onChange} placeholder={placeholder}
+          style={{ resize: "vertical", width: "100%" }} />
+      );
+    } else if (type === "select") {
+      input = (
+        <select className={inputCls} value={value} onChange={onChange} style={{ width: "100%" }}>
+          {(options || []).map(o => (
+            <option key={o} value={o}>{o || "— Not set —"}</option>
+          ))}
+        </select>
+      );
+    } else {
+      input = (
+        <input type={type} className={inputCls} value={value}
+          onChange={onChange} placeholder={placeholder} style={{ width: "100%" }} />
+      );
+    }
+
+    return (
+      <div key={key} style={{ gridColumn: `span ${field.gridSpan}` }}>
+        <label style={labelStyle}>
+          {label}{required && <span style={{ color: "#dc2626", marginLeft: 3 }}>*</span>}
+        </label>
+        {input}
+      </div>
+    );
+  };
+
+  const isEditing = formMode && formMode !== "create";
+
+  /* ─── active filter toggle button ─── */
+
+  const toggleBtn = (value, label) => {
+    const isActive = activeFilter === value;
+    return (
+      <button
+        onClick={() => { setActiveFilter(value); setExpandedId(null); }}
+        style={{
+          padding: "6px 12px", fontSize: 13, fontWeight: isActive ? 700 : 500,
+          borderRadius: 6, border: "1px solid var(--border)", cursor: "pointer",
+          background: isActive ? "var(--brand-primary)" : "#fff",
+          color: isActive ? "#fff" : "var(--text-muted)",
+          transition: "all 0.1s",
+          fontFamily: "inherit",
+        }}
+      >
+        {label}
+      </button>
+    );
+  };
+
+  /* ─── render ─── */
+
   return (
     <SkeletonPage
-      title={t("admin.sme.pageTitle", "SME Registry")}
-      subtitle={t("admin.sme.pageSubtitle", "Manage Subject Matter Experts used for career weight validation.")}
+      title="SME Registry"
+      subtitle={subtitleText()}
+      loading={loading}
+      error={!loading ? error : ""}
+      onRetry={loadAll}
       actions={
-        <Button onClick={() => { setShowForm((v) => !v); setFormError(null); }}>
-          {showForm
-            ? t("admin.sme.cancelButton", "Cancel")
-            : t("admin.sme.addButton", "Add SME")}
-        </Button>
+        !loading && !error && (
+          <Button onClick={openCreate} disabled={formMode !== null}>+ New SME</Button>
+        )
       }
       footer={
         <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
           <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
             ← Admin Console
           </Link>
-          <div style={{ display: "flex", gap: 16 }}>
-            <Link to="/admin/sme-tokens" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-              Manage Tokens →
-            </Link>
-            <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-              Home
-            </Link>
-          </div>
+          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
+            ← Home
+          </Link>
         </div>
       }
     >
-      {/* ── Filter tabs ──────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {[
-          { key: "all",      label: t("admin.sme.filter.all",      "All ({{count}})",      { count: smes.length }) },
-          { key: "active",   label: t("admin.sme.filter.active",   "Active ({{count}})",   { count: activeCount }) },
-          { key: "inactive", label: t("admin.sme.filter.inactive", "Inactive ({{count}})", { count: inactiveCount }) },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setFilter(tab.key)}
-            style={{
-              padding: "4px 14px", borderRadius: 16, border: "1px solid",
-              borderColor: filter === tab.key ? "#1F3864" : "#ccc",
-              background: filter === tab.key ? "#1F3864" : "transparent",
-              color: filter === tab.key ? "#fff" : "#444",
-              cursor: "pointer", fontSize: 13,
-              fontWeight: filter === tab.key ? 500 : 400,
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* ── Create / Edit form ── */}
+      {formMode !== null && (
+        <Card className="mb-6">
+          <h2 style={{ margin: "0 0 16px", fontSize: "var(--font-size-lg)", fontWeight: 700 }}>
+            {isEditing ? `Edit — ${formMode.full_name}` : "Create SME Profile"}
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            {FORM_FIELDS.map(renderFormField)}
+          </div>
+          {formError && (
+            <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{formError}</p>
+          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : isEditing ? "Save changes" : "Create SME"}
+            </Button>
+            <Button variant="secondary" onClick={closeForm} disabled={saving}>Cancel</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Deactivate confirmation ── */}
+      {deactivatingId !== null && (
+        <Card className="mb-6">
+          <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--text-primary)" }}>
+            Deactivate <strong>{smes.find(s => s.id === deactivatingId)?.full_name}</strong>?
+            They will be marked inactive and will not appear as available for new assignments.
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="danger" onClick={handleDeactivateConfirm} disabled={deactivating}>
+              {deactivating ? "Deactivating…" : "Yes, deactivate"}
+            </Button>
+            <Button variant="secondary" onClick={() => setDeactivatingId(null)} disabled={deactivating}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Filters ── */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+        <input
+          className={inputCls}
+          style={{ maxWidth: 260 }}
+          placeholder="Search by name or email…"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setExpandedId(null); }}
+        />
+        <select
+          className={inputCls}
+          style={{ maxWidth: 200 }}
+          value={domainFilter}
+          onChange={e => { setDomainFilter(e.target.value); setExpandedId(null); }}
+        >
+          <option value="">All Domains</option>
+          {domainOptions.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <div style={{ display: "flex", gap: 4 }}>
+          {toggleBtn("all",      "All")}
+          {toggleBtn("active",   "Active")}
+          {toggleBtn("inactive", "Inactive")}
+        </div>
+        {(search || domainFilter || activeFilter !== "all") && (
+          <Button size="sm" variant="ghost"
+            onClick={() => { setSearch(""); setDomainFilter(""); setActiveFilter("all"); setExpandedId(null); }}>
+            Clear filters
+          </Button>
+        )}
       </div>
 
-      {/* ── Create form ───────────────────────────────────────────── */}
-      {showForm && (
-        <form onSubmit={handleCreate} style={{
-          background: "#F8F9FA", border: "1px solid #dee2e6",
-          borderRadius: 8, padding: 20, marginBottom: 20,
-        }}>
-          <div style={{ fontWeight: 500, marginBottom: 14, fontSize: 15 }}>
-            {t("admin.sme.form.title", "New SME Profile")}
-          </div>
-
-          {formError && (
-            <div style={{ color: "#c00", marginBottom: 12, fontSize: 13 }}>
-              {formError}
-            </div>
-          )}
-
-          {/* Required fields */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <label style={{ fontSize: 13 }}>
-              {t("admin.sme.form.fullName", "Full name")} *
-              <input name="full_name" value={form.full_name} onChange={handleField}
-                required style={inputStyle}
-                placeholder={t("admin.sme.form.fullNamePlaceholder", "Dr. Ananya Sharma")} />
-            </label>
-            <label style={{ fontSize: 13 }}>
-              {t("admin.sme.form.email", "Email")} *
-              <input name="email" type="email" value={form.email} onChange={handleField}
-                required style={inputStyle}
-                placeholder={t("admin.sme.form.emailPlaceholder", "ananya@example.com")} />
-            </label>
-          </div>
-
-          {/* Career assignments */}
-          <label style={{ fontSize: 13, display: "block", marginBottom: 12 }}>
-            {t("admin.sme.form.careerAssignments", "Career assignments (comma-separated IDs, max 3)")}
-            <input name="career_assignments" value={form.career_assignments} onChange={handleField}
-              style={inputStyle}
-              placeholder={t("admin.sme.form.careerAssignmentsPlaceholder", "e.g. 12,45,88")} />
-          </label>
-
-          {/* Credential inputs */}
-          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, color: "#555" }}>
-            {t("admin.sme.form.credentialInputsLabel", "Credential inputs (0.0 – 1.0 scores; years in whole numbers)")}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
-            {[
-              { name: "years_experience", label: "admin.sme.form.yearsExperience", fallback: "Years experience", type: "number", min: 0, max: 60,    step: 1,    placeholder: "12" },
-              { name: "seniority_score",  label: "admin.sme.form.seniorityScore",  fallback: "Seniority score",  type: "number", min: 0, max: 1, step: 0.01, placeholder: "0.75" },
-              { name: "education_score",  label: "admin.sme.form.educationScore",  fallback: "Education score",  type: "number", min: 0, max: 1, step: 0.01, placeholder: "0.80" },
-              { name: "sector_relevance", label: "admin.sme.form.sectorRelevance", fallback: "Sector relevance", type: "number", min: 0, max: 1, step: 0.01, placeholder: "0.90" },
-            ].map((field) => (
-              <label key={field.name} style={{ fontSize: 13 }}>
-                {t(field.label, field.fallback)}
-                <input name={field.name} type={field.type}
-                  min={field.min} max={field.max} step={field.step}
-                  value={form[field.name]} onChange={handleField}
-                  style={inputStyle} placeholder={field.placeholder} />
-              </label>
-            ))}
-          </div>
-
-          {/* Context fields */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-            <label style={{ fontSize: 13 }}>
-              {t("admin.sme.form.sector", "Sector")}
-              <input name="sector" value={form.sector} onChange={handleField}
-                style={inputStyle}
-                placeholder={t("admin.sme.form.sectorPlaceholder", "Healthcare")} />
-            </label>
-            <label style={{ fontSize: 13 }}>
-              {t("admin.sme.form.education", "Education")}
-              <input name="education" value={form.education} onChange={handleField}
-                style={inputStyle}
-                placeholder={t("admin.sme.form.educationPlaceholder", "PhD Psychology")} />
-            </label>
-          </div>
-
-          <Button type="submit" disabled={submitting}>
-            {submitting
-              ? t("admin.sme.form.submitting", "Creating…")
-              : t("admin.sme.form.submitButton", "Create SME")}
-          </Button>
-        </form>
-      )}
-
-      {/* ── Error ─────────────────────────────────────────────────── */}
-      {error && (
-        <div style={{ color: "#c00", padding: 16, fontSize: 14 }}>{error}</div>
-      )}
-
-      {/* ── Loading ───────────────────────────────────────────────── */}
-      {loading && (
-        <div style={{ color: "#888", padding: 16, fontSize: 14 }}>
-          {t("admin.sme.loading", "Loading SME profiles…")}
-        </div>
-      )}
-
-      {/* ── Empty state ───────────────────────────────────────────── */}
-      {!loading && !error && smes.length === 0 && (
-        <div style={{ color: "#888", padding: 24, textAlign: "center", fontSize: 14 }}>
-          {t("admin.sme.empty.noResults", "No SME profiles found.")}{" "}
-          {filter !== "all" && (
-            <span>
-              <button onClick={() => setFilter("all")} style={{
-                background: "none", border: "none", color: "#1F3864",
-                cursor: "pointer", textDecoration: "underline", fontSize: 14,
-              }}>
-                {t("admin.sme.empty.tryAll", "Try switching to All.")}
-              </button>
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* ── Table ─────────────────────────────────────────────────── */}
-      {!loading && !error && smes.length > 0 && (
+      {/* ── Table ── */}
+      {filtered.length === 0 ? (
+        <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
+          No SME profiles match the current filters.
+        </p>
+      ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid #dee2e6", textAlign: "left" }}>
-                {[
-                  ["admin.sme.table.name",        "Name"],
-                  ["admin.sme.table.email",        "Email"],
-                  ["admin.sme.table.sector",       "Sector"],
-                  ["admin.sme.table.years",        "Yrs"],
-                  ["admin.sme.table.credScore",    "Cred. score"],
-                  ["admin.sme.table.calibScore",   "Calib. score"],
-                  ["admin.sme.table.submissions",  "Submissions"],
-                  ["admin.sme.table.status",       "Status"],
-                  ["admin.sme.table.actions",      "Actions"],
-                ].map(([key, fallback]) => (
-                  <th key={key} style={thStyle}>{t(key, fallback)}</th>
+              <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left" }}>
+                {["Name", "Email", "Organization", "Domain", "Experience", "Careers", "Active", "Actions"].map(h => (
+                  <th key={h} style={{
+                    padding: "8px 10px", fontWeight: 700,
+                    color: "var(--text-muted)", whiteSpace: "nowrap",
+                  }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {smes.map((sme) => (
-                <tr key={sme.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                  <td style={tdStyle}><strong>{sme.full_name}</strong></td>
-                  <td style={tdStyle}>{sme.email}</td>
-                  <td style={tdStyle}>{sme.sector || "—"}</td>
-                  <td style={tdStyle}>{sme.years_experience ?? "—"}</td>
-                  <td style={tdStyle}><Score value={sme.credentials_score} /></td>
-                  <td style={tdStyle}><Score value={sme.calibration_score} /></td>
-                  <td style={tdStyle}>{sme.submission_count}</td>
-                  <td style={tdStyle}><StatusBadge status={sme.status} t={t} /></td>
-                  <td style={tdStyle}>
-                    {sme.status === "active" ? (
-                      <button onClick={() => handleDeactivate(sme)} style={{
-                        background: "none", border: "1px solid #c00",
-                        color: "#c00", borderRadius: 4, padding: "2px 10px",
-                        cursor: "pointer", fontSize: 12,
+              {filtered.map((sme, idx) => {
+                const isInactive    = sme.is_active === false;
+                const assignedCount = Array.isArray(sme.career_assignments) ? sme.career_assignments.length : 0;
+                const maxCareers    = sme.max_careers ?? 3;
+                const atCapacity    = assignedCount >= maxCareers;
+                const isExpanded    = expandedId === sme.id;
+
+                return (
+                  <Fragment key={sme.id}>
+                    <tr style={{
+                      borderBottom: isExpanded ? "none" : "1px solid var(--border)",
+                      background: isExpanded
+                        ? "#dbeafe"
+                        : isInactive
+                          ? (idx % 2 === 0 ? "#fafafa" : "#f3f4f6")
+                          : (idx % 2 === 0 ? "transparent" : "var(--bg-app)"),
+                      opacity: isInactive ? 0.65 : 1,
+                    }}>
+                      {/* Name — clickable to expand */}
+                      <td style={{ padding: "9px 10px", fontWeight: 600, maxWidth: 180 }}>
+                        <span
+                          onClick={() => setExpandedId(isExpanded ? null : sme.id)}
+                          style={{
+                            color: "#0d9488", cursor: "pointer",
+                            textDecoration: isExpanded ? "underline" : "none",
+                            whiteSpace: "nowrap",
+                          }}
+                          title="Click to expand details"
+                        >
+                          {sme.full_name}
+                        </span>
+                        {isExpanded && <span style={{ fontSize: 10, color: "var(--text-muted)", marginLeft: 6 }}>▲</span>}
+                      </td>
+
+                      {/* Email */}
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", maxWidth: 200 }}>
+                        {sme.email || "—"}
+                      </td>
+
+                      {/* Organization */}
+                      <td style={{
+                        padding: "9px 10px", color: "var(--text-muted)",
+                        maxWidth: 160, whiteSpace: "nowrap",
+                        overflow: "hidden", textOverflow: "ellipsis",
                       }}>
-                        {t("admin.sme.action.deactivate", "Deactivate")}
-                      </button>
-                    ) : (
-                      <span style={{ color: "#999", fontSize: 12 }}>
-                        {t("admin.sme.status.inactive", "Inactive")}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                        {sme.organization || "—"}
+                      </td>
+
+                      {/* Domain */}
+                      <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                        {sme.expertise_domain
+                          ? <span style={{
+                              fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4,
+                              background: "#dbeafe", color: "#1e40af",
+                            }}>{sme.expertise_domain}</span>
+                          : <span style={{ color: "var(--text-muted)" }}>—</span>
+                        }
+                      </td>
+
+                      {/* Years experience */}
+                      <td style={{ padding: "9px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {sme.years_experience != null ? `${sme.years_experience} yrs` : "—"}
+                      </td>
+
+                      {/* Careers assigned */}
+                      <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                        <span style={{
+                          fontWeight: 600,
+                          color: atCapacity ? "#dc2626" : assignedCount > 0 ? "#d97706" : "var(--text-muted)",
+                        }}>
+                          {assignedCount}/{maxCareers}
+                        </span>
+                      </td>
+
+                      {/* Active badge */}
+                      <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                        {isInactive
+                          ? <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#fee2e2", color: "#991b1b" }}>Inactive</span>
+                          : <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#dcfce7", color: "#166534" }}>Active</span>
+                        }
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: "9px 10px" }}>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <Button size="sm" variant="secondary"
+                            onClick={() => openEdit(sme)}
+                            disabled={formMode !== null || deactivatingId !== null}>
+                            Edit
+                          </Button>
+                          {!isInactive && (
+                            <Button size="sm" variant="danger"
+                              onClick={() => setDeactivatingId(sme.id)}
+                              disabled={formMode !== null || deactivatingId !== null}>
+                              Deactivate
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* ── Detail panel (only when expanded) ── */}
+                    {isExpanded && <DetailPanel sme={sme} onEdit={openEdit} />}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -370,11 +647,3 @@ export default function AdminSMEPage() {
     </SkeletonPage>
   );
 }
-
-// ── Shared styles ─────────────────────────────────────────────────────────
-const inputStyle = {
-  display: "block", width: "100%", marginTop: 4, padding: "6px 10px",
-  borderRadius: 4, border: "1px solid #ced4da", fontSize: 13, boxSizing: "border-box",
-};
-const thStyle = { padding: "8px 12px", fontWeight: 500, color: "#555", whiteSpace: "nowrap" };
-const tdStyle = { padding: "8px 12px", verticalAlign: "middle" };
