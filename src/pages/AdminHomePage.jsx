@@ -73,6 +73,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>DPDP Compliance</Button>
         </Link>
 
+        <Link to="/admin/cps-factors">
+          <Button style={{ width: "100%" }}>CPS Factor Weights</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
