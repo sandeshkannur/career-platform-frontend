@@ -40,6 +40,7 @@ const AdminFitBandsPage = lazy(() => import("./pages/admin/AdminFitBandsPage"));
 const AdminDPDPCompliancePage = lazy(() => import("./pages/admin/AdminDPDPCompliancePage"));
 const AdminCPSFactorsPage = lazy(() => import("./pages/admin/AdminCPSFactorsPage"));
 const AdminEngineHealthPage = lazy(() => import("./pages/admin/AdminEngineHealthPage"));
+const AdminAuditTrailPage = lazy(() => import("./pages/admin/AdminAuditTrailPage"));
 
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
@@ -239,6 +240,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminEngineHealthPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/audit-trail"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminAuditTrailPage />
             </ProtectedRoute>
           }
         />
