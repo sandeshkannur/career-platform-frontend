@@ -77,6 +77,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>CPS Factor Weights</Button>
         </Link>
 
+        <Link to="/admin/engine-health">
+          <Button style={{ width: "100%" }}>Engine Health</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
