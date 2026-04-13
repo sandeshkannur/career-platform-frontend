@@ -81,6 +81,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Engine Health</Button>
         </Link>
 
+        <Link to="/admin/audit-trail">
+          <Button style={{ width: "100%" }}>Audit Trail</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
