@@ -425,6 +425,141 @@ function SubDetailPanel({
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   PIPELINE BOARD — allowed status transitions per current status
+────────────────────────────────────────────────────────────────────────── */
+const PIPELINE_MOVES = {
+  received:     [{ value: "under_review", label: "→ Under Review" }, { value: "rejected", label: "→ Reject" }],
+  under_review: [{ value: "approved",     label: "→ Approve" },      { value: "rejected", label: "→ Reject" }],
+  approved:     [{ value: "under_review", label: "→ Reopen" }],
+  rejected:     [{ value: "under_review", label: "→ Reopen" }],
+};
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PIPELINE CARD
+────────────────────────────────────────────────────────────────────────── */
+function PipelineCard({ sub, careerMap, onMove, isMoving }) {
+  const career = careerMap[sub.career_id];
+  const careerTitle = career
+    ? (career.title ?? career.name ?? String(career.id))
+    : String(sub.career_id ?? "—");
+  const moves = PIPELINE_MOVES[sub.status] ?? [];
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 8,
+      padding: 12,
+      boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)",
+      border: "1px solid var(--border)",
+      opacity: isMoving ? 0.55 : 1,
+      transition: "opacity 0.15s",
+    }}>
+      {/* Career title */}
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 3, lineHeight: 1.3 }}>
+        {careerTitle}
+      </div>
+
+      {/* SME email */}
+      <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4, wordBreak: "break-all" }}>
+        {sub.sme_email || "—"}
+      </div>
+
+      {/* Submitted date */}
+      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: moves.length > 0 ? 8 : 0 }}>
+        {relativeTime(sub.submitted_at)}
+      </div>
+
+      {/* Move buttons */}
+      {moves.length > 0 && (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {moves.map(m => (
+            <button
+              key={m.value}
+              onClick={() => onMove(sub.id, m.value)}
+              disabled={isMoving}
+              style={{
+                fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
+                border: "1px solid var(--border)", cursor: isMoving ? "not-allowed" : "pointer",
+                background: "#f9fafb", color: "var(--text-primary)",
+                fontFamily: "inherit", opacity: isMoving ? 0.5 : 1,
+                transition: "background 0.1s",
+              }}
+            >
+              {isMoving ? "…" : m.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PIPELINE COLUMN
+────────────────────────────────────────────────────────────────────────── */
+function PipelineColumn({ statusKey, submissions, careerMap, onMove, boardMovingId }) {
+  const meta  = STATUS_META[statusKey];
+  const cards = submissions.filter(s => s.status === statusKey);
+
+  return (
+    <div style={{ minWidth: 220, flex: "1 1 220px", display: "flex", flexDirection: "column" }}>
+      {/* Column header */}
+      <div style={{
+        background: meta.bg,
+        border: `1px solid ${meta.color}55`,
+        borderBottom: `3px solid ${meta.color}`,
+        borderRadius: "8px 8px 0 0",
+        padding: "10px 14px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: meta.color }}>
+          {meta.label}
+        </span>
+        <span style={{
+          fontSize: 12, fontWeight: 700,
+          background: meta.color, color: "#fff",
+          borderRadius: 10, padding: "1px 8px",
+          minWidth: 22, textAlign: "center",
+        }}>
+          {cards.length}
+        </span>
+      </div>
+
+      {/* Column body */}
+      <div style={{
+        flex: 1,
+        background: meta.bg + "66", // very light tint (hex opacity suffix)
+        border: `1px solid ${meta.color}33`,
+        borderTop: "none",
+        borderRadius: "0 0 8px 8px",
+        padding: 10,
+        display: "flex", flexDirection: "column", gap: 8,
+        minHeight: 160,
+      }}>
+        {cards.length === 0 ? (
+          <div style={{
+            textAlign: "center", color: "var(--text-muted)",
+            fontSize: 12, padding: "24px 0",
+          }}>
+            No submissions
+          </div>
+        ) : (
+          cards.map(sub => (
+            <PipelineCard
+              key={sub.id}
+              sub={sub}
+              careerMap={careerMap}
+              onMove={onMove}
+              isMoving={boardMovingId === sub.id}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    PAGE
 ────────────────────────────────────────────────────────────────────────── */
 export default function AdminSMEPage() {
@@ -463,6 +598,9 @@ export default function AdminSMEPage() {
   const [subEditStatus,   setSubEditStatus]   = useState("");
   const [subEditNotes,    setSubEditNotes]    = useState("");
   const [subUpdating,     setSubUpdating]     = useState(false);
+
+  /* ── new state — pipeline board ── */
+  const [boardMovingId,   setBoardMovingId]   = useState(null);
 
   /* ─── load SMEs ─── */
   const loadAll = useCallback(async () => {
@@ -504,9 +642,9 @@ export default function AdminSMEPage() {
     }
   }, []);
 
-  /* ─── lazily load submissions tab data on first visit ─── */
+  /* ─── lazily load submissions / pipeline tab data on first visit ─── */
   useEffect(() => {
-    if (activeTab === "submissions") {
+    if (activeTab === "submissions" || activeTab === "pipeline") {
       loadSubmissions();
       if (careers.length === 0) loadCareers();
     }
@@ -577,6 +715,11 @@ export default function AdminSMEPage() {
       return label
         ? `${n} ${label.toLowerCase()} submission${n !== 1 ? "s" : ""}`
         : `${n} submission${n !== 1 ? "s" : ""}`;
+    }
+    if (activeTab === "pipeline") {
+      if (subLoading) return "Loading…";
+      const n = submissions.length;
+      return `${n} submission${n !== 1 ? "s" : ""} in pipeline`;
     }
     if (loading) return "Loading…";
     const n = filtered.length;
@@ -684,6 +827,20 @@ export default function AdminSMEPage() {
       setSubError(e.message || "Status update failed.");
     } finally {
       setSubUpdating(false);
+    }
+  };
+
+  /* ─── pipeline board: quick status move (no notes textarea) ─── */
+  const handleBoardMove = async (submissionId, newStatus) => {
+    setBoardMovingId(submissionId);
+    setSubError("");
+    try {
+      await apiPut(`/v1/admin/sme/submissions/${submissionId}/status`, { status: newStatus });
+      await loadSubmissions();
+    } catch (e) {
+      setSubError(e.message || "Move failed.");
+    } finally {
+      setBoardMovingId(null);
     }
   };
 
@@ -797,6 +954,9 @@ export default function AdminSMEPage() {
         </button>
         <button style={tabStyle(activeTab === "submissions")} onClick={() => setActiveTab("submissions")}>
           Submissions
+        </button>
+        <button style={tabStyle(activeTab === "pipeline")} onClick={() => setActiveTab("pipeline")}>
+          Pipeline Board
         </button>
       </div>
 
@@ -1191,6 +1351,47 @@ export default function AdminSMEPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════
+          PIPELINE BOARD TAB
+          ══════════════════════════════════════════════════════════ */}
+      {activeTab === "pipeline" && (
+        <>
+          {/* Error banner */}
+          {subError && (
+            <p style={{ color: "#dc2626", marginBottom: 12, fontSize: 13 }}>{subError}</p>
+          )}
+
+          {/* Toolbar */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+            <Button size="sm" variant="secondary" onClick={loadSubmissions} disabled={subLoading}>
+              {subLoading ? "Loading…" : "Refresh"}
+            </Button>
+          </div>
+
+          {/* Board */}
+          {subLoading ? (
+            <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
+              Loading pipeline…
+            </p>
+          ) : (
+            <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+              <div style={{ display: "flex", gap: 12, minWidth: 920 }}>
+                {["received", "under_review", "approved", "rejected"].map(statusKey => (
+                  <PipelineColumn
+                    key={statusKey}
+                    statusKey={statusKey}
+                    submissions={submissions}
+                    careerMap={careerMap}
+                    onMove={handleBoardMove}
+                    boardMovingId={boardMovingId}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </>
