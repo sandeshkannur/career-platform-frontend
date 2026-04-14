@@ -25,19 +25,19 @@ const AQ_GROUPS = [
 ];
 
 const PERSONAS = [
-  { id: "stem",       label: "STEM Explorer",    desc: "Strong cognitive, weak emotional",
+  { id: "stem_explorer",    label: "STEM Explorer",    desc: "Strong cognitive, weak emotional",
     ranges: [{min:4,max:5},{min:4,max:5},{min:3,max:4},{min:2,max:3},{min:1,max:2},{min:2,max:3}] },
-  { id: "creative",   label: "Creative Artist",   desc: "Strong emotional/social, weak analytical",
+  { id: "creative_artist",  label: "Creative Artist",   desc: "Strong emotional/social, weak analytical",
     ranges: [{min:1,max:2},{min:1,max:2},{min:2,max:3},{min:3,max:4},{min:4,max:5},{min:4,max:5}] },
-  { id: "business",   label: "Business Leader",   desc: "Strong behavioral/drive, moderate cognitive",
+  { id: "business_leader",  label: "Business Leader",   desc: "Strong behavioral/drive, moderate cognitive",
     ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:3,max:4},{min:3,max:4}] },
-  { id: "healthcare", label: "Healthcare Helper", desc: "Moderate all, strong emotional",
+  { id: "healthcare_helper",label: "Healthcare Helper", desc: "Moderate all, strong emotional",
     ranges: [{min:3,max:4},{min:2,max:3},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:3,max:4}] },
-  { id: "balanced",   label: "Balanced",          desc: "All moderate (3-4)",
+  { id: "balanced",         label: "Balanced",          desc: "All moderate (3-4)",
     ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4}] },
-  { id: "random",     label: "Random",            desc: "Fully random (1-5)",
+  { id: "random",           label: "Random",            desc: "Fully random (1-5)",
     ranges: [{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5}] },
-  { id: "low",        label: "Low Confidence",    desc: "All low (1-2)",
+  { id: "low_confidence",   label: "Low Confidence",    desc: "All low (1-2)",
     ranges: [{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2}] },
 ];
 
@@ -62,15 +62,15 @@ const FIT_BAND = {
 };
 
 const PERSONA_BADGE = {
-  stem:       { bg: "#dbeafe", color: "#1e40af" },
-  creative:   { bg: "#fae8ff", color: "#7e22ce" },
-  business:   { bg: "#fef9c3", color: "#854d0e" },
-  healthcare: { bg: "#dcfce7", color: "#166534" },
-  balanced:   { bg: "#f0f9ff", color: "#0369a1" },
-  random:     { bg: "#f1f5f9", color: "#475569" },
-  low:        { bg: "#fee2e2", color: "#991b1b" },
-  custom:     { bg: "#f3f4f6", color: "#374151" },
-  mixed:      { bg: "#f5f3ff", color: "#5b21b6" },
+  stem_explorer:    { bg: "#dbeafe", color: "#1e40af" },
+  creative_artist:  { bg: "#fae8ff", color: "#7e22ce" },
+  business_leader:  { bg: "#fef9c3", color: "#854d0e" },
+  healthcare_helper:{ bg: "#dcfce7", color: "#166534" },
+  balanced:         { bg: "#f0f9ff", color: "#0369a1" },
+  random:           { bg: "#f1f5f9", color: "#475569" },
+  low_confidence:   { bg: "#fee2e2", color: "#991b1b" },
+  custom:           { bg: "#f3f4f6", color: "#374151" },
+  mixed:            { bg: "#f5f3ff", color: "#5b21b6" },
 };
 
 const EMPTY_CUSTOM_RANGES = AQ_GROUPS.map(() => ({ min: "1", max: "5" }));
@@ -387,10 +387,20 @@ export default function AdminSimulatorPage() {
       setTimeout(() => setCurrentStep(i + 1), delay)
     );
 
+    // Build custom_aq_ranges as dict with string keys (backend expects Dict[str, List[int]])
+    const AQ_GROUP_KEYS = ["aq_01_05", "aq_06_09", "aq_10_14", "aq_15_18", "aq_19_22", "aq_23_25"];
+    const custom_aq_ranges = {};
+    activeRanges.forEach((r, i) => {
+      custom_aq_ranges[AQ_GROUP_KEYS[i]] = [r.min, r.max];
+    });
+
     const payload = {
-      student_email: email, student_password: password, tier,
-      aq_ranges: activeRanges,
-      persona:   aqMode === "preset" ? personaId : "custom",
+      student_email: email,
+      student_password: password,
+      tier,
+      mode: aqMode === "preset" ? "preset" : "custom",
+      persona: aqMode === "preset" ? personaId : null,
+      custom_aq_ranges: aqMode === "custom" ? custom_aq_ranges : null,
       context_profile: {
         education_board: ctx.education_board || null,
         ses_band:        ctx.ses_band        || null,
@@ -442,7 +452,7 @@ export default function AdminSimulatorPage() {
     setBatchResults([]);
 
     try {
-      const raw     = await apiPost("/v1/admin/simulate-batch", { count, persona: batchPersona, tier: batchTier, create_students: createStudents, email_prefix: emailPrefix });
+      const raw     = await apiPost("/v1/admin/simulate-batch", { count, persona: batchPersona, tier: batchTier, create_students: createStudents, base_email_prefix: emailPrefix });
       const results = Array.isArray(raw) ? raw : (raw?.results ?? []);
       setBatchFakePct(1);
       setBatchResults(results);
