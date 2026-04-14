@@ -25,19 +25,42 @@ const AQ_GROUPS = [
 ];
 
 const PERSONAS = [
-  { id: "stem_explorer",    label: "STEM Explorer",    desc: "Strong cognitive, weak emotional",
-    ranges: [{min:4,max:5},{min:4,max:5},{min:3,max:4},{min:2,max:3},{min:1,max:2},{min:2,max:3}] },
-  { id: "creative_artist",  label: "Creative Artist",   desc: "Strong emotional/social, weak analytical",
-    ranges: [{min:1,max:2},{min:1,max:2},{min:2,max:3},{min:3,max:4},{min:4,max:5},{min:4,max:5}] },
-  { id: "business_leader",  label: "Business Leader",   desc: "Strong behavioral/drive, moderate cognitive",
-    ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:3,max:4},{min:3,max:4}] },
-  { id: "healthcare_helper",label: "Healthcare Helper", desc: "Moderate all, strong emotional",
-    ranges: [{min:3,max:4},{min:2,max:3},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:3,max:4}] },
-  { id: "balanced",         label: "Balanced",          desc: "All moderate (3-4)",
+  // Cognitive
+  { id: "analytical_thinker",      label: "Analytical Thinker",      desc: "Pure cognition peak — Data Scientist, Physicist",     group: "Cognitive",    color: "blue",
+    ranges: [{min:5,max:5},{min:5,max:5},{min:3,max:4},{min:2,max:3},{min:1,max:2},{min:2,max:3}] },
+  { id: "systematic_builder",      label: "Systematic Builder",      desc: "Design & build — Engineer, Architect",               group: "Cognitive",    color: "blue",
+    ranges: [{min:4,max:5},{min:4,max:5},{min:5,max:5},{min:4,max:5},{min:2,max:3},{min:2,max:3}] },
+  { id: "investigative_researcher",label: "Investigative Researcher",desc: "Curiosity & persistence — Researcher, Scientist",     group: "Cognitive",    color: "blue",
+    ranges: [{min:5,max:5},{min:4,max:5},{min:3,max:4},{min:4,max:5},{min:2,max:3},{min:1,max:2}] },
+  // Behavioral
+  { id: "strategic_leader",        label: "Strategic Leader",        desc: "Drive & communication — CEO, Consultant",            group: "Behavioral",   color: "amber",
+    ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:5,max:5},{min:3,max:4},{min:5,max:5}] },
+  { id: "organized_executor",      label: "Organized Executor",      desc: "Discipline & precision — Accountant, Auditor",       group: "Behavioral",   color: "amber",
+    ranges: [{min:2,max:3},{min:3,max:4},{min:4,max:5},{min:5,max:5},{min:3,max:4},{min:3,max:4}] },
+  { id: "hands_on_maker",          label: "Hands-On Maker",          desc: "Build & craft — Electrician, Chef, Welder",          group: "Behavioral",   color: "amber",
+    ranges: [{min:2,max:3},{min:2,max:3},{min:5,max:5},{min:4,max:5},{min:2,max:3},{min:2,max:3}] },
+  // Emotional
+  { id: "empathetic_healer",       label: "Empathetic Healer",       desc: "Caring & emotional — Counselor, Nurse, Therapist",   group: "Emotional",    color: "green",
+    ranges: [{min:3,max:4},{min:2,max:3},{min:3,max:4},{min:3,max:4},{min:5,max:5},{min:5,max:5}] },
+  { id: "creative_visionary",      label: "Creative Visionary",      desc: "Expression & imagination — Designer, Artist, Actor", group: "Emotional",    color: "green",
+    ranges: [{min:3,max:4},{min:2,max:3},{min:2,max:3},{min:2,max:3},{min:5,max:5},{min:4,max:5}] },
+  { id: "patient_educator",        label: "Patient Educator",        desc: "Teaching & guiding — Teacher, Trainer, Counselor",   group: "Emotional",    color: "green",
+    ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:5,max:5}] },
+  // Cross-Domain
+  { id: "tech_creative_hybrid",    label: "Tech-Creative Hybrid",    desc: "Tech meets art — UX Designer, Game Dev",             group: "Cross-Domain", color: "purple",
+    ranges: [{min:4,max:5},{min:4,max:5},{min:3,max:4},{min:2,max:3},{min:4,max:5},{min:3,max:4}] },
+  { id: "science_people_bridge",   label: "Science-People Bridge",   desc: "Science meets caring — Biomedical, Psychiatrist",    group: "Cross-Domain", color: "purple",
+    ranges: [{min:4,max:5},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:4,max:5}] },
+  { id: "entrepreneurial_connector",label:"Entrepreneurial Connector",desc:"Networks & energy — Agent, Planner, Coach",          group: "Cross-Domain", color: "purple",
+    ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:4,max:5},{min:3,max:4},{min:5,max:5}] },
+  // Control
+  { id: "balanced_allrounder",     label: "Balanced All-Rounder",    desc: "Moderate everything — Manager, Officer",             group: "Control",      color: "gray",
     ranges: [{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4},{min:3,max:4}] },
-  { id: "random",           label: "Random",            desc: "Fully random (1-5)",
+  { id: "explorer_undecided",      label: "Explorer (Undecided)",    desc: "Wide range, inconsistent — Entry-level roles",       group: "Control",      color: "gray",
+    ranges: [{min:2,max:4},{min:2,max:4},{min:2,max:4},{min:2,max:4},{min:2,max:4},{min:2,max:4}] },
+  { id: "random_stress_test",      label: "Random Stress Test",      desc: "Full 1-5 range — Edge case testing",                group: "Control",      color: "gray",
     ranges: [{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5},{min:1,max:5}] },
-  { id: "low_confidence",   label: "Low Confidence",    desc: "All low (1-2)",
+  { id: "low_engagement",          label: "Low Engagement",          desc: "All low 1-2 — Floor behavior test",                 group: "Control",      color: "gray",
     ranges: [{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2},{min:1,max:2}] },
 ];
 
@@ -62,15 +85,30 @@ const FIT_BAND = {
 };
 
 const PERSONA_BADGE = {
-  stem_explorer:    { bg: "#dbeafe", color: "#1e40af" },
-  creative_artist:  { bg: "#fae8ff", color: "#7e22ce" },
-  business_leader:  { bg: "#fef9c3", color: "#854d0e" },
-  healthcare_helper:{ bg: "#dcfce7", color: "#166534" },
-  balanced:         { bg: "#f0f9ff", color: "#0369a1" },
-  random:           { bg: "#f1f5f9", color: "#475569" },
-  low_confidence:   { bg: "#fee2e2", color: "#991b1b" },
-  custom:           { bg: "#f3f4f6", color: "#374151" },
-  mixed:            { bg: "#f5f3ff", color: "#5b21b6" },
+  // Cognitive — blue
+  analytical_thinker:       { bg: "#dbeafe", color: "#1e40af" },
+  systematic_builder:       { bg: "#dbeafe", color: "#1e40af" },
+  investigative_researcher: { bg: "#dbeafe", color: "#1e40af" },
+  // Behavioral — amber
+  strategic_leader:         { bg: "#fef9c3", color: "#854d0e" },
+  organized_executor:       { bg: "#fef9c3", color: "#854d0e" },
+  hands_on_maker:           { bg: "#fef9c3", color: "#854d0e" },
+  // Emotional — green
+  empathetic_healer:        { bg: "#dcfce7", color: "#166534" },
+  creative_visionary:       { bg: "#dcfce7", color: "#166534" },
+  patient_educator:         { bg: "#dcfce7", color: "#166534" },
+  // Cross-Domain — purple
+  tech_creative_hybrid:     { bg: "#f5f3ff", color: "#5b21b6" },
+  science_people_bridge:    { bg: "#f5f3ff", color: "#5b21b6" },
+  entrepreneurial_connector:{ bg: "#f5f3ff", color: "#5b21b6" },
+  // Control — gray
+  balanced_allrounder:      { bg: "#f1f5f9", color: "#475569" },
+  explorer_undecided:       { bg: "#f1f5f9", color: "#475569" },
+  random_stress_test:       { bg: "#f1f5f9", color: "#475569" },
+  low_engagement:           { bg: "#fee2e2", color: "#991b1b" },
+  // Meta
+  custom:                   { bg: "#f3f4f6", color: "#374151" },
+  mixed:                    { bg: "#e9d5ff", color: "#6d28d9" },
 };
 
 const EMPTY_CUSTOM_RANGES = AQ_GROUPS.map(() => ({ min: "1", max: "5" }));
@@ -296,7 +334,7 @@ export default function AdminSimulatorPage() {
 
   /* ── single: AQ mode ── */
   const [aqMode,       setAqMode]       = useState("preset");
-  const [personaId,    setPersonaId]    = useState("balanced");
+  const [personaId,    setPersonaId]    = useState("balanced_allrounder");
   const [customRanges, setCustomRanges] = useState(EMPTY_CUSTOM_RANGES);
 
   /* ── single: context (collapsible) ── */
@@ -311,7 +349,7 @@ export default function AdminSimulatorPage() {
 
   /* ── batch: config ── */
   const [batchCount,     setBatchCount]     = useState("10");
-  const [batchPersona,   setBatchPersona]   = useState("balanced");
+  const [batchPersona,   setBatchPersona]   = useState("balanced_allrounder");
   const [batchTier,      setBatchTier]      = useState("free");
   const [createStudents, setCreateStudents] = useState(true);
   const [emailPrefix,    setEmailPrefix]    = useState("sim");
@@ -603,7 +641,13 @@ export default function AdminSimulatorPage() {
                   <label style={LB}>Persona</label>
                   <select className={INPUT_CLS} style={{ width: "100%", boxSizing: "border-box", marginBottom: 14 }}
                     value={personaId} onChange={e => setPersonaId(e.target.value)}>
-                    {PERSONAS.map(p => <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>)}
+                    {["Cognitive", "Behavioral", "Emotional", "Cross-Domain", "Control"].map(grp => (
+                      <optgroup key={grp} label={grp + "-Dominant"}>
+                        {PERSONAS.filter(p => p.group === grp).map(p =>
+                          <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>
+                        )}
+                      </optgroup>
+                    ))}
                   </select>
                   <div style={microLabel}>Score Range Preview</div>
                   <AQRangePreview ranges={activeRanges} />
@@ -756,7 +800,13 @@ export default function AdminSimulatorPage() {
                   <label style={LB}>Persona</label>
                   <select className={INPUT_CLS} style={{ width: "100%", boxSizing: "border-box" }}
                     value={batchPersona} onChange={e => setBatchPersona(e.target.value)}>
-                    {PERSONAS.map(p => <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>)}
+                    {["Cognitive", "Behavioral", "Emotional", "Cross-Domain", "Control"].map(grp => (
+                      <optgroup key={grp} label={grp + "-Dominant"}>
+                        {PERSONAS.filter(p => p.group === grp).map(p =>
+                          <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>
+                        )}
+                      </optgroup>
+                    ))}
                     <option value="mixed">Mixed (rotate all)</option>
                   </select>
                 </div>
