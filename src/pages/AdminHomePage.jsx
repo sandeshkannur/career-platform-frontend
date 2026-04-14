@@ -89,6 +89,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Audit Trail</Button>
         </Link>
 
+        <Link to="/admin/simulator">
+          <Button style={{ width: "100%" }}>Assessment Simulator</Button>
+        </Link>
+
 </div>
     </SkeletonPage>
   );
