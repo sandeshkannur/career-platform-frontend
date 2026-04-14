@@ -602,6 +602,11 @@ export default function AdminSMEPage() {
   /* ── new state — pipeline board ── */
   const [boardMovingId,   setBoardMovingId]   = useState(null);
 
+  /* ── new state — aggregation ── */
+  const [aggData,    setAggData]    = useState(null);
+  const [aggLoading, setAggLoading] = useState(false);
+  const [aggError,   setAggError]   = useState("");
+
   /* ─── load SMEs ─── */
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -841,6 +846,21 @@ export default function AdminSMEPage() {
       setSubError(e.message || "Move failed.");
     } finally {
       setBoardMovingId(null);
+    }
+  };
+
+  /* ─── aggregation: run for selected career ─── */
+  const handleRunAggregation = async () => {
+    setAggLoading(true);
+    setAggError("");
+    setAggData(null);
+    try {
+      const data = await apiGet(`/v1/admin/sme/aggregation/${subCareerFilter}`);
+      setAggData(data);
+    } catch (e) {
+      setAggError(e.message || "Aggregation failed.");
+    } finally {
+      setAggLoading(false);
     }
   };
 
@@ -1215,7 +1235,7 @@ export default function AdminSMEPage() {
               className={INPUT_CLS}
               style={{ maxWidth: 220 }}
               value={subCareerFilter}
-              onChange={e => { setSubCareerFilter(e.target.value); setExpandedSubId(null); }}
+              onChange={e => { setSubCareerFilter(e.target.value); setExpandedSubId(null); setAggData(null); setAggError(""); }}
             >
               <option value="">All Careers</option>
               {careers.map(c => (
@@ -1251,6 +1271,12 @@ export default function AdminSMEPage() {
             <Button size="sm" variant="secondary" onClick={loadSubmissions} disabled={subLoading}>
               {subLoading ? "Loading…" : "Refresh"}
             </Button>
+
+            {subCareerFilter && (
+              <Button size="sm" variant="primary" onClick={handleRunAggregation} disabled={aggLoading}>
+                {aggLoading ? "Running…" : "Run Aggregation"}
+              </Button>
+            )}
           </div>
 
           {/* ── Submissions table ── */}
@@ -1353,6 +1379,147 @@ export default function AdminSMEPage() {
               </table>
             </div>
           )}
+
+          {/* ── Aggregation error ── */}
+          {aggError && (
+            <div style={{
+              marginTop: 20, padding: "12px 16px", borderRadius: 8,
+              background: "#fef9c3", border: "1px solid #fbbf24",
+              color: "#92400e", fontSize: 13,
+            }}>
+              ⚠ {aggError}
+            </div>
+          )}
+
+          {/* ── Aggregation results card ── */}
+          {aggData && (() => {
+            const consensusScore = aggData.consensus_score ?? aggData.consensusScore ?? 0;
+            const scoreBg    = consensusScore > 80 ? "#dcfce7" : consensusScore >= 50 ? "#fef9c3" : "#fee2e2";
+            const scoreColor = consensusScore > 80 ? "#166534" : consensusScore >= 50 ? "#92400e" : "#991b1b";
+            const aqRows     = Array.isArray(aggData.aq_breakdown) ? aggData.aq_breakdown
+                             : Array.isArray(aggData.aqBreakdown)  ? aggData.aqBreakdown
+                             : [];
+            return (
+              <div style={{
+                marginTop: 24, borderRadius: 10, border: "1px solid var(--border)",
+                background: "var(--card)", padding: "20px 22px",
+              }}>
+                <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+                  Aggregation Results
+                </h3>
+
+                {/* Summary row */}
+                <div style={{ display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
+                  <div style={{
+                    flex: "0 0 auto", borderRadius: 8, padding: "12px 20px",
+                    background: "#f0f9ff", border: "1px solid #bae6fd",
+                    textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: "#0369a1", lineHeight: 1 }}>
+                      {aggData.sme_count ?? aggData.smeCount ?? "—"}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#0369a1", marginTop: 4 }}>SMEs</div>
+                  </div>
+
+                  <div style={{
+                    flex: "0 0 auto", borderRadius: 8, padding: "12px 20px",
+                    background: "#fff7ed", border: "1px solid #fed7aa",
+                    textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: "#c2410c", lineHeight: 1 }}>
+                      {aggData.outlier_count ?? aggData.outlierCount ?? "—"}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#c2410c", marginTop: 4 }}>Outliers</div>
+                  </div>
+
+                  <div style={{
+                    flex: "0 0 auto", borderRadius: 8, padding: "12px 20px",
+                    background: scoreBg, border: `1px solid ${scoreColor}44`,
+                    textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>
+                      {typeof consensusScore === "number" ? `${consensusScore.toFixed(1)}%` : "—"}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: scoreColor, marginTop: 4 }}>Consensus Score</div>
+                  </div>
+                </div>
+
+                {/* AQ Breakdown table */}
+                {aqRows.length > 0 && (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left", background: "#f8fafc" }}>
+                          {["AQ Code", "Weighted Avg", "Std Dev", "Outlier SMEs", "Raw Values"].map(h => (
+                            <th key={h} style={{
+                              padding: "8px 10px", fontWeight: 700,
+                              color: "var(--text-muted)", whiteSpace: "nowrap",
+                            }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {aqRows.map((row, i) => {
+                          const stdDev        = row.std_dev ?? row.stdDev ?? 0;
+                          const isHighVariance = stdDev > 2.0;
+                          const outliers      = Array.isArray(row.outlier_smes ?? row.outlierSmes)
+                                              ? (row.outlier_smes ?? row.outlierSmes)
+                                              : [];
+                          const rawVals       = Array.isArray(row.raw_values ?? row.rawValues)
+                                              ? (row.raw_values ?? row.rawValues)
+                                              : [];
+
+                          return (
+                            <tr key={i} style={{
+                              borderBottom: "1px solid var(--border)",
+                              background: isHighVariance ? "#fef9c3" : i % 2 === 0 ? "transparent" : "var(--bg-app)",
+                            }}>
+                              <td style={{ padding: "8px 10px", fontWeight: 700, fontFamily: "monospace" }}>
+                                {row.aq_code ?? row.aqCode ?? "—"}
+                                {isHighVariance && (
+                                  <span style={{
+                                    marginLeft: 6, fontSize: 10, fontWeight: 700,
+                                    padding: "1px 5px", borderRadius: 3,
+                                    background: "#fbbf24", color: "#78350f",
+                                  }}>High Variance</span>
+                                )}
+                              </td>
+                              <td style={{ padding: "8px 10px", color: "var(--text-primary)" }}>
+                                {typeof (row.weighted_avg ?? row.weightedAvg) === "number"
+                                  ? (row.weighted_avg ?? row.weightedAvg).toFixed(3)
+                                  : "—"}
+                              </td>
+                              <td style={{
+                                padding: "8px 10px",
+                                color: isHighVariance ? "#92400e" : "var(--text-primary)",
+                                fontWeight: isHighVariance ? 700 : 400,
+                              }}>
+                                {typeof stdDev === "number" ? stdDev.toFixed(3) : "—"}
+                              </td>
+                              <td style={{ padding: "8px 10px", color: "var(--text-muted)", fontSize: 11 }}>
+                                {outliers.length > 0
+                                  ? outliers.join(", ")
+                                  : <span style={{ color: "var(--text-muted)" }}>—</span>}
+                              </td>
+                              <td style={{ padding: "8px 10px", color: "var(--text-muted)", fontSize: 11, fontFamily: "monospace" }}>
+                                {rawVals.length > 0
+                                  ? rawVals.map(v => (typeof v === "number" ? v.toFixed(2) : v)).join(", ")
+                                  : "—"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {aqRows.length === 0 && (
+                  <p style={{ color: "var(--text-muted)", fontSize: 13 }}>No AQ breakdown data returned.</p>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
 
