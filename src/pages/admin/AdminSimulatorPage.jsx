@@ -289,9 +289,13 @@ export default function AdminSimulatorPage() {
   const [tab, setTab] = useState("single");
 
   /* ── single: credentials ── */
-  const [email,    setEmail]    = useState("teststudent1@mapyourcareer.in");
-  const [password, setPassword] = useState("BetaTest@123");
-  const [tier,     setTier]     = useState("free");
+  const [email,       setEmail]       = useState("teststudent1@mapyourcareer.in");
+  const [password,    setPassword]    = useState("BetaTest@123");
+  const [tier,        setTier]        = useState("free");
+  const [knownEmails, setKnownEmails] = useState([
+    "teststudent1@mapyourcareer.in",
+    "beta4@mapyourcareer.in",
+  ]);
 
   /* ── single: AQ mode ── */
   const [aqMode,       setAqMode]       = useState("preset");
@@ -422,6 +426,7 @@ export default function AdminSimulatorPage() {
         topCluster: Array.isArray(result?.top_clusters) ? (result.top_clusters[0] ?? "—") : "—",
         status:     "success",
       }, ...h].slice(0, 50));
+      if (email) setKnownEmails(prev => prev.includes(email) ? prev : [...prev, email]);
       loadHealth();
     } catch (e) {
       timers.forEach(clearTimeout);
@@ -462,6 +467,14 @@ export default function AdminSimulatorPage() {
         topCluster: results[0]?.top_cluster ?? results[0]?.cluster_name ?? "—",
         status:     "success",
       }, ...h].slice(0, 50));
+      if (createStudents) {
+        const newEmails = results.map(r => r.email ?? r.student_email).filter(Boolean);
+        if (newEmails.length) setKnownEmails(prev => {
+          const set = new Set(prev);
+          newEmails.forEach(e => set.add(e));
+          return [...set];
+        });
+      }
       loadHealth();
     } catch (e) {
       setBatchError(e.message || "Batch simulation failed.");
@@ -545,8 +558,20 @@ export default function AdminSimulatorPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div>
                   <label style={LB}>Email</label>
-                  <input className={INPUT_CLS} style={{ width: "100%", boxSizing: "border-box" }}
-                    value={email} onChange={e => setEmail(e.target.value)} placeholder="student@example.com" />
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      list="email-suggestions"
+                      className={INPUT_CLS}
+                      style={{ width: "100%", boxSizing: "border-box" }}
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="Type or select student email..."
+                    />
+                    <datalist id="email-suggestions">
+                      {knownEmails.map(e => <option key={e} value={e} />)}
+                    </datalist>
+                  </div>
                 </div>
                 <div>
                   <label style={LB}>Password</label>
