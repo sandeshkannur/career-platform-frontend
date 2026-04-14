@@ -292,10 +292,7 @@ export default function AdminSimulatorPage() {
   const [email,       setEmail]       = useState("teststudent1@mapyourcareer.in");
   const [password,    setPassword]    = useState("BetaTest@123");
   const [tier,        setTier]        = useState("free");
-  const [knownEmails, setKnownEmails] = useState([
-    "teststudent1@mapyourcareer.in",
-    "beta4@mapyourcareer.in",
-  ]);
+  const [knownEmails, setKnownEmails] = useState([]);
 
   /* ── single: AQ mode ── */
   const [aqMode,       setAqMode]       = useState("preset");
@@ -346,6 +343,12 @@ export default function AdminSimulatorPage() {
   }, []);
 
   useEffect(() => { loadHealth(); }, [loadHealth]);
+
+  useEffect(() => {
+    apiGet("/v1/admin/simulate/students")
+      .then(emails => setKnownEmails(emails || []))
+      .catch(() => {});
+  }, []);
 
   /* ─── fake batch progress ticker ─── */
   useEffect(() => {
@@ -468,12 +471,7 @@ export default function AdminSimulatorPage() {
         status:     "success",
       }, ...h].slice(0, 50));
       if (createStudents) {
-        const newEmails = results.map(r => r.email ?? r.student_email).filter(Boolean);
-        if (newEmails.length) setKnownEmails(prev => {
-          const set = new Set(prev);
-          newEmails.forEach(e => set.add(e));
-          return [...set];
-        });
+        apiGet("/v1/admin/simulate/students").then(emails => setKnownEmails(emails || [])).catch(() => {});
       }
       loadHealth();
     } catch (e) {
