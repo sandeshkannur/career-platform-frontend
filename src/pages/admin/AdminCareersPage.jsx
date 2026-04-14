@@ -164,6 +164,176 @@ function DetailPanel({ career, onEdit }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   SIMILARITY BAR — fills proportionally to score (0–1)
+────────────────────────────────────────────────────────────────────────── */
+function SimBar({ score, color }) {
+  return (
+    <div style={{ height: 6, borderRadius: 3, background: "#e2e8f0", overflow: "hidden", marginBottom: 2 }}>
+      <div style={{
+        height: "100%", borderRadius: 3,
+        width: `${Math.min(100, Math.round(score * 100))}%`,
+        background: color, transition: "width 0.3s",
+      }} />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PROXIMITY PANEL — neighbour cards rendered as a table row
+────────────────────────────────────────────────────────────────────────── */
+function ProximityPanel({ entry, clusterName }) {
+  const { loading, error, data } = entry;
+
+  const neighbours = data
+    ? (Array.isArray(data) ? data : (data.neighbours ?? data.neighbors ?? []))
+    : [];
+
+  return (
+    <tr>
+      <td colSpan={9} style={{ padding: 0, borderBottom: "2px solid var(--border)" }}>
+        <div style={{ background: "#faf5ff", borderTop: "2px solid #d8b4fe", padding: "16px 20px" }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: "#7c3aed",
+            textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14,
+          }}>
+            Proximity Analysis — Nearest Neighbours
+          </div>
+
+          {loading && (
+            <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Loading proximity data…</p>
+          )}
+          {error && (
+            <p style={{ color: "#dc2626", fontSize: 13 }}>⚠ {error}</p>
+          )}
+          {!loading && !error && neighbours.length === 0 && (
+            <p style={{ color: "var(--text-muted)", fontSize: 13 }}>No neighbour data returned.</p>
+          )}
+
+          {!loading && !error && neighbours.length > 0 && (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))",
+              gap: 12,
+            }}>
+              {neighbours.slice(0, 5).map((nb, i) => {
+                const composite   = nb.composite ?? nb.similarity ?? nb.score ?? 0;
+                const pct         = Math.round(composite * 100);
+                const isDupe      = composite > 0.92;
+                const barClr      = composite > 0.9 ? "#7c3aed" : composite > 0.7 ? "#d97706" : "#94a3b8";
+                const scoreClr    = composite > 0.9 ? "#7c3aed" : composite > 0.7 ? "#d97706" : "var(--text-muted)";
+                const dims        = nb.dimensions ?? nb.dimension_scores ?? nb.scores ?? {};
+                const sharedSkills = Array.isArray(nb.shared_key_skills ?? nb.shared_skills)
+                  ? (nb.shared_key_skills ?? nb.shared_skills) : [];
+                const uniqueSrc   = Array.isArray(nb.unique_to_source)   ? nb.unique_to_source   : [];
+                const uniqueNb    = Array.isArray(nb.unique_to_neighbour ?? nb.unique_skills)
+                  ? (nb.unique_to_neighbour ?? nb.unique_skills) : [];
+                const allUnique   = [...uniqueSrc, ...uniqueNb];
+
+                return (
+                  <div key={nb.career_id ?? i} style={{
+                    background: "#fff", borderRadius: 8, padding: "12px 14px",
+                    border: `1px solid ${isDupe ? "#fca5a5" : "#ede9fe"}`,
+                    borderTop: `3px solid ${isDupe ? "#ef4444" : "#7c3aed"}`,
+                  }}>
+                    {/* Rank + duplicate badge */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: "#7c3aed",
+                        background: "#ede9fe", padding: "1px 6px", borderRadius: 3,
+                      }}>
+                        #{i + 1}
+                      </span>
+                      {isDupe && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700,
+                          background: "#fee2e2", color: "#991b1b",
+                          padding: "2px 6px", borderRadius: 3,
+                        }}>
+                          ⚠ Duplicate Risk
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 2, lineHeight: 1.3 }}>
+                      {nb.title ?? `Career #${nb.career_id}`}
+                    </div>
+
+                    {/* Cluster */}
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+                      {nb.cluster_name ?? clusterName(nb.cluster_id) ?? "—"}
+                    </div>
+
+                    {/* Composite score + bar */}
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                          Composite Similarity
+                        </span>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: scoreClr }}>{pct}%</span>
+                      </div>
+                      <SimBar score={composite} color={barClr} />
+                    </div>
+
+                    {/* Per-dimension scores */}
+                    {Object.keys(dims).length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 8 }}>
+                        {Object.entries(dims).map(([dim, val]) => (
+                          <span key={dim} style={{
+                            fontSize: 9, fontWeight: 600, padding: "2px 5px", borderRadius: 3,
+                            background: "#f1f5f9", color: "var(--text-muted)", textTransform: "capitalize",
+                          }}>
+                            {dim.replace(/_/g, " ")}: {typeof val === "number" ? `${Math.round(val * 100)}%` : String(val)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Shared key skills — green */}
+                    {sharedSkills.length > 0 && (
+                      <div style={{ marginBottom: 6 }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: "#166534", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                          Shared Skills
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                          {sharedSkills.map((s, j) => (
+                            <span key={j} style={{
+                              fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 3,
+                              background: "#dcfce7", color: "#166534",
+                            }}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Unique key skills — amber */}
+                    {allUnique.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: "#92400e", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                          Unique Skills
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                          {allUnique.map((s, j) => (
+                            <span key={j} style={{
+                              fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 3,
+                              background: "#fef3c7", color: "#92400e",
+                            }}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    HELPERS
 ────────────────────────────────────────────────────────────────────────── */
 function trunc(str, n = 60) {
@@ -203,6 +373,16 @@ export default function AdminCareersPage() {
   // delete confirmation
   const [deletingId, setDeletingId] = useState(null);
   const [deleting,   setDeleting]   = useState(false);
+
+  // proximity
+  const [proximityId,  setProximityId]  = useState(null);
+  const [proximityMap, setProximityMap] = useState({}); // {[career_id]: {loading, error, data}}
+
+  // recompute vectors
+  const [recomputeLoading,  setRecomputeLoading]  = useState(false);
+  const [recomputeMsg,      setRecomputeMsg]      = useState("");
+  const [recomputeIsError,  setRecomputeIsError]  = useState(false);
+  const [vectorsComputedAt, setVectorsComputedAt] = useState(null);
 
   /* ─── load ─── */
 
@@ -331,6 +511,54 @@ export default function AdminCareersPage() {
     }
   };
 
+  /* ─── proximity ─── */
+
+  const handleProximity = async (career) => {
+    // Toggle off if already open
+    if (proximityId === career.id) {
+      setProximityId(null);
+      return;
+    }
+    setProximityId(career.id);
+
+    // Already fetched — reuse cached result
+    if (proximityMap[career.id]?.data || proximityMap[career.id]?.error) return;
+
+    setProximityMap(prev => ({ ...prev, [career.id]: { loading: true, error: "", data: null } }));
+    try {
+      const data = await apiGet(`/v1/admin/careers/${career.id}/proximity`);
+      setProximityMap(prev => ({ ...prev, [career.id]: { loading: false, error: "", data } }));
+    } catch (e) {
+      setProximityMap(prev => ({
+        ...prev,
+        [career.id]: { loading: false, error: e.message || "Failed to load proximity.", data: null },
+      }));
+    }
+  };
+
+  /* ─── recompute vectors ─── */
+
+  const handleRecompute = async () => {
+    setRecomputeLoading(true);
+    setRecomputeMsg("");
+    setRecomputeIsError(false);
+    try {
+      await apiPost("/v1/admin/careers/recompute-vectors");
+      const now = new Date().toLocaleTimeString("en-IN", {
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+      });
+      setVectorsComputedAt(now);
+      setRecomputeMsg("Vectors recomputed successfully.");
+      setProximityMap({}); // Invalidate cached proximity results
+      setProximityId(null);
+    } catch (e) {
+      setRecomputeMsg(e.message || "Recompute failed.");
+      setRecomputeIsError(true);
+    } finally {
+      setRecomputeLoading(false);
+    }
+  };
+
   /* ─── shared styles ─── */
 
   const inputCls = [
@@ -400,7 +628,33 @@ export default function AdminCareersPage() {
       onRetry={loadAll}
       actions={
         !loading && !error && (
-          <Button onClick={openCreate} disabled={formMode !== null}>+ New Career</Button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {/* Vectors timestamp + recompute status */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+              {vectorsComputedAt && (
+                <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                  Vectors last computed: <strong>{vectorsComputedAt}</strong>
+                </span>
+              )}
+              {recomputeMsg && (
+                <span style={{
+                  fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                  color: recomputeIsError ? "#dc2626" : "#166534",
+                }}>
+                  {recomputeIsError ? "⚠ " : "✓ "}{recomputeMsg}
+                </span>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleRecompute}
+              disabled={recomputeLoading || formMode !== null}
+            >
+              {recomputeLoading ? "Recomputing…" : "Recompute Vectors"}
+            </Button>
+            <Button onClick={openCreate} disabled={formMode !== null}>+ New Career</Button>
+          </div>
         )
       }
       footer={
@@ -550,7 +804,7 @@ export default function AdminCareersPage() {
                         }
                       </td>
                       <td style={{ padding: "9px 10px" }}>
-                        <div style={{ display: "flex", gap: 6 }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
                           <Button size="sm" variant="secondary"
                             onClick={() => openEdit(career)}
                             disabled={formMode !== null || deletingId !== null}>
@@ -561,6 +815,14 @@ export default function AdminCareersPage() {
                             disabled={formMode !== null || deletingId !== null}>
                             Delete
                           </Button>
+                          <Button
+                            size="sm"
+                            variant={proximityId === career.id ? "primary" : "ghost"}
+                            onClick={() => handleProximity(career)}
+                            disabled={formMode !== null || deletingId !== null}
+                          >
+                            {proximityMap[career.id]?.loading ? "…" : "Proximity"}
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -568,6 +830,14 @@ export default function AdminCareersPage() {
                     {/* ── Detail panel (only when expanded) ── */}
                     {expandedId === career.id && (
                       <DetailPanel career={career} onEdit={openEdit} />
+                    )}
+
+                    {/* ── Proximity panel ── */}
+                    {proximityId === career.id && proximityMap[career.id] && (
+                      <ProximityPanel
+                        entry={proximityMap[career.id]}
+                        clusterName={clusterName}
+                      />
                     )}
                   </Fragment>
                 ))}
