@@ -388,7 +388,7 @@ export default function AdminSimulatorPage() {
     );
 
     const payload = {
-      email, password, tier,
+      student_email: email, student_password: password, tier,
       aq_ranges: activeRanges,
       persona:   aqMode === "preset" ? personaId : "custom",
       context_profile: {
