@@ -782,7 +782,7 @@ export default function AdminSimulatorPage() {
                   <input className={INPUT_CLS} style={{ width: "100%", boxSizing: "border-box" }}
                     value={emailPrefix} onChange={e => setEmailPrefix(e.target.value)} placeholder="sim" />
                   <p style={{ margin: "4px 0 0", fontSize: 10, color: "var(--text-muted)", lineHeight: 1.4 }}>
-                    <span style={{ fontFamily: "monospace" }}>{emailPrefix || "sim"}_YYYYMMDD_N@test.mapyourcareer.in</span>
+                    <span style={{ fontFamily: "monospace" }}>Students created as: {emailPrefix || "sim"}_{"{YYYYMMDD}"}_{"{seq}"}@test.mapyourcareer.in</span>
                   </p>
                 </div>
               </div>
