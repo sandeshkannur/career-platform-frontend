@@ -79,6 +79,7 @@ const STEP_DELAYS = [400, 1200, 3200, 3700, 4600, 5400];
 const FIT_BAND = {
   high_potential: { bg: "#dcfce7", color: "#166534", label: "High Potential" },
   strong_fit:     { bg: "#dbeafe", color: "#1e40af", label: "Strong Fit" },
+  strong:         { bg: "#dbeafe", color: "#1e40af", label: "Strong" },
   promising:      { bg: "#fef9c3", color: "#854d0e", label: "Promising" },
   developing:     { bg: "#fed7aa", color: "#9a3412", label: "Developing" },
   exploring:      { bg: "#f1f5f9", color: "#475569", label: "Exploring" },
@@ -275,7 +276,8 @@ function ResultsCard({ result, onRunAgain }) {
           <div style={microLabel}>Top {Math.min(9, careers.length)} Careers</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {careers.slice(0, 9).map((c, i) => {
-              const fb = FIT_BAND[c.fit_band ?? c.band] ?? { bg: "#f1f5f9", color: "#475569", label: c.fit_band ?? "—" };
+              const _fbKey = c.fit_band ?? c.band;
+              const fb = FIT_BAND[_fbKey] ?? (_fbKey ? { bg: "#f1f5f9", color: "#475569", label: _fbKey.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()) } : { bg: "#f1f5f9", color: "#475569", label: "—" });
               return (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 8,
@@ -956,7 +958,8 @@ export default function AdminSimulatorPage() {
                       {sortedBatch.map((row, i) => {
                         const pk = row.persona ?? batchPersona;
                         const pb = PERSONA_BADGE[pk] ?? { bg: "#f1f5f9", color: "#475569" };
-                        const fb = FIT_BAND[row.fit_band ?? row.band] ?? null;
+                        const _bfbKey = row.fit_band ?? row.band;
+                        const fb = FIT_BAND[_bfbKey] ?? (_bfbKey ? { bg: "#f1f5f9", color: "#475569", label: _bfbKey.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()) } : null);
                         return (
                           <tr key={i} style={{ borderBottom: "1px solid var(--border)", background: i % 2 === 0 ? "transparent" : "var(--bg-app)" }}>
                             <td style={{ padding: "7px 8px", color: "var(--text-muted)" }}>{row.seq ?? (i + 1)}</td>
