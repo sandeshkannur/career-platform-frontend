@@ -41,6 +41,10 @@ export default function AdminHomePage() {
           <Button style={{ width: "100%" }}>Careers</Button>
         </Link>
 
+        <Link to="/admin/careers/wizard">
+          <Button style={{ width: "100%" }}>Career Wizard</Button>
+        </Link>
+
         <Link to="/admin/key-skills">
           <Button style={{ width: "100%" }}>Key Skills</Button>
         </Link>
