@@ -42,6 +42,7 @@ const AdminCPSFactorsPage = lazy(() => import("./pages/admin/AdminCPSFactorsPage
 const AdminEngineHealthPage = lazy(() => import("./pages/admin/AdminEngineHealthPage"));
 const AdminAuditTrailPage = lazy(() => import("./pages/admin/AdminAuditTrailPage"));
 const AdminCareerWizardPage = lazy(() => import("./pages/admin/AdminCareerWizardPage"));
+const AdminSimulatorPage = lazy(() => import("./pages/admin/AdminSimulatorPage"));
 
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
@@ -259,6 +260,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminCareerWizardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/simulator"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminSimulatorPage />
             </ProtectedRoute>
           }
         />
