@@ -206,7 +206,7 @@ function TrendChart({ chartData }) {
 const RANK_COLORS = ["#1e40af", "#0f766e", "#166534", "#92400e", "#64748b"];
 
 function ClusterRanking({ clusters }) {
-  const maxCount = Math.max(1, ...clusters.map(c => c.count ?? 0));
+  const maxCount = Math.max(1, ...clusters.map(c => c.recommendation_count ?? c.count ?? 0));
 
   if (clusters.length === 0) {
     return (
@@ -227,7 +227,7 @@ function ClusterRanking({ clusters }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {clusters.map((c, i) => {
           const name  = c.cluster_name ?? c.name ?? `Cluster ${i + 1}`;
-          const count = c.count ?? 0;
+          const count = c.recommendation_count ?? c.count ?? 0;
           const barW  = (count / maxCount) * 100;
           const rank  = RANK_COLORS[i] ?? "#64748b";
 
@@ -379,7 +379,7 @@ export default function AdminEngineHealthPage() {
 
   const today      = d.assessments_today     ?? d.today_count    ?? 0;
   const week       = d.assessments_this_week ?? d.week_count     ?? 0;
-  const total      = d.total_assessments     ?? d.total_count    ?? 0;
+  const total      = d.assessments_total      ?? d.total_assessments ?? d.total_count ?? 0;
   const lastAt     = d.last_assessment_at    ?? d.last_at        ?? null;
 
   const breakdown  = d.status_breakdown ?? {};
@@ -387,8 +387,9 @@ export default function AdminEngineHealthPage() {
   const inProgress = breakdown.in_progress ?? d.in_progress ?? 0;
   const abandoned  = breakdown.abandoned  ?? d.abandoned  ?? 0;
 
-  const daily    = Array.isArray(d.daily_trend)  ? d.daily_trend
-                 : Array.isArray(d.daily_counts) ? d.daily_counts
+  const daily    = Array.isArray(d.assessments_by_day) ? d.assessments_by_day
+                 : Array.isArray(d.daily_trend)        ? d.daily_trend
+                 : Array.isArray(d.daily_counts)       ? d.daily_counts
                  : [];
   const clusters = (Array.isArray(d.top_clusters) ? d.top_clusters : []).slice(0, 5);
 
