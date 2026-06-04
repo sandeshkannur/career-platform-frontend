@@ -1,0 +1,10 @@
+```text
+   node_modules/
+   dist/
+   build/
+   .cache/
+   playwright-report/
+   test-results/
+   Snapshot/
+   package-lock.json
+   .env.local
