@@ -1,6 +1,7 @@
 // src/pages/admin/AdminCareerWizardPage.jsx
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import AdminHeader from "../../components/AdminHeader";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import Card from "../../ui/Card";
@@ -386,15 +387,11 @@ export default function AdminCareerWizardPage() {
   ──────────────────────────────────────────────────────────────── */
   if (submitted) {
     return (
-      <SkeletonPage
-        title="Career Created"
-        footer={
-          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-            <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>← Admin Console</Link>
-            <Link to="/"     style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>← Home</Link>
-          </div>
-        }
-      >
+      <>
+        <AdminHeader title="Career Wizard" crumbs={[{ label: "Career Data" }]} />
+        <SkeletonPage
+          title="Career Created"
+        >
         <Card>
           <div style={{ textAlign: "center", padding: "40px 24px" }}>
             <div style={{
@@ -419,7 +416,8 @@ export default function AdminCareerWizardPage() {
             </div>
           </div>
         </Card>
-      </SkeletonPage>
+        </SkeletonPage>
+      </>
     );
   }
 
@@ -427,19 +425,15 @@ export default function AdminCareerWizardPage() {
      WIZARD
   ──────────────────────────────────────────────────────────────── */
   return (
-    <SkeletonPage
-      title="Career Wizard"
-      subtitle={`Step ${step} of ${STEPS.length} — ${STEPS[step - 1].label}`}
-      loading={refLoading}
-      error={!refLoading ? refError : ""}
-      onRetry={loadRef}
-      footer={
-        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>← Admin Console</Link>
-          <Link to="/"     style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>← Home</Link>
-        </div>
-      }
-    >
+    <>
+      <AdminHeader title="Career Wizard" crumbs={[{ label: "Career Data" }]} />
+      <SkeletonPage
+        title="Career Wizard"
+        subtitle={`Step ${step} of ${STEPS.length} — ${STEPS[step - 1].label}`}
+        loading={refLoading}
+        error={!refLoading ? refError : ""}
+        onRetry={loadRef}
+      >
       {/* ── Step indicator ── */}
       <StepIndicator current={step} steps={STEPS} />
 
@@ -674,7 +668,7 @@ export default function AdminCareerWizardPage() {
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16, alignItems: "start" }}>
 
             {/* ── Left: skill picker ── */}
             <Card>
@@ -991,6 +985,7 @@ export default function AdminCareerWizardPage() {
           )}
         </div>
       </div>
-    </SkeletonPage>
+      </SkeletonPage>
+    </>
   );
 }

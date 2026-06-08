@@ -1,6 +1,6 @@
 // src/pages/admin/AdminMappingsPage.jsx
 import React, { useState, useEffect } from 'react';
-import AdminNav from '../../components/AdminNav';
+import AdminHeader from '../../components/AdminHeader';
 import AdminModal from '../../components/AdminModal';
 import FormField from '../../components/FormField';
 import { getMappingHealth, createMapping } from '../../api/adminAnalytics';
@@ -75,16 +75,16 @@ export default function AdminMappingsPage() {
 
   return (
     <>
-    <AdminNav title="Mappings & Weights" subtitle="Career ↔ KeySkill ↔ Student Skill weight health" />
-    <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <AdminHeader title="Mappings" crumbs={[{ label: 'Career Data' }]} />
+    <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Mappings & Weights</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: C.navy, margin: 0 }}>Mappings & Weights</h1>
           <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>Career ↔ KeySkill ↔ Student Skill weight health</div>
         </div>
         <button onClick={() => setShowCreate(true)} style={{
-          background: C.teal, color: '#fff', border: 'none',
-          borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+          background: C.navy, color: '#fff', border: 'none',
+          borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
         }}>Map Career → KeySkill</button>
       </div>
 
@@ -103,7 +103,7 @@ export default function AdminMappingsPage() {
       {/* Tier breakdown */}
       <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, padding: '16px 18px', marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 500, color: C.navy, marginBottom: 12 }}>Career Tier Breakdown</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
           {[
             { label: 'Tier 1 — Aspirational India', key: 'tier1_active', color: C.green, active: true },
             { label: 'Tier 2 — Automation Risk', key: 'tier2_active', color: C.amber, active: true },
@@ -165,8 +165,8 @@ export default function AdminMappingsPage() {
             </div>
             <button onClick={() => { setCreateResult(null); setForm({ career_id: '', keyskill_id: '', weight_percentage: '' }); }}
               style={{
-                marginTop: 12, background: C.teal, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 12,
+                marginTop: 12, background: C.navy, color: '#fff', border: 'none',
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12,
               }}>
               Map another
             </button>
@@ -200,12 +200,12 @@ export default function AdminMappingsPage() {
             </FormField>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={closeModal} style={{
-                background: 'none', border: `0.5px solid ${C.border}`,
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12,
+                background: '#fff', color: C.navy, border: '1px solid #e2e8f0',
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12,
               }}>Cancel</button>
               <button onClick={handleCreate} disabled={creating} style={{
                 background: C.navy, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
               }}>
                 {creating ? 'Saving...' : 'Save Mapping'}
               </button>
