@@ -1,7 +1,7 @@
 // src/pages/admin/AdminCareerClustersPage.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
 import SkeletonPage from "../../ui/SkeletonPage";
+import AdminHeader from "../../components/AdminHeader";
 import Button from "../../ui/Button";
 import Card from "../../ui/Card";
 import { apiGet, apiPost, apiPut, apiDelete } from "../../apiClient";
@@ -147,28 +147,20 @@ export default function AdminCareerClustersPage() {
   const formTitle = formMode === "create" ? "Create cluster" : `Edit — ${formMode?.name}`;
 
   return (
-    <SkeletonPage
-      title="Career Clusters"
-      subtitle={loading ? "Loading…" : `${clusters.length} clusters`}
-      loading={loading}
-      error={!loading ? error : ""}
-      onRetry={loadAll}
-      actions={
-        !loading && !error && (
-          <Button onClick={openCreate} disabled={formMode !== null}>+ New Cluster</Button>
-        )
-      }
-      footer={
-        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Admin Console
-          </Link>
-          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Home
-          </Link>
-        </div>
-      }
-    >
+    <>
+      <AdminHeader title="Career Clusters" crumbs={[{ label: "Career Data" }]} />
+      <SkeletonPage
+        title="Career Clusters"
+        subtitle={loading ? "Loading…" : `${clusters.length} clusters`}
+        loading={loading}
+        error={!loading ? error : ""}
+        onRetry={loadAll}
+        actions={
+          !loading && !error && (
+            <Button onClick={openCreate} disabled={formMode !== null}>+ New Cluster</Button>
+          )
+        }
+      >
       {/* ── Create / Edit form ── */}
       {formMode !== null && (
         <Card className="mb-6">
@@ -305,6 +297,7 @@ export default function AdminCareerClustersPage() {
           </p>
         </div>
       )}
-    </SkeletonPage>
+      </SkeletonPage>
+    </>
   );
 }
