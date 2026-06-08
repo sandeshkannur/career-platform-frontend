@@ -1,7 +1,7 @@
 // src/pages/admin/AdminKeySkillsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminNav from '../../components/AdminNav';
+import AdminHeader from '../../components/AdminHeader';
 import AdminModal from '../../components/AdminModal';
 import FormField from '../../components/FormField';
 import { getAdminKeySkills, getAdminClusters, createKeySkill } from '../../api/adminAnalytics';
@@ -77,25 +77,25 @@ export default function AdminKeySkillsPage() {
 
   return (
     <>
-    <AdminNav title="Key Skills" subtitle="Skill to cluster mapping and weights" />
-    <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+    <AdminHeader title="Key Skills" crumbs={[{ label: 'Career Data' }]} />
+    <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 500, color: C.navy, margin: 0 }}>Key Skills</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: C.navy, margin: 0 }}>Key Skills</h1>
           <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{keyskills.length} keyskills</div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setShowCreate(true)} style={{
-            background: C.teal, color: '#fff', border: 'none',
-            borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+            background: C.navy, color: '#fff', border: 'none',
+            borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
           }}>+ New Key Skill</button>
           <button onClick={() => navigate('/admin/bulk-upload')} style={{
-            background: C.navy, color: '#fff', border: 'none',
-            borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12,
+            background: '#fff', color: C.navy, border: '1px solid #e2e8f0',
+            borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12,
           }}>+ Upload CSV</button>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
         <input style={{ ...inputStyle, minWidth: 200 }} placeholder="Search skill name..."
           value={filters.search}
           onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} />
@@ -105,7 +105,7 @@ export default function AdminKeySkillsPage() {
           {clusters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
-      <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ background: C.card, border: `0.5px solid ${C.border}`, borderRadius: 10, overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
             <tr style={{ background: C.bg, borderBottom: `0.5px solid ${C.border}` }}>
@@ -175,8 +175,8 @@ export default function AdminKeySkillsPage() {
             <div style={{ fontSize: 12, color: '#166534' }}>Name: {createResult.name}</div>
             <button onClick={() => { setCreateResult(null); setForm({ name: '', description: '', cluster_id: '' }); }}
               style={{
-                marginTop: 12, background: C.teal, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 12,
+                marginTop: 12, background: C.navy, color: '#fff', border: 'none',
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12,
               }}>
               Create another
             </button>
@@ -207,12 +207,12 @@ export default function AdminKeySkillsPage() {
             </FormField>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={closeModal} style={{
-                background: 'none', border: `0.5px solid ${C.border}`,
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12,
+                background: '#fff', color: C.navy, border: '1px solid #e2e8f0',
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12,
               }}>Cancel</button>
               <button onClick={handleCreate} disabled={creating} style={{
                 background: C.navy, color: '#fff', border: 'none',
-                borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500,
               }}>
                 {creating ? 'Creating...' : 'Create Key Skill'}
               </button>

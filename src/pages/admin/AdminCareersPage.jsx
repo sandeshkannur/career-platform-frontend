@@ -1,6 +1,6 @@
 // src/pages/admin/AdminCareersPage.jsx
 import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
-import { Link } from "react-router-dom";
+import AdminHeader from "../../components/AdminHeader";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import Card from "../../ui/Card";
@@ -620,54 +620,46 @@ export default function AdminCareersPage() {
   /* ─── render ─── */
 
   return (
-    <SkeletonPage
-      title="Careers"
-      subtitle={subtitleText()}
-      loading={loading}
-      error={!loading ? error : ""}
-      onRetry={loadAll}
-      actions={
-        !loading && !error && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            {/* Vectors timestamp + recompute status */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-              {vectorsComputedAt && (
-                <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                  Vectors last computed: <strong>{vectorsComputedAt}</strong>
-                </span>
-              )}
-              {recomputeMsg && (
-                <span style={{
-                  fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
-                  color: recomputeIsError ? "#dc2626" : "#166534",
-                }}>
-                  {recomputeIsError ? "⚠ " : "✓ "}{recomputeMsg}
-                </span>
-              )}
+    <>
+      <AdminHeader title="Careers" crumbs={[{ label: "Career Data" }]} />
+      <SkeletonPage
+        title="Careers"
+        subtitle={subtitleText()}
+        loading={loading}
+        error={!loading ? error : ""}
+        onRetry={loadAll}
+        actions={
+          !loading && !error && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              {/* Vectors timestamp + recompute status */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                {vectorsComputedAt && (
+                  <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                    Vectors last computed: <strong>{vectorsComputedAt}</strong>
+                  </span>
+                )}
+                {recomputeMsg && (
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                    color: recomputeIsError ? "#dc2626" : "#166534",
+                  }}>
+                    {recomputeIsError ? "⚠ " : "✓ "}{recomputeMsg}
+                  </span>
+                )}
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleRecompute}
+                disabled={recomputeLoading || formMode !== null}
+              >
+                {recomputeLoading ? "Recomputing…" : "Recompute Vectors"}
+              </Button>
+              <Button onClick={openCreate} disabled={formMode !== null}>+ New Career</Button>
             </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleRecompute}
-              disabled={recomputeLoading || formMode !== null}
-            >
-              {recomputeLoading ? "Recomputing…" : "Recompute Vectors"}
-            </Button>
-            <Button onClick={openCreate} disabled={formMode !== null}>+ New Career</Button>
-          </div>
-        )
-      }
-      footer={
-        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Admin Console
-          </Link>
-          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Home
-          </Link>
-        </div>
-      }
-    >
+          )
+        }
+      >
       {/* ── Create / Edit form (config-driven) ── */}
       {formMode !== null && (
         <Card className="mb-6">
@@ -863,6 +855,7 @@ export default function AdminCareersPage() {
           </div>
         </>
       )}
-    </SkeletonPage>
+      </SkeletonPage>
+    </>
   );
 }

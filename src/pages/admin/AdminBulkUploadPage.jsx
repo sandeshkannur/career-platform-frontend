@@ -1,6 +1,6 @@
 // src/pages/admin/AdminBulkUploadPage.jsx
 import { useState, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import AdminHeader from "../../components/AdminHeader";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import Card from "../../ui/Card";
@@ -263,21 +263,13 @@ export default function AdminBulkUploadPage() {
   ].join(" ");
 
   return (
-    <SkeletonPage
-      title="Bulk Import — Careers"
-      subtitle="Upload a CSV to create or update career records in bulk"
-      footer={
-        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-          <Link to="/admin" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Admin Console
-          </Link>
-          <Link to="/" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none" }}>
-            ← Home
-          </Link>
-        </div>
-      }
-    >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, alignItems: "start" }}>
+    <>
+      <AdminHeader title="Bulk Upload" crumbs={[{ label: "Career Data" }]} />
+      <SkeletonPage
+        title="Bulk Import — Careers"
+        subtitle="Upload a CSV to create or update career records in bulk"
+      >
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20, alignItems: "start" }}>
 
         {/* ── LEFT: Upload + actions ── */}
         <div>
@@ -478,6 +470,7 @@ export default function AdminBulkUploadPage() {
           </Card>
         </div>
       </div>
-    </SkeletonPage>
+      </SkeletonPage>
+    </>
   );
 }
