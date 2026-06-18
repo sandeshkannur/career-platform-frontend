@@ -119,10 +119,10 @@ export default function AdminCareerWeightsPage() {
         apiGet(`${BASE}/key-skills`).catch(() => ({ key_skills: [] })),
       ]);
       setCareer(careerData);
-      const raw = careerData.keyskill_weights ?? careerData.key_skill_weights ?? [];
+      const raw = careerData.keyskills ?? careerData.keyskill_weights ?? careerData.key_skill_weights ?? [];
       setWeights(raw.map(w => ({
-        keyskill_id:   w.keyskill_id,
-        keyskill_name: w.keyskill_name ?? w.name ?? String(w.keyskill_id),
+        keyskill_id:   w.id ?? w.keyskill_id,
+        keyskill_name: w.keyskill_name ?? w.name ?? String(w.id ?? w.keyskill_id),
         weight_percentage: String(w.weight_percentage ?? w.weight ?? 0),
       })));
       const list = Array.isArray(ksData) ? ksData : (ksData.key_skills ?? ksData.keyskills ?? []);
