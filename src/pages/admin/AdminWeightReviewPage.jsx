@@ -182,7 +182,7 @@ export default function AdminWeightReviewPage() {
     try {
       const qs = statusFilter ? `?status=${statusFilter}` : "";
       const data = await apiGet(`${BASE}/weight-change-requests${qs}`);
-      setRequests(Array.isArray(data) ? data : (data.requests ?? data.items ?? []));
+      setRequests(Array.isArray(data) ? data : (data.items ?? data.requests ?? []));
     } catch (e) {
       setError(e.message || t("admin.weightReview.error.loadFailed", "Failed to load weight change requests."));
     } finally {
