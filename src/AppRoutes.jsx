@@ -43,6 +43,8 @@ const AdminEngineHealthPage = lazy(() => import("./pages/admin/AdminEngineHealth
 const AdminAuditTrailPage = lazy(() => import("./pages/admin/AdminAuditTrailPage"));
 const AdminCareerWizardPage = lazy(() => import("./pages/admin/AdminCareerWizardPage"));
 const AdminSimulatorPage = lazy(() => import("./pages/admin/AdminSimulatorPage"));
+const AdminCareerWeightsPage = lazy(() => import("./pages/admin/AdminCareerWeightsPage"));
+const AdminWeightReviewPage = lazy(() => import("./pages/admin/AdminWeightReviewPage"));
 
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
@@ -269,6 +271,24 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminSimulatorPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/career-weights/:careerId"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminCareerWeightsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/weight-review"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminWeightReviewPage />
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,6 @@
 // src/pages/admin/AdminCareersPage.jsx
 import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
@@ -107,6 +108,7 @@ function renderFieldValue(value, format) {
    Renders DETAIL_SECTIONS config as a 3-column card panel.
 ────────────────────────────────────────────────────────────────────────── */
 function DetailPanel({ career, onEdit }) {
+  const navigate = useNavigate();
   return (
     <tr>
       <td colSpan={9} style={{
@@ -128,7 +130,12 @@ function DetailPanel({ career, onEdit }) {
                 </span>
               )}
             </span>
-            <Button size="sm" onClick={() => onEdit(career)}>Edit this career</Button>
+            <div style={{ display: "flex", gap: 6 }}>
+              <Button size="sm" onClick={() => onEdit(career)}>Edit this career</Button>
+              <Button size="sm" variant="secondary" onClick={() => navigate(`/admin/career-weights/${career.id}`)}>
+                Manage Weights
+              </Button>
+            </div>
           </div>
 
           {/* Three-column sections */}

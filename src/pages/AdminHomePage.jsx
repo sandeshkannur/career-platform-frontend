@@ -29,6 +29,7 @@ const SECTIONS = [
       { label: "Student Skills (26)",         route: "/admin/student-skills", desc: "Reference view of the 26 canonical student skills" },
       { label: "Fit Band Thresholds",         route: "/admin/fit-bands",      desc: "Configure the five fit-band score cutoffs" },
       { label: "CPS Factor Weights",          route: "/admin/cps-factors",    desc: "Configure contextual profile score weights" },
+      { label: "Weight Change Requests",      route: "/admin/weight-review",  desc: "Review queue and audit trail for keyskill weight proposals" },
     ],
   },
   {
