@@ -357,7 +357,7 @@ export default function AdminWeightReviewPage() {
                   </td>
                   <td style={{ padding: "8px 10px", textAlign: "center" }}>
                     {req.status === "promoted"
-                      ? req.vectors_recomputed
+                      ? (detail?.vectors_recomputed ?? req.vectors_recomputed)
                         ? <span style={{ color: "#166534", fontSize: 11, fontWeight: 600 }}>✓ Recomputed</span>
                         : <span style={{ color: "#92400e", fontSize: 11, fontWeight: 600 }}>⚠ Stale</span>
                       : <span style={{ color: "var(--text-muted)", fontSize: 11 }}>—</span>
