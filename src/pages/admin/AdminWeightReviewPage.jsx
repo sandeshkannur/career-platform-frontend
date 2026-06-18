@@ -38,7 +38,7 @@ function StatusBadge({ status }) {
 /* ─────────────────────────────────────────────────────────────────────────
    DIFF TABLE  — baseline vs proposed weights with change highlighting
 ────────────────────────────────────────────────────────────────────────── */
-function DiffTable({ baselineWeights = [], proposedWeights = [] }) {
+function DiffTable({ baselineWeights = [], proposedWeights = [], ksMap = {} }) {
   const baseMap = Object.fromEntries(baselineWeights.map(w => [w.keyskill_id, w]));
   const propMap = Object.fromEntries(proposedWeights.map(w => [w.keyskill_id, w]));
 
@@ -54,7 +54,7 @@ function DiffTable({ baselineWeights = [], proposedWeights = [] }) {
     const after  = p ? parseFloat(p.weight_percentage) : null;
     return {
       id,
-      name:    (b || p).keyskill_name ?? String(id),
+      name:    ksMap[id] ?? (b || p).keyskill_name ?? String(id),
       before,
       after,
       added:   !b && !!p,
@@ -174,6 +174,26 @@ export default function AdminWeightReviewPage() {
 
   // Promote confirm modal
   const [promoteId,     setPromoteId]     = useState(null);
+
+  // Lookup maps built once on mount — no per-row fetches
+  const [ksMap,     setKsMap]     = useState({});  // { [keyskill_id]: name }
+  const [careerMap, setCareerMap] = useState({});  // { [career_id]: title }
+
+  useEffect(() => {
+    Promise.all([
+      apiGet(`${BASE}/key-skills`).catch(() => null),
+      apiGet("/v1/careers").catch(() => null),
+    ]).then(([ksData, careersData]) => {
+      if (ksData) {
+        const list = Array.isArray(ksData) ? ksData : (ksData.key_skills ?? ksData.keyskills ?? []);
+        setKsMap(Object.fromEntries(list.map(k => [k.id ?? k.keyskill_id, k.name ?? k.keyskill_name ?? String(k.id ?? k.keyskill_id)])));
+      }
+      if (careersData) {
+        const list = Array.isArray(careersData) ? careersData : (careersData.careers ?? []);
+        setCareerMap(Object.fromEntries(list.map(c => [c.id, c.title])));
+      }
+    });
+  }, []);
 
   /* ─── load queue ─── */
   const loadRequests = useCallback(async () => {
@@ -341,7 +361,8 @@ export default function AdminWeightReviewPage() {
                 <StatusBadge status={req.status} />
               </td>
               <td style={{ padding: "8px 10px", fontSize: 12 }}>
-                {req.career_title ?? req.career_id ?? "—"}
+                {/* career_id is inside changes[0]; for multi-career batches shows first */}
+                {careerMap[req.changes?.[0]?.career_id] ?? req.changes?.[0]?.career_id ?? "—"}
               </td>
               <td style={{ padding: "8px 10px", fontSize: 12, color: "var(--text-muted)" }}>
                 {req.created_by ?? "—"}
@@ -439,6 +460,7 @@ export default function AdminWeightReviewPage() {
                           <DiffTable
                             baselineWeights={detail.changes?.[0]?.baseline_weights ?? detail.baseline_weights ?? []}
                             proposedWeights={detail.changes?.[0]?.proposed_weights ?? detail.proposed_weights ?? []}
+                            ksMap={ksMap}
                           />
                         </div>
 
