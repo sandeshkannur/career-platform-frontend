@@ -802,8 +802,8 @@ export default function AdminCareersPage() {
                           : <span style={{ color: "var(--text-muted)" }}>—</span>
                         }
                       </td>
-                      <td style={{ padding: "9px 10px" }}>
-                        <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
+                      <td style={{ padding: "9px 10px", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           <Button size="sm" variant="secondary"
                             onClick={() => openEdit(career)}
                             disabled={formMode !== null || deletingId !== null}>

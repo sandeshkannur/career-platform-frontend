@@ -437,8 +437,8 @@ export default function AdminWeightReviewPage() {
                             Keyskill Weight Changes
                           </div>
                           <DiffTable
-                            baselineWeights={detail.changes?.baseline_weights ?? detail.baseline_weights ?? []}
-                            proposedWeights={detail.changes?.proposed_weights ?? detail.proposed_weights ?? []}
+                            baselineWeights={detail.changes?.[0]?.baseline_weights ?? detail.baseline_weights ?? []}
+                            proposedWeights={detail.changes?.[0]?.proposed_weights ?? detail.proposed_weights ?? []}
                           />
                         </div>
 
