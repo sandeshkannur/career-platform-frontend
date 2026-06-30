@@ -50,6 +50,9 @@ const AdminWeightReviewPage = lazy(() => import("./pages/admin/AdminWeightReview
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
 const StudentConsentPage = lazy(() => import("./pages/StudentConsentPage"));
 
+// Added Language Selection Screen lazy import:
+const LanguageSelectScreen = lazy(() => import("./pages/student/LanguageSelectScreen"));
+
 const StudentOnboardingPage = lazy(() =>
   import("./pages/student/StudentOnboardingPage")
 );
@@ -109,6 +112,9 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
         <Route path="/guardian/verify" element={<GuardianVerifyPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        
+        {/* Added standalone route path configuration: */}
+        <Route path="/language" element={<LanguageSelectScreen />} />
 
         {/* ======================
            Admin Routes
