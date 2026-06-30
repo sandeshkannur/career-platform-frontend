@@ -28,8 +28,11 @@ export default function LanguageSelectScreen() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "24px 16px",
+        justifyContent: "flex-start",
+        paddingTop: "18vh",
+        paddingRight: "16px",
+        paddingBottom: "24px",
+        paddingLeft: "16px",
         boxSizing: "border-box",
       }}
     >
