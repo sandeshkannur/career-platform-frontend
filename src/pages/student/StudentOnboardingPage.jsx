@@ -169,20 +169,25 @@ export default function StudentOnboardingPage() {
   /* ---------------- Render: Mobile stepper ---------------- */
   function renderMobileStepper() {
     return (
-      <div style={{ maxWidth: 520, display: "grid", gap: 14 }}>
-        <div style={{ fontSize: 12, opacity: 0.75 }}>
-          {t("student.onboarding.stepPrefix", "Step")} {step + 1} {t("student.onboarding.stepOf", "of")} {FIELDS.length}
+      <div style={{ maxWidth: 520, display: "grid", gap: 14, lineHeight: 1.4 }}>
+        <div>
+          <div style={{ width: "100%", height: 4, borderRadius: 2, background: "rgba(107, 114, 128, 0.2)", overflow: "hidden", marginBottom: 8 }}>
+            <div style={{ height: "100%", width: `${((step + 1) / FIELDS.length) * 100}%`, background: "var(--color-primary, #2540D9)", borderRadius: 2 }} />
+          </div>
+          <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
+            {t("student.onboarding.stepPrefix", "Step")} {step + 1} {t("student.onboarding.stepOf", "of")} {FIELDS.length}
+          </div>
         </div>
 
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
             {currentField.label}{" "}
             {currentField.required ? (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>
+              <span style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
                 ({t("student.onboarding.required", "required")})
               </span>
             ) : (
-              <span style={{ fontSize: 12, opacity: 0.7 }}>
+              <span style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
                 ({t("student.onboarding.optional", "optional")})
               </span>
             )}
@@ -192,10 +197,11 @@ export default function StudentOnboardingPage() {
             value={draft[currentField.key]}
             onChange={updateField(currentField.key)}
             placeholder={currentField.placeholder}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
 
           {currentField.help ? (
-            <div style={{ marginTop: 8, fontSize: 12, opacity: 0.75 }}>
+            <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
               {currentField.help}
             </div>
           ) : null}
@@ -207,8 +213,9 @@ export default function StudentOnboardingPage() {
                 marginTop: 10,
                 padding: 10,
                 borderRadius: 8,
-                border: "1px solid #f0c36d",
-                background: "#fff9ef",
+                border: "1px solid var(--color-warning-ink, #B45309)",
+                background: "var(--color-paper, #F8FAF9)",
+                color: "var(--color-ink-900, #111521)",
                 fontSize: 13,
               }}
             >
@@ -218,22 +225,22 @@ export default function StudentOnboardingPage() {
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Button variant="secondary" onClick={goBack}>
+          <Button variant="secondary" onClick={goBack} style={{ minHeight: 48 }}>
             {t("student.onboarding.actions.back", "Back")}
           </Button>
 
-          <Button onClick={goNext} disabled={!stepIsValid}>
+          <Button onClick={goNext} disabled={!stepIsValid} style={{ minHeight: 48 }}>
             {step < FIELDS.length - 1
               ? t("student.onboarding.actions.next", "Next")
               : t("student.onboarding.actions.saveContinue", "Save & Continue")}
           </Button>
 
-          <Button variant="secondary" onClick={handleClearDraft}>
+          <Button variant="secondary" onClick={handleClearDraft} style={{ minHeight: 48 }}>
             {t("student.onboarding.actions.clearDraft", "Clear Draft")}
           </Button>
         </div>
 
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
+        <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
           {t("student.onboarding.draftStored", "Draft is stored locally (sessionStorage). Backend save will be added later.")}
         </div>
       </div>
@@ -243,12 +250,12 @@ export default function StudentOnboardingPage() {
   /* ---------------- Render: Desktop full form ---------------- */
   function renderDesktopForm() {
     return (
-      <div style={{ maxWidth: 640, display: "grid", gap: 14 }}>
+      <div style={{ maxWidth: 640, display: "grid", gap: 14, lineHeight: 1.4 }}>
         {/* Grade */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
             {t("student.onboarding.gradeClass", "Grade / Class")}{" "}
-            <span style={{ opacity: 0.7 }}>
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>
               ({t("student.onboarding.required", "required")})
             </span>
           </div>
@@ -256,14 +263,15 @@ export default function StudentOnboardingPage() {
             value={draft.grade}
             onChange={updateField("grade")}
             placeholder={t("student.onboarding.placeholder.grade", "e.g. 9")}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
         </div>
 
         {/* Primary goal */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
             {t("student.onboarding.primaryGoal", "Primary Goal")}{" "}
-            <span style={{ opacity: 0.7 }}>
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>
               ({t("student.onboarding.required", "required")})
             </span>
           </div>
@@ -271,42 +279,49 @@ export default function StudentOnboardingPage() {
             value={draft.primary_goal}
             onChange={updateField("primary_goal")}
             placeholder={t("student.onboarding.placeholder.primaryGoal", "e.g. choose a stream, explore careers, plan higher studies")}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
         </div>
 
         {/* Interests */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            {t("student.onboarding.interests", "Interests")} ({t("student.onboarding.optional", "optional")})
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
+            {t("student.onboarding.interests", "Interests")}{" "}
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>({t("student.onboarding.optional", "optional")})</span>
           </div>
           <Input
             value={draft.interests}
             onChange={updateField("interests")}
             placeholder={t("student.onboarding.placeholder.interests", "e.g. coding, biology, art, public speaking")}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
         </div>
 
         {/* Preferred countries */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            {t("student.onboarding.preferredCountries", "Preferred Countries")} ({t("student.onboarding.optional", "optional")})
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
+            {t("student.onboarding.preferredCountries", "Preferred Countries")}{" "}
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>({t("student.onboarding.optional", "optional")})</span>
           </div>
           <Input
             value={draft.preferred_countries}
             onChange={updateField("preferred_countries")}
             placeholder={t("student.onboarding.placeholder.preferredCountries", "e.g. India, UK, US")}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
         </div>
 
         {/* Constraints */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-            {t("student.onboarding.constraints", "Constraints")} ({t("student.onboarding.optional", "optional")})
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6, color: "var(--color-ink-900, #111521)", lineHeight: 1.4 }}>
+            {t("student.onboarding.constraints", "Constraints")}{" "}
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>({t("student.onboarding.optional", "optional")})</span>
           </div>
           <Input
             value={draft.constraints}
             onChange={updateField("constraints")}
             placeholder={t("student.onboarding.placeholder.constraints", "e.g. budget, location, academics")}
+            style={{ minHeight: 48, lineHeight: 1.4 }}
           />
         </div>
 
@@ -317,8 +332,9 @@ export default function StudentOnboardingPage() {
             style={{
               padding: 10,
               borderRadius: 8,
-              border: "1px solid #f0c36d",
-              background: "#fff9ef",
+              border: "1px solid var(--color-warning-ink, #B45309)",
+              background: "var(--color-paper, #F8FAF9)",
+              color: "var(--color-ink-900, #111521)",
               fontSize: 13,
             }}
           >
@@ -331,23 +347,24 @@ export default function StudentOnboardingPage() {
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Button onClick={handleContinue} disabled={!isValid}>
+          <Button onClick={handleContinue} disabled={!isValid} style={{ minHeight: 48 }}>
             {t("student.onboarding.actions.saveContinue", "Save & Continue")}
           </Button>
 
           <Button
             variant="secondary"
             onClick={() => navigate("/student/dashboard")}
+            style={{ minHeight: 48 }}
           >
             {t("student.onboarding.actions.backToDashboard", "Back to Dashboard")}
           </Button>
 
-          <Button variant="secondary" onClick={handleClearDraft}>
+          <Button variant="secondary" onClick={handleClearDraft} style={{ minHeight: 48 }}>
             {t("student.onboarding.actions.clearDraft", "Clear Draft")}
           </Button>
         </div>
 
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
+        <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
           {t("student.onboarding.draftStored", "Draft is stored locally (sessionStorage). Backend save will be added later.")}
         </div>
       </div>
