@@ -18,8 +18,8 @@ import PublicHeader from "../ui/PublicHeader";
 function StatPill({ value, label }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-      <span style={{ fontSize: 30, fontWeight: 800, color: "var(--brand-primary)" }}>{value}</span>
-      <span style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.35 }}>{label}</span>
+      <span style={{ fontSize: 30, fontWeight: 800, color: "var(--color-primary, #2540D9)" }}>{value}</span>
+      <span style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)", textAlign: "center", lineHeight: 1.35 }}>{label}</span>
     </div>
   );
 }
@@ -27,19 +27,19 @@ function StatPill({ value, label }) {
 function StepCard({ number, title, desc }) {
   return (
     <div style={{
-      background: "#fff", border: "1px solid var(--border)",
+      background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)",
       borderRadius: 16, padding: "20px 20px",
       display: "flex", gap: 14, alignItems: "flex-start",
     }}>
       <div style={{
         flexShrink: 0, width: 34, height: 34, borderRadius: "50%",
-        background: "var(--brand-primary)", color: "#fff",
+        background: "var(--color-primary, #2540D9)", color: "#fff",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontWeight: 700, fontSize: 14,
       }}>{number}</div>
       <div>
-        <div style={{ fontWeight: 700, color: "var(--brand-primary)", marginBottom: 6, fontSize: 14 }}>{title}</div>
-        <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.65 }}>{desc}</div>
+        <div style={{ fontWeight: 700, color: "var(--color-primary, #2540D9)", marginBottom: 6, fontSize: 14 }}>{title}</div>
+        <div style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", lineHeight: 1.65 }}>{desc}</div>
       </div>
     </div>
   );
@@ -48,13 +48,13 @@ function StepCard({ number, title, desc }) {
 function FeatureCard({ icon, title, desc }) {
   return (
     <div style={{
-      background: "#fff", border: "1px solid var(--border)",
+      background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)",
       borderRadius: 16, padding: "20px",
       boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
     }}>
       <div style={{ fontSize: 24, marginBottom: 10 }}>{icon}</div>
-      <div style={{ fontWeight: 700, color: "var(--brand-primary)", marginBottom: 6, fontSize: 14 }}>{title}</div>
-      <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.65 }}>{desc}</div>
+      <div style={{ fontWeight: 700, color: "var(--color-primary, #2540D9)", marginBottom: 6, fontSize: 14 }}>{title}</div>
+      <div style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", lineHeight: 1.65 }}>{desc}</div>
     </div>
   );
 }
@@ -62,12 +62,12 @@ function FeatureCard({ icon, title, desc }) {
 function QuoteCard({ quote, name, role }) {
   return (
     <div style={{
-      background: "#fff", border: "1px solid var(--border)",
+      background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)",
       borderRadius: 16, padding: "20px",
     }}>
-      <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 14px" }}>"{quote}"</p>
-      <div style={{ fontWeight: 700, fontSize: 13, color: "var(--brand-primary)" }}>{name}</div>
-      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{role}</div>
+      <p style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", lineHeight: 1.7, margin: "0 0 14px" }}>"{quote}"</p>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "var(--color-primary, #2540D9)" }}>{name}</div>
+      <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>{role}</div>
     </div>
   );
 }
@@ -85,8 +85,8 @@ function Section({ children, bg = "transparent", py = 48 }) {
 function SectionHeader({ title, subtitle }) {
   return (
     <div style={{ textAlign: "center", marginBottom: 32 }}>
-      <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--brand-primary)", margin: "0 0 8px" }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>{subtitle}</p>}
+      <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--color-primary, #2540D9)", margin: "0 0 8px" }}>{title}</h2>
+      {subtitle && <p style={{ fontSize: 14, color: "var(--color-ink-500, #6B7280)", margin: 0 }}>{subtitle}</p>}
     </div>
   );
 }
@@ -107,7 +107,7 @@ function PrimaryBtn({ to, children }) {
   return (
     <Link to={to} style={{
       textDecoration: "none",
-      background: "var(--brand-primary)", color: "#fff",
+      background: "var(--color-primary, #2540D9)", color: "#fff",
       borderRadius: 12, padding: "11px 26px",
       fontSize: 14, fontWeight: 700, display: "inline-block",
     }}>{children}</Link>
@@ -118,8 +118,8 @@ function SecondaryBtn({ to, children }) {
   return (
     <Link to={to} style={{
       textDecoration: "none",
-      background: "#fff", color: "var(--brand-primary)",
-      border: "1px solid var(--border)",
+      background: "var(--color-surface, #FFFFFF)", color: "var(--color-primary, #2540D9)",
+      border: "1px solid var(--color-border, #6B7280)",
       borderRadius: 12, padding: "11px 26px",
       fontSize: 14, fontWeight: 600, display: "inline-block",
     }}>{children}</Link>
@@ -156,30 +156,30 @@ export default function HomePage() {
       <PublicHeader />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <Section bg="var(--bg-app)" py={56}>
+      <Section bg="var(--color-paper, #F8FAF9)" py={56}>
         <div style={{ textAlign: "center", maxWidth: 660, margin: "0 auto" }}>
 
           {/* eyebrow */}
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            background: "#fff", border: "1px solid var(--border)",
+            background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)",
             borderRadius: 999, padding: "6px 16px",
-            fontSize: 12, color: "var(--text-muted)", marginBottom: 24,
+            fontSize: 12, color: "var(--color-ink-500, #6B7280)", marginBottom: 24,
           }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-success, #0E9F6E)", display: "inline-block" }} />
             {t("home.hero.eyebrow", "Now live · India's first AQ-based career assessment")}
           </div>
 
           <h1 style={{
             fontSize: "clamp(26px, 5vw, 42px)",
-            fontWeight: 800, color: "var(--brand-primary)",
+            fontWeight: 800, color: "var(--color-primary, #2540D9)",
             lineHeight: 1.15, letterSpacing: "-0.4px",
             margin: "0 0 18px",
           }}>
             {t("home.hero.headline", "Discover the career you were built for")}
           </h1>
 
-          <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 30px" }}>
+          <p style={{ fontSize: 16, color: "var(--color-ink-500, #6B7280)", lineHeight: 1.7, margin: "0 0 30px" }}>
             {t("home.hero.subtitle", "MapYourCareer uses 25 Associated Qualities to build your unique talent fingerprint — then maps it to 335 careers across 15 industry clusters. Science-backed. Counsellor-verified.")}
           </p>
 
@@ -191,7 +191,7 @@ export default function HomePage() {
           {/* stat pills */}
           <div style={{
             display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16,
-            background: "#fff", border: "1px solid var(--border)",
+            background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)",
             borderRadius: 16, padding: "20px 16px",
             maxWidth: 400, margin: "0 auto",
           }}>
@@ -203,7 +203,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
-      <Section bg="#fff">
+      <Section bg="var(--color-surface, #FFFFFF)">
         <SectionHeader
           title={t("home.howItWorks.title", "How it works")}
           subtitle={t("home.howItWorks.subtitle", "Three steps. Twenty minutes. A lifetime of clarity.")}
@@ -225,7 +225,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── FEATURES ──────────────────────────────────────────── */}
-      <Section bg="var(--bg-app)">
+      <Section bg="var(--color-paper, #F8FAF9)">
         <SectionHeader
           title={t("home.features.title", "Built differently")}
           subtitle={t("home.features.subtitle", "Not a quiz. Not a personality type. A real assessment engine.")}
@@ -259,7 +259,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── CAREER CLUSTERS ───────────────────────────────────── */}
-      <Section bg="#fff">
+      <Section bg="var(--color-surface, #FFFFFF)">
         <SectionHeader
           title={t("home.clusters.title", "16 career clusters covered")}
           subtitle={t("home.clusters.subtitle", "Every major industry — from your first job to your calling.")}
@@ -267,16 +267,16 @@ export default function HomePage() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
           {clusters.map((c) => (
             <span key={c} style={{
-              background: "var(--bg-app)", border: "1px solid var(--border)",
+              background: "var(--color-paper, #F8FAF9)", border: "1px solid var(--color-border, #6B7280)",
               borderRadius: 999, padding: "6px 14px",
-              fontSize: 12, color: "var(--text-muted)", fontWeight: 500,
+              fontSize: 12, color: "var(--color-ink-500, #6B7280)", fontWeight: 500,
             }}>{c}</span>
           ))}
         </div>
       </Section>
 
       {/* ── SOCIAL PROOF ──────────────────────────────────────── */}
-      <Section bg="var(--bg-app)">
+      <Section bg="var(--color-paper, #F8FAF9)">
         <SectionHeader title={t("home.quotes.title", "What counsellors say")} />
         <AutoGrid>
           <QuoteCard
@@ -298,7 +298,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── FINAL CTA ─────────────────────────────────────────── */}
-      <Section bg="var(--brand-primary)" py={52}>
+      <Section bg="var(--color-primary, #2540D9)" py={52}>
         <div style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 26, fontWeight: 800, color: "#fff", margin: "0 0 12px" }}>
             {t("home.finalCta.title", "Ready to map your career?")}
@@ -308,8 +308,8 @@ export default function HomePage() {
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link to="/signup" style={{
-              textDecoration: "none", background: "#fff",
-              color: "var(--brand-primary)", borderRadius: 12,
+              textDecoration: "none", background: "var(--color-surface, #FFFFFF)",
+              color: "var(--color-primary, #2540D9)", borderRadius: 12,
               padding: "12px 28px", fontSize: 14, fontWeight: 700,
             }}>
               {t("home.finalCta.cta.signup", "Create Free Account")}
@@ -327,13 +327,13 @@ export default function HomePage() {
       </Section>
 
       {/* ── FOOTER ────────────────────────────────────────────── */}
-      <div style={{ background: "#fff", borderTop: "1px solid var(--border)" }}>
+      <div style={{ background: "var(--color-surface, #FFFFFF)", borderTop: "1px solid var(--color-border, #6B7280)" }}>
         <div style={{
           maxWidth: 960, margin: "0 auto", padding: "24px 20px",
           display: "flex", flexWrap: "wrap",
           alignItems: "center", justifyContent: "space-between", gap: 12,
         }}>
-          <div style={{ fontWeight: 800, fontSize: 14, color: "var(--brand-primary)" }}>
+          <div style={{ fontWeight: 800, fontSize: 14, color: "var(--color-primary, #2540D9)" }}>
             {t("home.footer.brand", "MapYourCareer")}
           </div>
           <div style={{ display: "flex", gap: 20 }}>
@@ -343,11 +343,11 @@ export default function HomePage() {
               { to: "/signup",  label: t("nav.signup",  "Signup") },
             ].map(({ to, label }) => (
               <Link key={to} to={to} style={{
-                textDecoration: "none", fontSize: 13, color: "var(--text-muted)",
+                textDecoration: "none", fontSize: 13, color: "var(--color-ink-500, #6B7280)",
               }}>{label}</Link>
             ))}
           </div>
-          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+          <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
             {t("home.footer.copy", "© 2025 MapYourCareer · India")}
           </div>
         </div>
