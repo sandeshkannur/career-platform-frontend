@@ -30,3 +30,5 @@ translation-audit-output/
 
 # Ignore local snapshot generation folders
 Snapshot/
+
+.aider*
