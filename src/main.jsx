@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { LanguageProvider } from "./locales/LanguageProvider.jsx";
 import { AdminLanguageProvider } from "./locales/AdminLanguageProvider";
 import "./index.css";
+import "./tokens.css";
 import "./App.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
