@@ -49,6 +49,8 @@ export default function PublicHeader() {
           display: "flex",
           alignItems: "center",
           gap: 16,
+          flexWrap: "wrap",
+          rowGap: 8,
         }}
       >
         {/* ← CHANGED: CareerPlatform → MapYourCareer */}
@@ -67,6 +69,9 @@ export default function PublicHeader() {
             display: "flex",
             alignItems: "center",
             gap: 12,
+            flexWrap: "wrap",
+            minWidth: 0,
+            rowGap: 8,
           }}
         >
           <LanguageSwitcher compact />

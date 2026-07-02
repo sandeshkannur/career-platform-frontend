@@ -30,6 +30,8 @@ export default function LanguageSwitcher({ compact = false }) {
           borderRadius: 10,
           border: "1px solid var(--border)",
           background: "var(--bg-card)",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         {SUPPORTED_LANGS.map((l) => (
