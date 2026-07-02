@@ -1,0 +1,40 @@
+/* ============================================================
+   MapYourCareer — colour design tokens
+   Role-named CSS custom properties. Contrast ratios verified
+   against WCAG 2.1 (paper = #F8FAF9 unless noted).
+   Rule of use: vibrant FILL + white/near-black text on top.
+   Never vibrant text on a vibrant background.
+   ============================================================ */
+
+:root {
+  /* ---- Brand ---- */
+  --color-primary:        #2540D9;
+  --color-secondary:      #6D28D9;
+  --color-accent:         #E11D74;
+  --color-accent-ink:     #C2185B;
+
+  /* ---- Semantic (always pair with icon + label, never colour alone) ---- */
+  --color-success:        #0E9F6E;
+  --color-success-strong: #067A52;
+  --color-warning:        #F59E0B;
+  --color-warning-ink:    #B45309;
+  --color-error:          #E02424;
+  --color-error-ink:      #C81E1E;
+  --color-info:           #2540D9;
+  --color-info-ink:       #1366B8;
+
+  /* ---- Ink / neutrals ---- */
+  --color-ink-900:        #111521;
+  --color-ink-700:        #374151;
+  --color-ink-500:        #6B7280;
+  --color-ink-400:        #9AA3AF;
+  --color-border:         #6B7280;
+
+  /* ---- Surfaces ---- */
+  --color-paper:          #F8FAF9;
+  --color-surface:        #FFFFFF;
+
+  /* ---- Text-on-fill helpers ---- */
+  --color-on-fill-light:  #FFFFFF;
+  --color-on-fill-dark:   #111521;
+}
