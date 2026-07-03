@@ -719,5 +719,12 @@
   "auth.login.otp.changeNumber": "Use a different number",
   "auth.signup.phoneLabel": "Phone number (optional)",
   "auth.signup.phonePlaceholder": "+91XXXXXXXXXX",
-  "auth.signup.phoneHelp": "Optional — lets you also log in with your phone number via OTP."
+  "auth.signup.phoneHelp": "Optional — lets you also log in with your phone number via OTP.",
+  "student.profile.field.phone": "Phone",
+  "student.profile.field.dob": "Date of birth",
+  "student.profile.guardian.title": "Guardian",
+  "student.profile.guardian.email": "Guardian email",
+  "student.profile.guardian.consentStatus": "Consent status",
+  "student.profile.guardian.verified": "Verified",
+  "student.profile.guardian.pending": "Pending"
 }

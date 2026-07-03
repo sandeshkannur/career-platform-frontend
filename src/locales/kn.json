@@ -829,5 +829,12 @@
   "auth.login.otp.changeNumber": "ಬೇರೆ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ",
   "auth.signup.phoneLabel": "ಫೋನ್ ಸಂಖ್ಯೆ (ಐಚ್ಛಿಕ)",
   "auth.signup.phonePlaceholder": "+91XXXXXXXXXX",
-  "auth.signup.phoneHelp": "ಐಚ್ಛಿಕ — OTP ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯೊಂದಿಗೆ ಲಾಗಿನ್ ಆಗಲು ಸಹ ಇದು ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ."
+  "auth.signup.phoneHelp": "ಐಚ್ಛಿಕ — OTP ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯೊಂದಿಗೆ ಲಾಗಿನ್ ಆಗಲು ಸಹ ಇದು ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ.",
+  "student.profile.field.phone": "ಫೋನ್",
+  "student.profile.field.dob": "ಜನ್ಮ ದಿನಾಂಕ",
+  "student.profile.guardian.title": "ಪೋಷಕ",
+  "student.profile.guardian.email": "ಪೋಷಕರ ಇಮೇಲ್",
+  "student.profile.guardian.consentStatus": "ಸಮ್ಮತಿ ಸ್ಥಿತಿ",
+  "student.profile.guardian.verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+  "student.profile.guardian.pending": "ಬಾಕಿ ಇದೆ"
 }
