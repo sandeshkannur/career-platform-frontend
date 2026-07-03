@@ -20,17 +20,17 @@ export default function StudentProfilePage() {
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>
           {t("student.profile.title", "Profile")}
         </h1>
-        <p style={{ marginTop: 6, fontSize: 14, color: "var(--text-muted)" }}>
+        <p style={{ marginTop: 6, fontSize: 14, color: "var(--color-ink-500, #6B7280)" }}>
           {t("student.profile.subtitle", "Your account details and preferences.")}
         </p>
       </div>
 
       {/* Account card */}
-      <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: 14, padding: 20 }}>
+      <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
           <div style={{
             width: 52, height: 52, borderRadius: "50%",
-            background: "var(--brand-primary)", color: "#fff",
+            background: "var(--color-primary, #2540D9)", color: "#fff",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 18, fontWeight: 800, flexShrink: 0,
           }}>
@@ -40,14 +40,14 @@ export default function StudentProfilePage() {
             <div style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
               {fullName || t("student.profile.unknownName", "Student")}
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 2 }}>{email}</div>
+            <div style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", marginTop: 2 }}>{email}</div>
           </div>
           {tier && (
             <div style={{
               marginLeft: "auto",
-              background: tier === "premium" ? "var(--brand-primary)" : "var(--bg-app)",
-              color: tier === "premium" ? "#fff" : "var(--text-muted)",
-              border: tier === "premium" ? "none" : "1px solid var(--border)",
+              background: tier === "premium" ? "var(--color-primary, #2540D9)" : "var(--color-paper, #F8FAF9)",
+              color: tier === "premium" ? "#fff" : "var(--color-ink-500, #6B7280)",
+              border: tier === "premium" ? "none" : "1px solid var(--color-border, #6B7280)",
               borderRadius: 999,
               padding: "4px 12px",
               fontSize: 11,
@@ -61,20 +61,20 @@ export default function StudentProfilePage() {
           )}
         </div>
 
-        <div style={{ display: "grid", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+        <div style={{ display: "grid", gap: 10, borderTop: "1px solid var(--color-border, #6B7280)", paddingTop: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-            <span style={{ color: "var(--text-muted)" }}>{t("student.profile.field.role", "Role")}</span>
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.role", "Role")}</span>
             <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{role}</span>
           </div>
           {email && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-              <span style={{ color: "var(--text-muted)" }}>{t("student.profile.field.email", "Email")}</span>
+              <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.email", "Email")}</span>
               <span style={{ fontWeight: 600 }}>{email}</span>
             </div>
           )}
           {tier && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-              <span style={{ color: "var(--text-muted)" }}>{t("student.profile.field.tier", "Plan")}</span>
+              <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.tier", "Plan")}</span>
               <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{tier}</span>
             </div>
           )}
@@ -82,11 +82,11 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Coming soon card */}
-      <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: 14, padding: 20 }}>
+      <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
         <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
           {t("student.profile.comingSoonTitle", "More settings coming soon")}
         </div>
-        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+        <p style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", margin: 0 }}>
           {t("student.profile.comingSoonBody", "Profile editing, notification preferences, and more will be available in a future release.")}
         </p>
       </div>
