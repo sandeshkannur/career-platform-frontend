@@ -28,12 +28,12 @@ export default function AuthHeader({ variant = "full" }) {
 
   if (variant === "minimal") {
     return (
-      <div className="flex items-center justify-between py-3">
+      <div className="flex items-center justify-between py-3 flex-wrap gap-2">
         <Link to="/" className="text-[var(--text)] no-underline">
           <span className="text-sm font-semibold">MapYourCareer</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <LanguageSwitcher compact />
           <Link
             to="/pricing"
@@ -56,6 +56,8 @@ export default function AuthHeader({ variant = "full" }) {
           display: "flex",
           alignItems: "center",
           gap: 16,
+          flexWrap: "wrap",
+          rowGap: 8,
         }}
       >
         <Link to="/" style={{ textDecoration: "none", color: "#111" }}>
@@ -67,7 +69,7 @@ export default function AuthHeader({ variant = "full" }) {
           <NavLink to="/signup">{t("nav.signup", "Signup")}</NavLink>
         </div>
 
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", minWidth: 0 }}>
           <LanguageSwitcher compact />
           <Link
             to="/pricing"
