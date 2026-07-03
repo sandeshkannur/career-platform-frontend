@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [dob, setDob] = useState("");
   const [grade, setGrade] = useState("");
   const [guardianEmail, setGuardianEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const canSubmit = useMemo(() => {
     return (
@@ -43,7 +44,8 @@ async function onSubmit(e) {
         password: password,
         dob: dob,
         grade: parseInt(grade),
-        guardian_email: guardianEmail || null
+        guardian_email: guardianEmail || null,
+        phone_number: phoneNumber || null
       })
     });
 
@@ -178,6 +180,24 @@ async function onSubmit(e) {
                       autoComplete="email"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text)]">
+                    {t("auth.signup.phoneLabel", "Phone number (optional)")}
+                  </label>
+                  <div className="mt-2">
+                    <Input
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      type="tel"
+                      placeholder={t("auth.signup.phonePlaceholder", "+91XXXXXXXXXX")}
+                      autoComplete="tel"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">
+                    {t("auth.signup.phoneHelp", "Optional — lets you also log in with your phone number via OTP.")}
+                  </p>
                 </div>
 
                 <Button type="submit" disabled={!canSubmit} style={{ width: "100%" }}>
