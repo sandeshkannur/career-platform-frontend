@@ -38,9 +38,9 @@ function ActionCard({ icon, title, body, onClick, accent = false }) {
       type="button"
       onClick={onClick}
       style={{
-        background: accent ? "var(--brand-primary)" : "#fff",
-        color: accent ? "#fff" : "var(--text)",
-        border: accent ? "none" : "1px solid var(--border)",
+        background: accent ? "var(--color-primary, #2540D9)" : "var(--color-surface, #FFFFFF)",
+        color: accent ? "#fff" : "var(--color-ink-900, #111521)",
+        border: accent ? "none" : "1px solid var(--color-border, #6B7280)",
         borderRadius: 16,
         padding: "18px 20px",
         textAlign: "left",
@@ -55,9 +55,9 @@ function ActionCard({ icon, title, body, onClick, accent = false }) {
     >
       <div style={{
         width: 36, height: 36, borderRadius: 10,
-        background: accent ? "rgba(255,255,255,0.2)" : "var(--bg-app)",
+        background: accent ? "rgba(255,255,255,0.2)" : "var(--color-paper, #F8FAF9)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: accent ? "#fff" : "var(--brand-primary)",
+        color: accent ? "#fff" : "var(--color-primary, #2540D9)",
       }}>
         <Icon path={icon} size={18} />
       </div>
@@ -142,7 +142,7 @@ export default function StudentDashboardPage() {
               ? `${t("student.dashboard.welcomePrefix", "Welcome,")} ${firstName} 👋`
               : t("student.dashboard.title", "Student Dashboard")}
           </h1>
-          <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--text-muted)" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--color-ink-500, #6B7280)" }}>
             {t("student.dashboard.chooseNext", "Choose what you want to do next.")}
           </p>
         </div>
@@ -151,42 +151,42 @@ export default function StudentDashboardPage() {
 
       {/* ── Consent banners ────────────────────────────── */}
       {showConsentRequired && (
-        <div style={{ marginBottom: 16, borderRadius: 12, border: "1px solid #f0c36d", background: "#fff9ef", padding: "12px 16px" }}>
+        <div style={{ marginBottom: 16, borderRadius: 12, border: "1px solid var(--color-warning-ink, #B45309)", background: "var(--color-paper, #F8FAF9)", padding: "12px 16px" }}>
           <div style={{ fontWeight: 700, fontSize: 14 }}>{t("consent.required.title", "Guardian consent required ⚠️")}</div>
-          <div style={{ marginTop: 4, fontSize: 13, color: "var(--text-muted)" }}>{t("consent.required.body", "Your account is marked as a minor. Please complete guardian consent verification.")}</div>
+          <div style={{ marginTop: 4, fontSize: 13, color: "var(--color-ink-500, #6B7280)" }}>{t("consent.required.body", "Your account is marked as a minor. Please complete guardian consent verification.")}</div>
         </div>
       )}
       {showConsentVerified && (
-        <div style={{ marginBottom: 16, borderRadius: 12, border: "1px solid #cfe9d6", background: "#f3fff6", padding: "12px 16px" }}>
+        <div style={{ marginBottom: 16, borderRadius: 12, border: "1px solid var(--color-success-strong, #067A52)", background: "var(--color-paper, #F8FAF9)", padding: "12px 16px" }}>
           <div style={{ fontWeight: 700, fontSize: 14 }}>{t("consent.verified.title", "Parental consent verified ✅")}</div>
         </div>
       )}
 
       {/* ── KPI strip ──────────────────────────────────── */}
       {loading ? (
-        <div style={{ borderRadius: 16, border: "1px solid var(--border)", background: "#fff", padding: "20px 24px", marginBottom: 20, fontSize: 13, color: "var(--text-muted)" }}>
+        <div style={{ borderRadius: 16, border: "1px solid var(--color-border, #6B7280)", background: "var(--color-surface, #FFFFFF)", padding: "20px 24px", marginBottom: 20, fontSize: 13, color: "var(--color-ink-500, #6B7280)" }}>
           {t("student.dashboard.loading", "Loading dashboard data…")}
         </div>
       ) : (
         <div style={{
-          borderRadius: 16, border: "1px solid var(--border)", background: "#fff",
+          borderRadius: 16, border: "1px solid var(--color-border, #6B7280)", background: "var(--color-surface, #FFFFFF)",
           padding: "20px 24px", marginBottom: 20,
           display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 20,
         }}>
           {/* Assessments taken */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-ink-500, #6B7280)", marginBottom: 4 }}>
               {t("student.dashboard.kpi.assessments", "Assessments")}
             </div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: "var(--brand-primary)", lineHeight: 1 }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "var(--color-primary, #2540D9)", lineHeight: 1 }}>
               {totalAssessments}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>taken</div>
+            <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)", marginTop: 2 }}>taken</div>
           </div>
 
           {/* Last submitted */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-ink-500, #6B7280)", marginBottom: 4 }}>
               {t("student.dashboard.kpi.lastSubmitted", "Last submitted")}
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.2 }}>
@@ -196,13 +196,13 @@ export default function StudentDashboardPage() {
 
           {/* Results ready */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-ink-500, #6B7280)", marginBottom: 4 }}>
               {t("student.dashboard.kpi.resultsHistory", "Results")}
             </div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: "var(--brand-primary)", lineHeight: 1 }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "var(--color-primary, #2540D9)", lineHeight: 1 }}>
               {totalResults}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)", marginTop: 2 }}>
               {t("student.dashboard.kpi.records", "record(s)")}
             </div>
           </div>
@@ -210,11 +210,11 @@ export default function StudentDashboardPage() {
           {/* Latest career match */}
           {latestCareer && (
             <div style={{ gridColumn: "span 2" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-ink-500, #6B7280)", marginBottom: 4 }}>
                 Latest top match
               </div>
               <div style={{ fontSize: 15, fontWeight: 700 }}>{latestCareer.title}</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{latestCareer.cluster}</div>
+              <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>{latestCareer.cluster}</div>
             </div>
           )}
         </div>
@@ -222,22 +222,22 @@ export default function StudentDashboardPage() {
 
       {/* ── Top strengths ──────────────────────────────── */}
       {topSkills.length > 0 && (
-        <div style={{ borderRadius: 16, border: "1px solid var(--border)", background: "#fff", padding: "16px 20px", marginBottom: 20 }}>
+        <div style={{ borderRadius: 16, border: "1px solid var(--color-border, #6B7280)", background: "var(--color-surface, #FFFFFF)", padding: "16px 20px", marginBottom: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
             {t("student.dashboard.kpi.scoring", "Your top strengths")}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {topSkills.map((s) => (
               <span key={s.skill_id} style={{
-                borderRadius: 999, border: "1px solid #bae6fd",
-                background: "#f0f9ff", color: "#0369a1",
+                borderRadius: 999, border: "1px solid var(--color-border, #6B7280)",
+                background: "var(--color-paper, #F8FAF9)", color: "var(--color-primary, #2540D9)",
                 padding: "4px 12px", fontSize: 12, fontWeight: 600,
               }}>
                 {s.skill_name || `Skill ${s.skill_id}`}
               </span>
             ))}
           </div>
-          <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-muted)" }}>
+          <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
             Based on your latest assessment. Take another to see how your strengths evolve.
           </div>
         </div>
@@ -294,7 +294,7 @@ export default function StudentDashboardPage() {
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <Link to="/" style={{ fontSize: 13, color: "var(--brand-primary)", textDecoration: "none" }}>
+        <Link to="/" style={{ fontSize: 13, color: "var(--color-primary, #2540D9)", textDecoration: "none" }}>
           {t("nav.backHome", "← Home")}
         </Link>
       </div>
