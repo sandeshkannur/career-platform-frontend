@@ -13,6 +13,13 @@ export default function StudentProfilePage() {
   const initials = fullName
     ? fullName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
     : "?";
+  const phoneNumber = sessionUser?.phone_number || null;
+  const dob = sessionUser?.dob
+    ? new Date(sessionUser.dob).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+    : null;
+  const isMinor = sessionUser?.is_minor === true;
+  const guardianEmail = sessionUser?.guardian_email || null;
+  const consentVerified = sessionUser?.consent_verified === true;
 
   return (
     <div style={{ maxWidth: 600, display: "grid", gap: 16 }}>
@@ -27,7 +34,7 @@ export default function StudentProfilePage() {
 
       {/* Account card */}
       <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
           <div style={{
             width: 52, height: 52, borderRadius: "50%",
             background: "var(--color-primary, #2540D9)", color: "#fff",
@@ -62,24 +69,66 @@ export default function StudentProfilePage() {
         </div>
 
         <div style={{ display: "grid", gap: 10, borderTop: "1px solid var(--color-border, #6B7280)", paddingTop: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
             <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.role", "Role")}</span>
-            <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{role}</span>
+            <span style={{ fontWeight: 600, textTransform: "capitalize", textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{role}</span>
           </div>
           {email && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
               <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.email", "Email")}</span>
-              <span style={{ fontWeight: 600 }}>{email}</span>
+              <span style={{ fontWeight: 600, textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{email}</span>
+            </div>
+          )}
+          {phoneNumber && (
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
+              <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.phone", "Phone")}</span>
+              <span style={{ fontWeight: 600, textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{phoneNumber}</span>
             </div>
           )}
           {tier && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
               <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.tier", "Plan")}</span>
-              <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{tier}</span>
+              <span style={{ fontWeight: 600, textTransform: "capitalize", textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{tier}</span>
+            </div>
+          )}
+          {dob && (
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
+              <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.field.dob", "Date of birth")}</span>
+              <span style={{ fontWeight: 600, textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{dob}</span>
             </div>
           )}
         </div>
       </div>
+
+      {/* Guardian card (minors only) */}
+      {isMinor && (
+        <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>
+            {t("student.profile.guardian.title", "Guardian")}
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {guardianEmail && (
+              <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
+                <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.guardian.email", "Guardian email")}</span>
+                <span style={{ fontWeight: 600, textAlign: "right", wordBreak: "break-word", minWidth: 0 }}>{guardianEmail}</span>
+              </div>
+            )}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "4px 12px", fontSize: 13 }}>
+              <span style={{ color: "var(--color-ink-500, #6B7280)" }}>{t("student.profile.guardian.consentStatus", "Consent status")}</span>
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontWeight: 700, fontSize: 12,
+                color: consentVerified ? "var(--color-success-strong, #067A52)" : "var(--color-warning-ink, #B45309)",
+              }}>
+                {consentVerified ? "✓" : "▲"}
+                {consentVerified
+                  ? t("student.profile.guardian.verified", "Verified")
+                  : t("student.profile.guardian.pending", "Pending")}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Coming soon card */}
       <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
