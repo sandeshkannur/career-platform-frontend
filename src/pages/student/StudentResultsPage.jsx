@@ -457,7 +457,7 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
 
       {/* Body */}
       <div style={{ padding: isTopMatch ? "14px 16px" : "12px 14px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: isTopMatch ? 0 : 6 }}>
+        <div className="top-career-card__headerRow">
           <div>
             <div style={{ fontSize: isTopMatch ? 17 : 15, fontWeight: isTopMatch ? 800 : 700, color: "#0f172a", lineHeight: 1.25 }}>{title}</div>
             {prestige && <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 2 }}>{prestige}</div>}
@@ -1539,6 +1539,14 @@ export default function StudentResultsPage() {
                             details[data-collapsible][open] > summary .cp-collapseHide { display: inline; }
                             .top-career-card { padding: 12px; border-radius: 12px; }
                             .top-career-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+                            .top-career-card__headerRow {
+                              display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+                            }
+                            @media (min-width: 480px) {
+                              .top-career-card__headerRow {
+                                flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 8px;
+                              }
+                            }
                             .top-career-card__titleWrap { min-width: 0; }
                             .top-career-card__title { font-weight: 800; line-height: 1.2; font-size: 15px; }
                             .top-career-card__cluster { font-size: 11px; margin-top: 2px; }
