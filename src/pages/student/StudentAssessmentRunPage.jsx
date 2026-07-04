@@ -45,26 +45,26 @@ const MILESTONES = { 8: "q9", 26: "q18", 40: "q27", 47: "q36" };
 function AssessmentIntroScreen({ onContinue, t }) {
   return (
     <div className="mx-auto w-full max-w-lg px-6 py-12">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">
+      <h1 className="text-2xl font-bold text-[var(--color-ink-900,#111521)] mb-3">
         {t("student.assessmentChapters.intro.title")}
       </h1>
-      <p className="text-[var(--text-muted)] mb-6">
+      <p className="text-[var(--color-ink-500,#6B7280)] mb-6">
         {t("student.assessmentChapters.intro.body")}
       </p>
       <ul className="space-y-3 mb-6">
         {["rule1", "rule2", "rule3", "rule4"].map((r) => (
-          <li key={r} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
-            <span className="text-green-500 mt-0.5">✓</span>
+          <li key={r} className="flex items-start gap-2 text-sm text-[var(--color-ink-900,#111521)]">
+            <span className="text-[var(--color-success,#0E9F6E)] mt-0.5">✓</span>
             <span>{t(`student.assessmentChapters.intro.${r}`)}</span>
           </li>
         ))}
       </ul>
-      <p className="text-xs text-[var(--text-muted)] mb-8">
+      <p className="text-xs text-[var(--color-ink-500,#6B7280)] mb-8">
         {t("student.assessmentChapters.intro.time")}
       </p>
       <button
         onClick={onContinue}
-        className="w-full rounded-xl bg-[var(--brand-primary,#1d4ed8)] px-6 py-3 text-white font-semibold hover:opacity-90 transition"
+        className="w-full rounded-xl bg-[var(--color-primary,#2540D9)] px-6 py-3 text-white font-semibold hover:opacity-90 transition"
       >
         {t("student.assessmentChapters.intro.cta")}
       </button>
@@ -543,34 +543,34 @@ export default function StudentAssessmentRunPage() {
         </div>
 
         <div className="mb-4">
-          <div className="mb-1 flex justify-between text-xs text-[var(--text-muted)]">
+          <div className="mb-1 flex justify-between text-xs text-[var(--color-ink-500,#6B7280)]">
             <span>{t("student.assessmentChapters.ch5.progressLabel", "Chapter 5 of 5")}</span>
             <span>50 / 60</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-[var(--border)]">
-            <div className="h-2 rounded-full bg-[var(--brand-primary)]" style={{ width: "83%" }} />
+          <div className="h-2 w-full rounded-full bg-[var(--color-border,#6B7280)]">
+            <div className="h-2 rounded-full bg-[var(--color-primary,#2540D9)]" style={{ width: "83%" }} />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-6 sm:p-8">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+        <div className="rounded-2xl border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] p-6 sm:p-8">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-500,#6B7280)]">
             {t("student.assessmentChapters.ch5.label", "Chapter 5")}
           </div>
-          <h2 className="mb-3 text-xl font-bold text-[var(--text-primary)] sm:text-2xl">
+          <h2 className="mb-3 text-xl font-bold text-[var(--color-ink-900,#111521)] sm:text-2xl">
             {t("student.assessmentChapters.ch5.title", "What do you enjoy?")}
           </h2>
-          <p className="mb-5 text-sm leading-relaxed text-[var(--text-muted)]">
+          <p className="mb-5 text-sm leading-relaxed text-[var(--color-ink-500,#6B7280)]">
             {t(
               "student.assessmentChapters.ch5.intro",
               "This final chapter has 10 short activity questions. There are no right or wrong answers — simply pick what feels most natural to you. This helps us understand which career worlds genuinely excite you."
             )}
           </p>
 
-          <div className="mb-5 rounded-xl border border-[var(--border)] bg-[var(--bg-app)] p-4">
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="mb-5 rounded-xl border border-[var(--color-border,#6B7280)] bg-[var(--color-paper,#F8FAF9)] p-4">
+            <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-500,#6B7280)]">
               {t("student.assessmentChapters.ch5.whyLabel", "Why this matters")}
             </div>
-            <p className="text-sm text-[var(--text-primary)]">
+            <p className="text-sm text-[var(--color-ink-900,#111521)]">
               {t(
                 "student.assessmentChapters.ch5.why",
                 "Research shows that measuring both traits and interests together is 2× more accurate at predicting career satisfaction than traits alone. Your answers here personalise your career matches."
@@ -578,13 +578,13 @@ export default function StudentAssessmentRunPage() {
             </p>
           </div>
 
-          <p className="mb-6 text-sm text-[var(--text-muted)]">
+          <p className="mb-6 text-sm text-[var(--color-ink-500,#6B7280)]">
             {t("student.assessmentChapters.ch5.instructions", "10 questions · 2–3 minutes · Pick one option per question")}
           </p>
 
           <Button
             onClick={() => setPhase("interest")}
-            style={{ background: "var(--brand-primary)", color: "#fff", border: "none", padding: "11px 24px", fontSize: 14 }}
+            style={{ background: "var(--color-primary, #2540D9)", color: "#fff", border: "none", padding: "11px 24px", fontSize: 14 }}
           >
             {t("student.assessmentChapters.ch5.cta", "Start Chapter 5 →")}
           </Button>
@@ -609,7 +609,7 @@ export default function StudentAssessmentRunPage() {
             <h1 className="text-xl font-semibold">
               {t("student.assessmentRun.title", "Assessment")}
             </h1>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
+            <p className="mt-1 text-sm text-[var(--color-ink-500,#6B7280)]">
               {t("student.assessmentChapters.ch5.title", "What do you enjoy?")}
             </p>
           </div>
@@ -617,7 +617,7 @@ export default function StudentAssessmentRunPage() {
             <select
               value={lang}
               onChange={handleLangChange}
-              className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
+              className="h-9 rounded-lg border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] px-2 text-sm"
             >
               <option value="en">{t("common.language.en", "EN")}</option>
               <option value="kn">{t("common.language.kn", "KN")}</option>
@@ -627,35 +627,35 @@ export default function StudentAssessmentRunPage() {
 
         {/* Progress — Q51–Q60 out of 60 */}
         <div className="mt-6">
-          <div className="mb-1 flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="mb-1 flex items-center justify-between text-xs text-[var(--color-ink-500,#6B7280)]">
             <div>
               {t("student.assessmentRun.progress.question", "Question")}{" "}
-              <span className="font-medium text-[var(--text-primary)]">{currentQNum}</span>{" "}
+              <span className="font-medium text-[var(--color-ink-900,#111521)]">{currentQNum}</span>{" "}
               {t("student.assessmentRun.progress.of", "of")}{" "}
-              <span className="font-medium text-[var(--text-primary)]">60</span>
+              <span className="font-medium text-[var(--color-ink-900,#111521)]">60</span>
               <span className="ml-2 opacity-70">
                 · {t("student.assessmentChapters.ch5.label", "Chapter 5")}
               </span>
             </div>
             <div>{pct}%</div>
           </div>
-          <div className="h-2 w-full rounded-full bg-[var(--border)]">
+          <div className="h-2 w-full rounded-full bg-[var(--color-border,#6B7280)]">
             <div
-              className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
+              className="h-2 rounded-full bg-[var(--color-primary,#2540D9)] transition-all"
               style={{ width: `${pct}%` }}
             />
           </div>
         </div>
 
         {/* Question card */}
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <div className="mt-6 rounded-2xl border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] p-6">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-500,#6B7280)]">
             {t("interest.question", "Question")} {interestIndex + 1} {t("interest.of", "of")} 10
           </div>
           <div className="mb-2 text-lg font-semibold leading-snug">
             {t(`interest.${iq.id}.text`, `Activity question ${interestIndex + 1}`)}
           </div>
-          <div className="mb-5 text-sm text-[var(--text-muted)]">
+          <div className="mb-5 text-sm text-[var(--color-ink-500,#6B7280)]">
             {t(`interest.${iq.id}.sub`, "Pick what feels most natural to you")}
           </div>
 
@@ -672,12 +672,12 @@ export default function StudentAssessmentRunPage() {
                   className={[
                     "w-full rounded-xl border px-4 py-3 text-left text-sm transition hover:shadow-sm",
                     active
-                      ? "border-[var(--brand-primary)] bg-[var(--bg-app)]"
-                      : "border-[var(--border)] bg-white",
+                      ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]"
+                      : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
                   ].join(" ")}
                   aria-pressed={active}
                 >
-                  <span className="font-medium text-[var(--text-primary)]">{label}</span>
+                  <span className="font-medium text-[var(--color-ink-900,#111521)]">{label}</span>
                 </button>
               );
             })}
@@ -686,23 +686,23 @@ export default function StudentAssessmentRunPage() {
           {!iqSelected && (
             <div
               role="alert"
-              className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm"
+              className="mt-4 rounded-xl border border-[var(--color-warning-ink,#B45309)] bg-[var(--color-paper,#F8FAF9)] p-3 text-sm"
             >
               <div className="font-semibold">
                 {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
               </div>
-              <div className="mt-1 text-[var(--text-muted)]">
+              <div className="mt-1 text-[var(--color-ink-500,#6B7280)]">
                 {t("student.assessmentRun.helper.select_body", "You can change your answer anytime before submitting.")}
               </div>
             </div>
           )}
 
           {/* Bottom nav — ONLY place with Next/Submit */}
-          <div className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+          <div className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--color-border,#6B7280)] pt-4">
             <Button variant="secondary" onClick={handleInterestBack}>
               {t("student.assessmentRun.actions.back", "Back")}
             </Button>
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-[var(--color-ink-500,#6B7280)]">
               {Object.keys(interestAnswers).length}/10 {t("interest.nav.answered", "answered")}
             </span>
             <Button
@@ -710,7 +710,7 @@ export default function StudentAssessmentRunPage() {
               disabled={!iqSelected || phase === "submitting"}
               style={
                 iqSelected && phase !== "submitting"
-                  ? { background: "var(--brand-primary)", color: "#fff", border: "none" }
+                  ? { background: "var(--color-primary, #2540D9)", color: "#fff", border: "none" }
                   : {}
               }
             >
@@ -740,7 +740,7 @@ export default function StudentAssessmentRunPage() {
             <h1 className="text-xl font-semibold">
               {t("student.assessmentRun.title", "Assessment")}
             </h1>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
+            <p className="mt-1 text-sm text-[var(--color-ink-500,#6B7280)]">
               {t("student.assessmentRun.loading.subtitle", "Loading your assessment…")}
             </p>
           </div>
@@ -750,7 +750,7 @@ export default function StudentAssessmentRunPage() {
             </Button>
           </div>
         </div>
-        <div className="mt-6 rounded-xl border border-[var(--border)] bg-white p-4 text-sm">
+        <div className="mt-6 rounded-xl border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] p-4 text-sm">
           {t("student.assessmentRun.loading.body", "Loading…")}
         </div>
       </div>
@@ -770,11 +770,11 @@ export default function StudentAssessmentRunPage() {
             {t("student.assessmentRun.actions.back", "Back")}
           </Button>
         </div>
-        <div className="mt-6 rounded-xl border border-[#f3b4b4] bg-[#fff6f6] p-4">
+        <div className="mt-6 rounded-xl border border-[var(--color-error-ink,#C81E1E)] bg-[var(--color-paper,#F8FAF9)] p-4">
           <div className="text-sm font-semibold">
             {t("student.assessmentRun.error.title", "Failed to load questions")}
           </div>
-          <div className="mt-1 text-sm text-[var(--text-muted)]">
+          <div className="mt-1 text-sm text-[var(--color-ink-500,#6B7280)]">
             {questionsError?.message || t("student.assessmentRun.error.fallback", "Failed to load questions.")}
           </div>
         </div>
@@ -811,7 +811,7 @@ export default function StudentAssessmentRunPage() {
               <h1 className="text-xl font-semibold">
                 {t("student.assessmentRun.title", "Assessment")}
               </h1>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">
+              <p className="mt-1 text-sm text-[var(--color-ink-500,#6B7280)]">
                 {t("student.assessmentRun.subtitle", "Answer honestly. There are no right or wrong answers.")}
               </p>
             </div>
@@ -819,7 +819,7 @@ export default function StudentAssessmentRunPage() {
               <select
                 value={lang}
                 onChange={handleLangChange}
-                className="h-9 rounded-lg border border-[var(--border)] bg-white px-2 text-sm"
+                className="h-9 rounded-lg border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] px-2 text-sm"
                 aria-label={t("student.assessmentRun.language.ariaLabel", "Language")}
               >
                 <option value="en">{t("common.language.en", "EN")}</option>
@@ -833,28 +833,28 @@ export default function StudentAssessmentRunPage() {
 
           {/* Progress — shows X/60 total */}
           <div className="mt-6">
-            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+            <div className="flex items-center justify-between text-xs text-[var(--color-ink-500,#6B7280)]">
               <div>
                 {t("student.assessmentRun.progress.question", "Question")}{" "}
-                <span className="font-medium text-[var(--text-primary)]">{index + 1}</span>{" "}
+                <span className="font-medium text-[var(--color-ink-900,#111521)]">{index + 1}</span>{" "}
                 {t("student.assessmentRun.progress.of", "of")}{" "}
-                <span className="font-medium text-[var(--text-primary)]">60</span>
+                <span className="font-medium text-[var(--color-ink-900,#111521)]">60</span>
               </div>
               <div>{Math.round(((index + 1) / 60) * 100)}%</div>
             </div>
-            <div className="mt-2 h-2 w-full rounded-full bg-[var(--border)]">
+            <div className="mt-2 h-2 w-full rounded-full bg-[var(--color-border,#6B7280)]">
               <div
-                className="h-2 rounded-full bg-[var(--brand-primary)] transition-all"
+                className="h-2 rounded-full bg-[var(--color-primary,#2540D9)] transition-all"
                 style={{ width: `${Math.round(((index + 1) / 60) * 100)}%` }}
               />
             </div>
             {syncState.status !== "idle" ? (
-              <div className="mt-2 text-xs text-[var(--text-muted)]">{syncState.message}</div>
+              <div className="mt-2 text-xs text-[var(--color-ink-500,#6B7280)]">{syncState.message}</div>
             ) : null}
           </div>
 
           {/* Question Card */}
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-6">
+          <div className="mt-6 rounded-2xl border border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)] p-6">
             <div className="text-lg font-semibold leading-snug">{currentText}</div>
             <div className="mt-4">
               <QuestionRenderer
@@ -872,22 +872,22 @@ export default function StudentAssessmentRunPage() {
             </div>
 
             {!selected && (
-              <div role="alert" className="mt-4 rounded-xl border border-[#f0c36d] bg-[#fff9ef] p-3 text-sm">
+              <div role="alert" className="mt-4 rounded-xl border border-[var(--color-warning-ink,#B45309)] bg-[var(--color-paper,#F8FAF9)] p-3 text-sm">
                 <div className="font-semibold">
                   {t("student.assessmentRun.helper.select_title", "Select an option to continue")}
                 </div>
-                <div className="mt-1 text-[var(--text-muted)]">
+                <div className="mt-1 text-[var(--color-ink-500,#6B7280)]">
                   {t("student.assessmentRun.helper.select_body", "You can change your answer anytime before submitting.")}
                 </div>
               </div>
             )}
 
             {/* Bottom nav — Next/Continue ONLY here, never in header */}
-            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--color-border,#6B7280)] pt-4">
               <Button variant="secondary" onClick={handleBack}>
                 {t("student.assessmentRun.actions.back", "Back")}
               </Button>
-              <span className="text-xs text-[var(--text-muted)]">
+              <span className="text-xs text-[var(--color-ink-500,#6B7280)]">
                 {index + 1} / 60
               </span>
               <Button
@@ -895,7 +895,7 @@ export default function StudentAssessmentRunPage() {
                 disabled={!selected}
                 style={
                   selected
-                    ? { background: "var(--brand-primary)", color: "#fff", border: "none" }
+                    ? { background: "var(--color-primary, #2540D9)", color: "#fff", border: "none" }
                     : {}
                 }
               >

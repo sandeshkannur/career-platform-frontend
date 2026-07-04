@@ -5,7 +5,7 @@
  * matching the existing choose() contract in StudentAssessmentRunPage.
  */
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 
 
 function LikertQuestion({ selected, onChoose }) {
@@ -54,12 +54,12 @@ function EmojiLikertQuestion({ question, selected, onChoose }) {
             onClick={() => onChoose(val)}
             className={[
               "flex flex-1 flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
-              active ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
+              active ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]" : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
             ].join(" ")}
             aria-pressed={active}
           >
             <span className="text-2xl leading-none" role="img" aria-hidden="true">{em}</span>
-            <span className="text-xs text-[var(--text-muted)]">{labels[i]}</span>
+            <span className="text-xs text-[var(--color-ink-500,#6B7280)]">{labels[i]}</span>
           </button>
         );
       })}
@@ -86,8 +86,8 @@ function ScenarioQuestion({ question, selected, onChoose }) {
             <span className={[
               "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold",
               active
-                ? "bg-[var(--brand-primary)] text-white"
-                : "bg-[var(--bg-app)] text-[var(--text-muted)]",
+                ? "bg-[var(--color-primary,#2540D9)] text-white"
+                : "bg-[var(--color-paper,#F8FAF9)] text-[var(--color-ink-500,#6B7280)]",
             ].join(" ")}>
               {letters[i]}
             </span>
@@ -122,7 +122,7 @@ function RankingQuestion({ question, onChoose }) {
 
   return (
     <div className="grid gap-2">
-      <p className="text-xs text-[var(--text-muted)] mb-1">
+      <p className="text-xs text-[var(--color-ink-500,#6B7280)] mb-1">
         Drag to rank — most like you at the top
       </p>
       {items.map((opt, i) => (
@@ -135,14 +135,14 @@ function RankingQuestion({ question, onChoose }) {
           className={[
             "flex items-center gap-3 rounded-xl border px-3 py-3 text-sm cursor-grab transition select-none",
             dragging === i ? "opacity-40" : "opacity-100",
-            i === 0 ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
+            i === 0 ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]" : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
           ].join(" ")}
         >
-          <span className="text-[var(--text-muted)]">⠿</span>
-          <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--bg-app)] text-xs font-semibold text-[var(--text-muted)]">
+          <span className="text-[var(--color-ink-500,#6B7280)]">⠿</span>
+          <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-paper,#F8FAF9)] text-xs font-semibold text-[var(--color-ink-500,#6B7280)]">
             {i + 1}
           </span>
-          <span className="font-medium text-[var(--text-primary)]">{opt.label}</span>
+          <span className="font-medium text-[var(--color-ink-900,#111521)]">{opt.label}</span>
         </div>
       ))}
     </div>
@@ -169,7 +169,7 @@ function SliderQuestion({ question, selected, onChoose }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-between text-xs text-[var(--text-muted)]">
+      <div className="flex justify-between text-xs text-[var(--color-ink-500,#6B7280)]">
         <span>{left}</span>
         <span>{right}</span>
       </div>
@@ -178,7 +178,7 @@ function SliderQuestion({ question, selected, onChoose }) {
         min="1" max="5" step="1"
         value={displayVal}
         onChange={handleChange}
-        className="w-full accent-[var(--brand-primary)]"
+        className="w-full accent-[var(--color-primary,#2540D9)]"
       />
       <div className="text-center">
         {touched || selected ? (
@@ -186,10 +186,10 @@ function SliderQuestion({ question, selected, onChoose }) {
             <span className="text-3xl leading-none" role="img" aria-hidden="true">
               {emojis[displayVal - 1]}
             </span>
-            <p className="text-sm text-[var(--text-muted)] mt-1">{labels[displayVal - 1]}</p>
+            <p className="text-sm text-[var(--color-ink-500,#6B7280)] mt-1">{labels[displayVal - 1]}</p>
           </>
         ) : (
-          <p className="text-sm text-[var(--text-muted)]">Move the slider to answer</p>
+          <p className="text-sm text-[var(--color-ink-500,#6B7280)]">Move the slider to answer</p>
         )}
       </div>
     </div>
@@ -203,15 +203,15 @@ function ThisOrThatQuestion({ question, selected, onChoose }) {
   const pair = [optA, optB].filter(Boolean);
 
   return (
-    <div className="flex items-stretch gap-3">
+    <div className="flex flex-col sm:flex-row items-stretch gap-3">
       {pair.map((opt, i) => {
         const val = String(opt.score_value);
         const active = selected === val;
         return (
-          <>
+          <Fragment key={val}>
             {i === 1 && (
               <div key="or-divider" className="flex flex-shrink-0 items-center">
-                <span className="text-xs font-medium text-[var(--text-muted)]">or</span>
+                <span className="text-xs font-medium text-[var(--color-ink-500,#6B7280)]">or</span>
               </div>
             )}
             <button
@@ -220,13 +220,13 @@ function ThisOrThatQuestion({ question, selected, onChoose }) {
               onClick={() => onChoose(val)}
               className={[
                 "flex flex-1 items-center justify-center rounded-xl border px-4 py-5 text-center text-sm font-medium transition hover:shadow-sm",
-                active ? "border-[var(--brand-primary)] bg-[var(--bg-app)]" : "border-[var(--border)] bg-white",
+                active ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]" : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
               ].join(" ")}
               aria-pressed={active}
             >
               {opt.label}
             </button>
-          </>
+          </Fragment>
         );
       })}
     </div>
