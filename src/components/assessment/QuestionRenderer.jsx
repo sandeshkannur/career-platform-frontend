@@ -43,19 +43,21 @@ function EmojiLikertQuestion({ question, selected, onChoose }) {
     cfg.labels ||
     ["Never", "Rarely", "Sometimes", "Often", "Always"];
   return (
-    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div className="grid grid-cols-2 gap-3 sm:grid-flow-col sm:grid-cols-5">
       {emojis.map((em, i) => {
         const val = String(i + 1);
         const active = selected === val;
+        const isLoneLastItem = i === emojis.length - 1 && emojis.length % 2 === 1;
         return (
           <button
             key={val}
             type="button"
             onClick={() => onChoose(val)}
             className={[
-              "flex flex-none snap-start basis-[22%] sm:basis-auto sm:flex-1 flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
+              "flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
+              isLoneLastItem ? "col-span-2 justify-self-center w-1/2 sm:col-span-1 sm:w-auto" : "",
               active ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]" : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
-            ].join(" ")}
+            ].join(" ").trim()}
             aria-pressed={active}
           >
             <span className="text-2xl leading-none" role="img" aria-hidden="true">{em}</span>
