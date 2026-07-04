@@ -52,6 +52,7 @@ export default function StudentAssessmentIntroPage() {
   const navigate = useNavigate();
   const { t } = useContent();
   const [busy, setBusy] = useState(false);
+  const [startError, setStartError] = useState(null);
 
   const lastRun = useMemo(() => readLastRunSnapshot(), []);
   const contextCompleted = useMemo(
@@ -97,6 +98,7 @@ export default function StudentAssessmentIntroPage() {
   );
 
   const handleStart = useCallback(async () => {
+    setStartError(null);
     setBusy(true);
     try {
       const data = await startAssessment();
@@ -106,11 +108,13 @@ export default function StudentAssessmentIntroPage() {
         throw new Error(t("student.assessmentIntro.errors.missingAssessmentId", "assessment_id missing from response"));
       }
 
-      // Persist a minimal snapshot for resume.
-      // Backend may return more fields; we keep them as-is.
       writeLastRunSnapshot({ ...data, assessment_id: assessmentId });
 
       goToRun(assessmentId);
+    } catch (e) {
+      setStartError(
+        e?.message || t("student.assessmentIntro.errors.startFailed", "Could not start the assessment. Please check your connection and try again.")
+      );
     } finally {
       setBusy(false);
     }
@@ -158,12 +162,12 @@ export default function StudentAssessmentIntroPage() {
           {t("student.assessmentIntro.body1", "This assessment helps generate deterministic and explainable career recommendations based on your responses.")}
         </p>
         {!contextCompleted && (
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+          <div style={{ padding: 12, border: "1px solid var(--color-border, #6B7280)", borderRadius: 8 }}>
             <div style={{ fontWeight: 800, marginBottom: 6 }}>
               {t("student.assessmentIntro.contextCard.title", "Help us tailor guidance (optional, ~30 seconds)")}
             </div>
 
-            <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4, marginBottom: 10 }}>
+            <div style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", lineHeight: 1.4, marginBottom: 10 }}>
               {t("student.assessmentIntro.contextCard.desc", "Adding a few details helps keep recommendations practical for you. You can skip this and update later anytime.")}
             </div>
 
@@ -178,20 +182,33 @@ export default function StudentAssessmentIntroPage() {
           </div>
         )}
         {activeError ? (
-          <div style={{ fontSize: 12, opacity: 0.7 }}>
+          <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
             {t("student.assessmentIntro.activeError", "Couldn’t check saved progress right now. You can still start or resume if available.")}
           </div>
         ) : null}
 
+        {startError ? (
+          <div style={{
+            borderRadius: 8,
+            border: "1px solid var(--color-warning-ink, #B45309)",
+            background: "var(--color-paper, #F8FAF9)",
+            padding: "10px 14px",
+            fontSize: 13,
+            color: "var(--color-ink-900, #111521)",
+          }}>
+            {startError}
+          </div>
+        ) : null}
+
         {activeState?.active && activeState?.assessment_id && !activeState?.is_complete ? (
-          <div style={{ fontSize: 12, opacity: 0.75 }}>
+          <div style={{ fontSize: 12, color: "var(--color-ink-500, #6B7280)" }}>
             {t("student.assessmentIntro.savedProgressPrefix", "Saved progress found: answered")}{" "}
             <b>{activeState.answered_count}</b> {t("student.assessmentIntro.savedProgressOf", "of")}{" "}
             <b>{activeState.total_questions}</b>.
           </div>
         ) : null}
 
-        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+        <div style={{ padding: 16, border: "1px solid var(--color-border, #6B7280)", borderRadius: 12, background: "var(--color-surface, #FFFFFF)" }}>
           <div style={{ fontWeight: 800, marginBottom: 12 }}>
             {t("student.assessmentIntro.expect.title", "What to expect")}
           </div>
@@ -204,7 +221,7 @@ export default function StudentAssessmentIntroPage() {
               <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <div style={{
                   minWidth: 26, height: 26, borderRadius: "50%",
-                  background: "var(--brand-primary)", color: "#fff",
+                  background: "var(--color-primary, #2540D9)", color: "#fff",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 12, fontWeight: 700, flexShrink: 0,
                 }}>
@@ -216,12 +233,12 @@ export default function StudentAssessmentIntroPage() {
           </div>
         </div>
 
-        <details style={{ border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+        <details style={{ border: "1px solid var(--color-border, #6B7280)", borderRadius: 12, background: "var(--color-surface, #FFFFFF)" }}>
           <summary style={{ padding: "12px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", userSelect: "none", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>{t("student.assessmentIntro.privacy.title", "Privacy & disclaimer")}</span>
-            <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>▾</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: "var(--color-ink-500, #6B7280)" }}>▾</span>
           </summary>
-          <div style={{ padding: "0 16px 14px", fontSize: 13, lineHeight: 1.6, color: "var(--text-muted)", borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+          <div style={{ padding: "0 16px 14px", fontSize: 13, lineHeight: 1.6, color: "var(--color-ink-500, #6B7280)", borderTop: "1px solid var(--color-border, #6B7280)", paddingTop: 12 }}>
             {t("student.assessmentIntro.privacy.body", "Your responses are used only to generate your recommendations and reports. This is a guidance tool and not a guaranteed predictor of outcomes.")}
           </div>
         </details>
