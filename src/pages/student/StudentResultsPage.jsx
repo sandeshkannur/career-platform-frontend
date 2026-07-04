@@ -101,13 +101,28 @@ function fmtInr(v) {
     : `\u20b9${(v / 1000).toFixed(0)}K`;
 }
 
-const BAND_STYLES = {
-  high_potential: { bg: "#0b1f3a", color: "#fff" },
-  strong:         { bg: "#064e3b", color: "#fff" },
-  promising:      { bg: "#1e3a8a", color: "#fff" },
-  developing:     { bg: "#581c87", color: "#fff" },
-  exploring:      { bg: "#374151", color: "#fff" },
-};
+function StarFitIndicator({ fitBandKey, label, size = 13 }) {
+  const STAR_COUNTS = {
+    high_potential: 5, strong: 4, promising: 3, developing: 2, exploring: 1,
+  };
+  const filled = STAR_COUNTS[fitBandKey] ?? 1;
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+      <div style={{ display: "inline-flex", gap: 1 }} aria-hidden="true">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span key={i} style={{
+            fontSize: size,
+            color: "var(--color-primary, #2540D9)",
+            opacity: i < filled ? 1 : 0.22,
+          }}>★</span>
+        ))}
+      </div>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-ink-700, #374151)" }}>
+        {label}
+      </span>
+    </div>
+  );
+}
 
 const RISK_CFG = {
   low:    { label: "Low automation risk", bg: "#f0fdf4", color: "#166534", dot: "#16a34a" },
@@ -193,7 +208,7 @@ function InlineLanguageToggle({ lang, onChange, t }) {
             padding: "3px 10px", borderRadius: 999,
             border: "none", cursor: "pointer",
             fontSize: 11, fontWeight: 600,
-            background: lang === l.code ? "#0b1f3a" : "transparent",
+            background: lang === l.code ? "var(--color-primary, #2540D9)" : "transparent",
             color: lang === l.code ? "#fff" : "#475569",
             transition: "all .15s",
           }}
@@ -264,7 +279,7 @@ function InterestInventoryTeaser({ t, interestData, navigate }) {
           </div>
           <button
             onClick={() => navigate("/student/interest")}
-            style={{ fontSize: 11, color: "#0b1f3a", background: "none", border: "none", cursor: "pointer", fontWeight: 600, flexShrink: 0 }}
+            style={{ fontSize: 11, color: "var(--color-primary, #2540D9)", background: "none", border: "none", cursor: "pointer", fontWeight: 600, flexShrink: 0 }}
           >
             {t("interest.results.retake", "Retake →")}
           </button>
@@ -275,7 +290,7 @@ function InterestInventoryTeaser({ t, interestData, navigate }) {
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {interestData.top_clusters.slice(0, 3).map((cl, i) => (
             <span key={cl} style={{
-              background: i === 0 ? "#0b1f3a" : "#f0fdf4",
+              background: i === 0 ? "var(--color-primary, #2540D9)" : "#f0fdf4",
               color: i === 0 ? "#fff" : "#166534",
               border: i === 0 ? "none" : "1px solid #bbf7d0",
               borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600,
@@ -305,7 +320,7 @@ function InterestInventoryTeaser({ t, interestData, navigate }) {
         <button
           onClick={() => navigate("/student/interest")}
           style={{
-            background: "#0b1f3a", color: "#fff", border: "none",
+            background: "var(--color-primary, #2540D9)", color: "#fff", border: "none",
             borderRadius: 8, padding: "6px 14px",
             fontSize: 12, fontWeight: 600, cursor: "pointer",
             whiteSpace: "nowrap", flexShrink: 0,
@@ -329,7 +344,7 @@ function PathwayDropdown({ career, t }) {
         cursor: "pointer", listStyle: "none",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8,
-        padding: "8px 12px", fontSize: 12, fontWeight: 600, color: "#0b1f3a",
+        padding: "8px 12px", fontSize: 12, fontWeight: 600, color: "var(--color-primary, #2540D9)",
       }}>
         <span>{t("studentResults.pathway.toggle", "How to get there")}</span>
         <span style={{ fontSize: 10, color: "#64748b" }}>▼</span>
@@ -340,7 +355,7 @@ function PathwayDropdown({ career, t }) {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
               <div style={{
                 width: 20, height: 20, borderRadius: "50%",
-                background: ["#0b1f3a", "#0f6e56", "#16a34a"][i],
+                background: ["var(--color-primary, #2540D9)", "#0f6e56", "#16a34a"][i],
                 color: "#fff", display: "flex", alignItems: "center",
                 justifyContent: "center", fontSize: 10, fontWeight: 700,
               }}>{i + 1}</div>
@@ -380,7 +395,7 @@ function PathwayDropdown({ career, t }) {
               </div>
             )}
             {career?.top_tier_potential && (
-              <div style={{ background: "#0b1f3a", borderRadius: 8, padding: "8px 12px" }}>
+              <div style={{ background: "var(--color-primary, #2540D9)", borderRadius: 8, padding: "8px 12px" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.6)", marginBottom: 2, textTransform: "uppercase", letterSpacing: ".04em" }}>
                   {t("studentResults.pathway.topTier", "Top tier potential")}
                 </div>
@@ -399,7 +414,6 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
   const isTopMatch = idx === 0;
   const band      = fitBandsCopy?.[career?.fit_band_key] || null;
   const bandLabel = band?.label || career?.fit_band_key || t("studentResults.fitBandFallback", "Match");
-  const bandStyle = BAND_STYLES[career?.fit_band_key] || BAND_STYLES.exploring;
   const title     = career?.title || career?.career_title || career?.name || t("studentResults.topCareerFallback", "Career");
   const prestige  = career?.prestige_title || "";
   const cluster   = career?.cluster || career?.cluster_title || "";
@@ -420,23 +434,23 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
   return (
     <div style={{
       background: "#fff",
-      border: isTopMatch ? "1.5px solid #0b1f3a" : "1px solid #e2e8f0",
+      border: isTopMatch ? "1.5px solid var(--color-primary, #2540D9)" : "1px solid #e2e8f0",
       borderRadius: 12, overflow: "hidden", marginBottom: isTopMatch ? 12 : 8,
     }}>
-      {/* Navy header — top match only */}
+      {/* Primary header — top match only */}
       {isTopMatch && (
         <div style={{
-          background: "#0b1f3a", padding: "10px 16px",
+          background: "var(--color-primary, #2540D9)", padding: "10px 16px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.75)" }}>
             {t("studentResults.topMatchLabel", "Top match")}
           </span>
           <span style={{
-            background: "rgba(255,255,255,.15)", color: "#fff",
-            borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600,
+            background: "var(--color-surface, #ffffff)", borderRadius: 999,
+            padding: "3px 10px", display: "inline-flex",
           }}>
-            {bandLabel}
+            <StarFitIndicator fitBandKey={career?.fit_band_key} label={bandLabel} size={14} />
           </span>
         </div>
       )}
@@ -449,8 +463,8 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
             {prestige && <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 2 }}>{prestige}</div>}
           </div>
           {!isTopMatch && (
-            <span style={{ background: bandStyle.bg, color: bandStyle.color, borderRadius: 999, padding: "3px 9px", fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
-              {bandLabel}
+            <span style={{ flexShrink: 0 }}>
+              <StarFitIndicator fitBandKey={career?.fit_band_key} label={bandLabel} size={12} />
             </span>
           )}
         </div>
@@ -465,13 +479,16 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
         {/* Description */}
         {description && <div style={{ marginTop: 10, fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{description}</div>}
 
+        {(() => {
+          const detailBody = (
+            <>
         {/* Salary */}
         {(e || m || pk) && (
           <div style={{ marginTop: 12 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 5 }}>
               {t("studentResults.salaryRange", "Annual salary range")}
             </div>
-            <div style={{ height: 6, borderRadius: 999, background: "linear-gradient(90deg,#0b1f3a 0%,#0f6e56 55%,#16a34a 100%)", marginBottom: 4 }} />
+            <div style={{ height: 6, borderRadius: 999, background: "linear-gradient(90deg,var(--color-primary, #2540D9) 0%,#0f6e56 55%,#16a34a 100%)", marginBottom: 4 }} />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
               {e  && <span style={{ color: "#64748b" }}>{e} <span style={{ fontSize: 10 }}>{t("studentResults.salary.entry", "entry")}</span></span>}
               {m  && <span style={{ fontWeight: 700, color: "#0f172a" }}>{m}</span>}
@@ -514,6 +531,28 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
         )}
 
         <PathwayDropdown career={career} t={t} />
+            </>
+          );
+
+          if (isTopMatch) return detailBody;
+
+          return (
+            <details data-collapsible style={{ marginTop: 10 }}>
+              <summary style={{
+                cursor: "pointer", listStyle: "none",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8,
+                padding: "8px 12px", fontSize: 12, fontWeight: 600,
+                color: "var(--color-primary, #2540D9)",
+              }}>
+                <span className="cp-collapseShow">{t("studentResults.card.showDetails", "Show full details")}</span>
+                <span className="cp-collapseHide">{t("studentResults.card.hideDetails", "Hide details")}</span>
+                <span style={{ fontSize: 10, color: "#64748b" }}>▼</span>
+              </summary>
+              {detailBody}
+            </details>
+          );
+        })()}
       </div>
     </div>
   );
@@ -553,6 +592,19 @@ export default function StudentResultsPage() {
   const lang = language || "en";
   const [contentLang, setContentLang] = React.useState(lang);
   React.useEffect(() => { setContentLang(lang); }, [lang]);
+
+  // Collapsible sections: closed by default on mobile, expanded by default at
+  // tablet+. Sections render after async data arrives, so this runs on every
+  // render and opens each collapsible exactly once when it first appears.
+  useEffect(() => {
+    if (typeof window === "undefined" || window.innerWidth < 640) return;
+    document
+      .querySelectorAll("details[data-collapsible]:not([data-collapsible-init])")
+      .forEach((d) => {
+        d.setAttribute("data-collapsible-init", "1");
+        d.open = true;
+      });
+  });
 
   const [recs, setRecs] = useState(null);
   const [recsLoading, setRecsLoading] = useState(false);
@@ -871,6 +923,16 @@ export default function StudentResultsPage() {
       title={t("studentResults.title", "Your Career Results")}
       subtitle={t("studentResults.subtitle", "Top recommendations based on your assessment.")}
     >
+      {isPaidOrPremium && (
+        <div style={{ marginBottom: 8 }}>
+          <span style={{
+            background: "var(--color-secondary, #6D28D9)", color: "#fff",
+            borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 700,
+          }}>
+            {t("studentResults.premiumBadge", "Premium")}
+          </span>
+        </div>
+      )}
       <div className="cp-results">
         <div className="cp-resultsActions">
           <Button variant="secondary" onClick={() => navigate("/student/dashboard")}>
@@ -1096,7 +1158,7 @@ export default function StudentResultsPage() {
                         const interestTeaser = <InterestInventoryTeaser t={t} interestData={interestData} navigate={navigate} />;
 
                         return (
-                          <div>
+                          <div id="results-top-matches">
                             {strengthMap}
                             {interestTeaser}
                             {visible.map((c, idx) => (
@@ -1123,10 +1185,13 @@ export default function StudentResultsPage() {
                         return (
                           <div style={{ marginTop: 14 }}>
                             <div className="cp-insightsStack">
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.clusterSignals.title", "Cluster signals")}
-                                </div>
+                              <div id="results-cluster-signals" className="cp-softPanel" style={{ borderLeft: "3px solid var(--color-secondary, #6D28D9)" }}>
+                                <details data-collapsible>
+                                  <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 6, display: "inline-block" }}>
+                                      {t("studentResults.clusterSignals.title", "Cluster signals")}
+                                    </div>
+                                  </summary>
                                 {clusterEntries.length > 0 ? (
                                   <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                                     {clusterEntries.map(([clusterName, careers]) => (
@@ -1156,12 +1221,16 @@ export default function StudentResultsPage() {
                                 ) : (
                                   <ComingSoon />
                                 )}
+                                </details>
                               </div>
 
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.whyFit.title", "Why these careers fit you")}
-                                </div>
+                              <div id="results-why-fit" className="cp-softPanel" style={{ borderLeft: "3px solid var(--color-secondary, #6D28D9)" }}>
+                                <details data-collapsible>
+                                  <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 6, display: "inline-block" }}>
+                                      {t("studentResults.whyFit.title", "Why these careers fit you")}
+                                    </div>
+                                  </summary>
                                 {careersWithSkills.length > 0 ? (
                                   <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                                     {careersWithSkills.map((c, idx) => {
@@ -1181,7 +1250,7 @@ export default function StudentResultsPage() {
                                                   padding: "2px 8px",
                                                   borderRadius: 999,
                                                   background: "rgba(0,0,0,0.06)",
-                                                  color: "var(--text-primary)",
+                                                  color: "var(--color-ink-900, #111521)",
                                                 }}
                                               >
                                                 {sk.keyskill_name || sk.name || sk.keyskill_code || String(sk)}
@@ -1195,6 +1264,7 @@ export default function StudentResultsPage() {
                                 ) : (
                                   <ComingSoon />
                                 )}
+                                </details>
                               </div>
                             </div>
                           </div>
@@ -1204,11 +1274,11 @@ export default function StudentResultsPage() {
                       const renderUpsellCard = () => (
                         <div
                           style={{
-                            border: "1px solid var(--brand-primary)",
+                            border: "1px solid var(--color-primary, #2540D9)",
                             borderRadius: 12,
                             padding: 20,
                             marginTop: 16,
-                            background: "var(--bg-card, #ffffff)",
+                            background: "var(--color-surface, #ffffff)",
                           }}
                         >
                           <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>
@@ -1227,7 +1297,7 @@ export default function StudentResultsPage() {
                           <button
                             onClick={() => navigate("/pricing")}
                             style={{
-                              background: "var(--brand-primary)",
+                              background: "var(--color-primary, #2540D9)",
                               color: "#fff",
                               border: "none",
                               borderRadius: 8,
@@ -1288,28 +1358,35 @@ export default function StudentResultsPage() {
                         );
                                                 
                         return (
-                          <div style={{ marginTop: 14 }}>
+                          <div id="results-premium-insights" style={{ marginTop: 14 }}>
                             <div className="text-muted" style={{ fontSize: 12, marginBottom: 8 }}>
                               {t("studentResults.premiumInsights.title", "Premium insights")}
                             </div>
 
                             <div className="cp-insights2">
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.focusThemes.title", "Focus themes")}
-                                </div>
+                              <div className="cp-softPanel" style={{ borderLeft: "3px solid var(--color-secondary, #6D28D9)" }}>
+                                <details data-collapsible>
+                                  <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 6, display: "inline-block" }}>
+                                      {t("studentResults.focusThemes.title", "Focus themes")}
+                                    </div>
+                                  </summary>
                                 {themesBody}
                                 {explainError ? (
                                   <div className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
                                     {explainError}
                                   </div>
                                 ) : null}
+                                </details>
                               </div>
 
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.associatedQualities.title", "Associated qualities")}
-                                </div>
+                              <div className="cp-softPanel" style={{ borderLeft: "3px solid var(--color-secondary, #6D28D9)" }}>
+                                <details data-collapsible>
+                                  <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 6, display: "inline-block" }}>
+                                      {t("studentResults.associatedQualities.title", "Associated qualities")}
+                                    </div>
+                                  </summary>
 
                                 {explainLoading || resolvedAqs.length > 0 ? (
                                   <details>
@@ -1329,14 +1406,18 @@ export default function StudentResultsPage() {
                                 ) : (
                                   <ComingSoon />
                                 )}
+                                </details>
                               </div>
                             </div>
 
                             <div className="cp-insightsStack">
-                              <div className="cp-softPanel">
-                                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                                  {t("studentResults.guidedNextSteps.title", "Guided next steps")}
-                                </div>
+                              <div className="cp-softPanel" style={{ borderLeft: "3px solid var(--color-secondary, #6D28D9)" }}>
+                                <details data-collapsible>
+                                  <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 6, display: "inline-block" }}>
+                                      {t("studentResults.guidedNextSteps.title", "Guided next steps")}
+                                    </div>
+                                  </summary>
 
                                 {deepLoading ? (
                                   <div className="text-muted" style={{ fontSize: 13 }}>
@@ -1359,6 +1440,7 @@ export default function StudentResultsPage() {
                                 ) : (
                                   <ComingSoon />
                                 )}
+                                </details>
                               </div>
                             </div>
                           </div>
@@ -1390,6 +1472,32 @@ export default function StudentResultsPage() {
                             </div>
                           </div>
 
+                          {isPaidOrPremium && (
+                            <div style={{
+                              position: "sticky", top: 0, zIndex: 5, background: "var(--color-paper, #F8FAF9)",
+                              display: "flex", gap: 6, overflowX: "auto", padding: "8px 0",
+                              borderBottom: "1px solid var(--color-border, #6B7280)", marginBottom: 8,
+                            }}>
+                              {[
+                                { id: "results-top-matches", label: t("studentResults.nav.topMatches", "Top matches") },
+                                { id: "results-cluster-signals", label: t("studentResults.nav.clusterSignals", "Cluster signals") },
+                                { id: "results-why-fit", label: t("studentResults.nav.whyFit", "Why they fit") },
+                                { id: "results-premium-insights", label: t("studentResults.nav.premiumInsights", "Premium insights") },
+                              ].map((s) => (
+                                <button key={s.id} onClick={() => {
+                                  const el = document.getElementById(s.id);
+                                  if (el) { el.querySelector("details")?.setAttribute("open", ""); el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+                                }} style={{
+                                  flexShrink: 0, background: "#fff", border: "1px solid var(--color-border, #6B7280)",
+                                  borderRadius: 999, padding: "5px 12px", fontSize: 12, fontWeight: 600,
+                                  color: "var(--color-ink-700, #374151)", cursor: "pointer", whiteSpace: "nowrap",
+                                }}>
+                                  {s.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
                           <div className="card" style={{ padding: 16 }}>
                             {renderTopCareersCards()}
 
@@ -1414,7 +1522,7 @@ export default function StudentResultsPage() {
                             .cp-inlineIcon { display: inline-flex; align-items: center; gap: 6px; }
                             .cp-contextGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 2px; }
                             .cp-miniCard { border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 8px 10px; }
-                            .cp-miniLabel { font-size: 10px; margin-bottom: 2px; color: var(--text-muted); }
+                            .cp-miniLabel { font-size: 10px; margin-bottom: 2px; color: var(--color-ink-500, #6B7280); }
                             .cp-miniValue { font-size: 12px; font-weight: 700; line-height: 1.25; }
                             .cp-contextExplain { margin-top: 8px; }
                             .cp-detailsSummary { cursor: pointer; font-weight: 700; font-size: 13px; }
@@ -1424,6 +1532,11 @@ export default function StudentResultsPage() {
                             .cp-insights2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
                             .cp-insightsStack { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
                             .cp-softPanel { border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.015); }
+                            details[data-collapsible] > summary { cursor: pointer; }
+                            details[data-collapsible] > summary::-webkit-details-marker { display: none; }
+                            details[data-collapsible] > summary .cp-collapseHide { display: none; }
+                            details[data-collapsible][open] > summary .cp-collapseShow { display: none; }
+                            details[data-collapsible][open] > summary .cp-collapseHide { display: inline; }
                             .top-career-card { padding: 12px; border-radius: 12px; }
                             .top-career-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
                             .top-career-card__titleWrap { min-width: 0; }
