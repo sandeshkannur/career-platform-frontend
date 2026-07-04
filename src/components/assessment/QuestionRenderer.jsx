@@ -43,7 +43,7 @@ function EmojiLikertQuestion({ question, selected, onChoose }) {
     cfg.labels ||
     ["Never", "Rarely", "Sometimes", "Often", "Always"];
   return (
-    <div className="flex justify-between gap-2">
+    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
       {emojis.map((em, i) => {
         const val = String(i + 1);
         const active = selected === val;
@@ -53,7 +53,7 @@ function EmojiLikertQuestion({ question, selected, onChoose }) {
             type="button"
             onClick={() => onChoose(val)}
             className={[
-              "flex flex-1 flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
+              "flex flex-none snap-start basis-[22%] sm:basis-auto sm:flex-1 flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition",
               active ? "border-[var(--color-primary,#2540D9)] bg-[var(--color-paper,#F8FAF9)]" : "border-[var(--color-border,#6B7280)] bg-[var(--color-surface,#FFFFFF)]",
             ].join(" ")}
             aria-pressed={active}
