@@ -232,34 +232,34 @@ export default function StudentAssessmentSubmitPage() {
           {t("student.assessmentSubmit.attemptId", "Attempt ID")}: <b>{attemptId || t("student.assessmentSubmit.unknown", "unknown")}</b>
         </div>
 
-        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+        <div style={{ padding: 16, border: "1px solid var(--color-border, #6B7280)", borderRadius: 12, background: "var(--color-surface, #FFFFFF)" }}>
           <div style={{ fontWeight: 800, marginBottom: 12 }}>
             {t("student.assessmentSubmit.summary.title", "Completion summary")}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
-            <span style={{ color: "var(--text-muted)" }}>
+            <span style={{ color: "var(--color-ink-500, #6B7280)" }}>
               {t("student.assessmentSubmit.summary.answered", "Answered")}
             </span>
             <span style={{ fontWeight: 700 }}>
               {answeredCount} / {QUESTION_COUNT}
               {missingCount > 0 && (
-                <span style={{ marginLeft: 8, color: "var(--error-text)", fontWeight: 500 }}>
+                <span style={{ marginLeft: 8, color: "var(--color-error-ink, #C81E1E)", fontWeight: 500 }}>
                   ({missingCount} {t("student.assessmentSubmit.summary.missing", "missing")})
                 </span>
               )}
             </span>
           </div>
-          <div style={{ height: 8, borderRadius: 999, background: "var(--bg-app)", overflow: "hidden" }}>
+          <div style={{ height: 8, borderRadius: 999, background: "var(--color-paper, #F8FAF9)", overflow: "hidden" }}>
             <div style={{
               height: "100%",
               width: `${Math.round((answeredCount / QUESTION_COUNT) * 100)}%`,
-              background: answeredCount === QUESTION_COUNT ? "var(--success-text)" : "var(--brand-primary)",
+              background: answeredCount === QUESTION_COUNT ? "var(--color-success-strong, #067A52)" : "var(--color-primary, #2540D9)",
               borderRadius: 999,
               transition: "width 0.3s ease",
             }} />
           </div>
           {answeredCount === QUESTION_COUNT && (
-            <div style={{ marginTop: 10, fontSize: 13, color: "var(--success-text)", fontWeight: 600 }}>
+            <div style={{ marginTop: 10, fontSize: 13, color: "var(--color-success-strong, #067A52)", fontWeight: 600 }}>
               ✓ {t("student.assessmentSubmit.summary.allAnswered", "All questions answered — ready to submit!")}
             </div>
           )}
@@ -271,17 +271,17 @@ export default function StudentAssessmentSubmitPage() {
             style={{
               padding: 12,
               borderRadius: 10,
-              border: "1px solid var(--error-border)",
-              background: "var(--error-bg)",
+              border: "1px solid var(--color-error-ink, #C81E1E)",
+              background: "var(--color-paper, #F8FAF9)",
               fontSize: 13,
-              color: "var(--error-text)",
+              color: "var(--color-error-ink, #C81E1E)",
             }}
           >
             {error}
           </div>
         ) : null}
 
-        <div style={{ padding: 16, border: "1px solid var(--border)", borderRadius: 12, background: "#fff" }}>
+        <div style={{ padding: 16, border: "1px solid var(--color-border, #6B7280)", borderRadius: 12, background: "var(--color-surface, #FFFFFF)" }}>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>
             {t("student.assessmentSubmit.whatsNext.title", "What happens next")}
           </div>
@@ -294,13 +294,13 @@ export default function StudentAssessmentSubmitPage() {
               <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                 <div style={{
                   minWidth: 22, height: 22, borderRadius: "50%",
-                  background: "var(--brand-tint)", color: "var(--brand-primary)",
+                  background: "var(--color-primary, #2540D9)", color: "#fff",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 11, fontWeight: 700, flexShrink: 0,
                 }}>
                   {i + 1}
                 </div>
-                <div style={{ fontSize: 13, lineHeight: 1.5, paddingTop: 2, color: "var(--text-muted)" }}>{step}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, paddingTop: 2, color: "var(--color-ink-500, #6B7280)" }}>{step}</div>
               </div>
             ))}
           </div>
