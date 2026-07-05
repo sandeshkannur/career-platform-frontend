@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Defensive safety net: never allow page-level horizontal scroll on mobile.
+   overflow-x: clip (not hidden) — hidden makes body a scroll container, which
+   silently breaks position:sticky descendants; clip only clips. */
+html, body { overflow-x: clip; max-width: 100vw; }
+
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
 :root {
   /* Backgrounds */
