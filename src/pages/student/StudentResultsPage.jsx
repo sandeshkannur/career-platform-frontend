@@ -1477,6 +1477,10 @@ export default function StudentResultsPage() {
                               position: "sticky", top: 0, zIndex: 5, background: "var(--color-paper, #F8FAF9)",
                               display: "flex", gap: 6, overflowX: "auto", padding: "8px 0",
                               borderBottom: "1px solid var(--color-border, #6B7280)", marginBottom: 8,
+                              width: "100%", minWidth: 0, boxSizing: "border-box",
+                              // inline-size containment: the nowrap buttons must not set a
+                              // min-content floor that propagates up to the layout's flex <main>
+                              contain: "inline-size",
                             }}>
                               {[
                                 { id: "results-top-matches", label: t("studentResults.nav.topMatches", "Top matches") },
@@ -1512,8 +1516,8 @@ export default function StudentResultsPage() {
                           </div>
 
                           <style>{`
-                            .cp-results { display: flex; flex-direction: column; gap: 10px; }
-                            .cp-resultsActions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+                            .cp-results { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+                            .cp-resultsActions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; min-width: 0; }
                             .results-section { margin-top: 4px; }
                             .results-section__titleRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
                             .results-section__title { font-size: 15px; font-weight: 800; line-height: 1.2; }
