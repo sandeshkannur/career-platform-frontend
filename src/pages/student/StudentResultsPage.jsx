@@ -439,9 +439,8 @@ function TopCareerCard({ career, fitBandsCopy, idx, t }) {
     }}>
       {/* Primary header — top match only */}
       {isTopMatch && (
-        <div style={{
+        <div className="top-career-card__topBanner" style={{
           background: "var(--color-primary, #2540D9)", padding: "10px 16px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.75)" }}>
             {t("studentResults.topMatchLabel", "Top match")}
@@ -1481,6 +1480,10 @@ export default function StudentResultsPage() {
                               // inline-size containment: the nowrap buttons must not set a
                               // min-content floor that propagates up to the layout's flex <main>
                               contain: "inline-size",
+                              // right-edge fade signals the row scrolls instead of hard-cutting a tab
+                              paddingRight: 24,
+                              WebkitMaskImage: "linear-gradient(to right, black 85%, transparent 100%)",
+                              maskImage: "linear-gradient(to right, black 85%, transparent 100%)",
                             }}>
                               {[
                                 { id: "results-top-matches", label: t("studentResults.nav.topMatches", "Top matches") },
@@ -1549,6 +1552,16 @@ export default function StudentResultsPage() {
                             @media (min-width: 480px) {
                               .top-career-card__headerRow {
                                 flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 8px;
+                              }
+                            }
+                            .top-career-card__topBanner {
+                              display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+                            }
+                            @media (min-width: 400px) {
+                              .top-career-card__topBanner {
+                                /* wrap: at 400-410px the pill can be a few px wider than the banner;
+                                   wrapping drops it to a second line instead of clipping it */
+                                flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
                               }
                             }
                             .top-career-card__titleWrap { min-width: 0; }
