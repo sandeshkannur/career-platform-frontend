@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import {
   getPlatformAnalytics,
   getStudentAnalytics,
+  getStudentReportDownloads,
   getAQInfluence,
   getWhatIf,
   getReachability,
@@ -1221,6 +1222,162 @@ function GraphAnalyticsPanel({ studentId, topCareer }) {
   );
 }
 
+// ── Report Downloads Panel (drill-down tab) ───────────────────────────────
+
+function ReportDownloadsPanel({ studentId }) {
+  const PC = {
+    navy: '#0b1f3a', teal: '#0d9488', red: '#dc2626',
+    muted: '#64748b', border: '#e2e8f0', bg: '#f8fafc', card: '#ffffff',
+  };
+  const PAGE_SIZE = 25;
+
+  const [data, setData] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const load = async (nextOffset) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const d = await getStudentReportDownloads(studentId, { limit: PAGE_SIZE, offset: nextOffset });
+      setData(d);
+      setOffset(nextOffset);
+    } catch (e) {
+      setError(e?.message || 'Failed to load report downloads.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(0); }, [studentId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fmtDateTime = (iso) => (iso ? new Date(iso).toLocaleString('en-IN') : '—');
+
+  const cardStyle = {
+    background: PC.card, border: `1px solid ${PC.border}`,
+    borderRadius: 8, padding: '16px 18px', marginBottom: 14,
+  };
+  const secTitle = {
+    fontSize: 12, fontWeight: 'bold', color: PC.navy,
+    textTransform: 'uppercase', letterSpacing: '0.04em',
+    marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${PC.border}`,
+  };
+  const pagerBtn = (disabled) => ({
+    background: 'none', border: `1px solid ${PC.border}`, borderRadius: 8,
+    padding: '4px 12px', fontSize: 12, cursor: disabled ? 'not-allowed' : 'pointer',
+    color: PC.navy, fontWeight: 600, opacity: disabled ? 0.5 : 1,
+  });
+
+  if (loading && !data) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center', color: PC.muted }}>
+        Loading report downloads...
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <div style={{ color: PC.red, fontSize: 13, marginBottom: 10 }}>{error}</div>
+        <button onClick={() => load(offset)} style={pagerBtn(false)}>↻ Retry</button>
+      </div>
+    );
+  }
+
+  const summary = data?.summary || {};
+  const downloads = Array.isArray(data?.downloads) ? data.downloads : [];
+  const total = summary.total_downloads ?? 0;
+  const from = total === 0 ? 0 : offset + 1;
+  const to = offset + downloads.length;
+  const prevDisabled = loading || offset === 0;
+  const nextDisabled = loading || offset + PAGE_SIZE >= total;
+
+  return (
+    <div>
+      {/* Summary KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 10, marginBottom: 16 }}>
+        {[
+          { v: total, l: 'Total downloads' },
+          { v: summary.last_downloaded_at ? fmtDateTime(summary.last_downloaded_at) : '—', l: 'Last downloaded' },
+        ].map((k, i) => (
+          <div key={i} style={{ background: PC.bg, borderRadius: 8, padding: '12px 14px', border: `1px solid ${PC.border}` }}>
+            <div style={{ fontSize: i === 0 ? 20 : 14, fontWeight: 'bold', color: PC.navy, fontFamily: 'monospace', lineHeight: 1.2 }}>{k.v}</div>
+            <div style={{ fontSize: 11, color: PC.muted, marginTop: 4 }}>{k.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={cardStyle}>
+        <div style={secTitle}>Download history</div>
+
+        {error && (
+          <div style={{ color: PC.red, fontSize: 12, marginBottom: 10 }}>{error}</div>
+        )}
+
+        {downloads.length === 0 ? (
+          <div style={{ color: PC.muted, fontSize: 12, padding: '8px 0' }}>
+            No downloads yet.
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9' }}>
+                  {['Downloaded at', 'Format', 'Locale', 'Tier', 'Assessment', 'Assessment submitted'].map(h => (
+                    <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: PC.muted }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {downloads.map(row => (
+                  <tr key={row.id} style={{ borderBottom: `1px solid ${PC.border}` }}>
+                    <td style={{ padding: '5px 8px' }}>{fmtDateTime(row.downloaded_at)}</td>
+                    <td style={{ padding: '5px 8px' }}>
+                      <span style={{
+                        fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 'bold',
+                        background: (row.format === 'pdf' ? PC.teal : PC.navy) + '22',
+                        color: row.format === 'pdf' ? PC.teal : PC.navy,
+                        textTransform: 'uppercase',
+                      }}>
+                        {row.format || '—'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '5px 8px' }}>{row.locale || '—'}</td>
+                    <td style={{ padding: '5px 8px' }}>{row.tier || '—'}</td>
+                    <td style={{ padding: '5px 8px', fontFamily: 'monospace' }}>
+                      {row.assessment_id != null ? `#${row.assessment_id}` : '—'}
+                    </td>
+                    <td style={{ padding: '5px 8px' }}>{fmtDateTime(row.assessment_submitted_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {total > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+            <div style={{ fontSize: 11, color: PC.muted }}>
+              Showing {from}–{to} of {total}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button disabled={prevDisabled} onClick={() => load(Math.max(0, offset - PAGE_SIZE))} style={pagerBtn(prevDisabled)}>
+                ← Prev
+              </button>
+              <button disabled={nextDisabled} onClick={() => load(offset + PAGE_SIZE)} style={pagerBtn(nextDisabled)}>
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Student Drill-Down Panel ──────────────────────────────────────────────
 
 function StudentDrillDown({ studentId, data, loading }) {
@@ -1280,6 +1437,7 @@ function StudentDrillDown({ studentId, data, loading }) {
         {[
           ['profile', 'Student Profile'],
           ['advanced', 'Advanced Analytics'],
+          ['downloads', 'Report Downloads'],
         ].map(([t, label]) => (
           <div
             key={t}
@@ -1555,6 +1713,8 @@ function StudentDrillDown({ studentId, data, loading }) {
           topCareer={data?.section_c_career_stability?.rank1_history?.[0]?.rank1_career || ''}
         />
       )}
+
+      {drillTab === 'downloads' && <ReportDownloadsPanel studentId={studentId} />}
     </div>
   );
 }
