@@ -623,7 +623,8 @@ export default function StudentResultsPage() {
       null;
 
     const params = new URLSearchParams(location?.search || "");
-    const fromQuery = params.get("assessment_id");
+    // History's "View" button links with ?assessmentId=…; accept both spellings
+    const fromQuery = params.get("assessment_id") ?? params.get("assessmentId");
 
     if (fromState != null) return Number(fromState);
     if (fromQuery != null && fromQuery !== "") return Number(fromQuery);
@@ -632,25 +633,6 @@ export default function StudentResultsPage() {
   }, [location?.state, location?.search]);
 
   const studentId = sessionUser?.student_profile?.student_id ?? null;
-
-  async function handleDownloadReport() {
-    if (!studentId || pdfDownloading) return;
-    setPdfDownloading(true);
-    setPdfError("");
-    try {
-      await downloadScorecardPdf(studentId, contentLang || lang || "en");
-    } catch (e) {
-      setPdfError(
-        e?.message ||
-          t(
-            "studentResults.errors.reportDownloadFailed",
-            "Could not download the report. Please try again."
-          )
-      );
-    } finally {
-      setPdfDownloading(false);
-    }
-  }
 
   useEffect(() => {
     async function load() {
@@ -715,6 +697,35 @@ export default function StudentResultsPage() {
 
     return data.results[0];
   }, [data, selectedAssessmentId]);
+
+  // The assessment behind the result actually rendered on screen. Note this is
+  // NOT selectedAssessmentId (the id *requested* via nav state/query): when the
+  // requested id matches no result, the page falls back to showing results[0],
+  // and the download must follow what is displayed.
+  const displayedAssessmentId = selectedResult?.assessment_id ?? null;
+
+  async function handleDownloadReport() {
+    if (!studentId || !displayedAssessmentId || pdfDownloading) return;
+    setPdfDownloading(true);
+    setPdfError("");
+    try {
+      await downloadScorecardPdf(
+        studentId,
+        contentLang || lang || "en",
+        displayedAssessmentId
+      );
+    } catch (e) {
+      setPdfError(
+        e?.message ||
+          t(
+            "studentResults.errors.reportDownloadFailed",
+            "Could not download the report. Please try again."
+          )
+      );
+    } finally {
+      setPdfDownloading(false);
+    }
+  }
 
   const backendBlocks = useMemo(() => {
     return Array.isArray(selectedResult?.blocks) ? selectedResult.blocks : [];
@@ -967,7 +978,7 @@ export default function StudentResultsPage() {
 
           <Button
             variant="secondary"
-            disabled={!studentId || pdfDownloading}
+            disabled={!studentId || !displayedAssessmentId || pdfDownloading}
             onClick={handleDownloadReport}
           >
             {pdfDownloading

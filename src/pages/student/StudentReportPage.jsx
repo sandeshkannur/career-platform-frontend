@@ -96,12 +96,19 @@ export default function StudentReportPage() {
 
   const canDownloadJson = !!report && !loading;
 
+  // The route param (:reportId) is the student_id, not an assessment id — the
+  // only id tied to the report being displayed is in the fetched payload
+  // itself. Pass it when present so the PDF is pinned to this exact report;
+  // if the payload has no assessment_id the backend resolves "latest" as
+  // before.
+  const reportAssessmentId = report?.assessment_id ?? null;
+
   async function handleDownloadPdf() {
-    if (!studentId || pdfDownloading) return;
+    if (!studentId || !report || pdfDownloading) return;
     setPdfDownloading(true);
     setPdfError("");
     try {
-      await downloadScorecardPdf(studentId, language || "en");
+      await downloadScorecardPdf(studentId, language || "en", reportAssessmentId);
     } catch (e) {
       setPdfError(
         e?.message ||
@@ -133,7 +140,7 @@ export default function StudentReportPage() {
           </Button>
 
           <Button
-            disabled={!studentId || pdfDownloading}
+            disabled={!studentId || loading || !report || pdfDownloading}
             onClick={handleDownloadPdf}
           >
             {pdfDownloading

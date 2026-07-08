@@ -58,19 +58,27 @@ function filenameFromContentDisposition(header) {
 }
 
 /**
- * GET /v1/reports/scorecard/{student_id}?format=pdf&locale={locale}
+ * GET /v1/reports/scorecard/{student_id}?format=pdf&locale={locale}[&assessment_id={id}]
  * Fetches the PDF scorecard and triggers a browser download.
  * Tier gating (free=5 careers, paid=9) is applied server-side.
+ *
+ * Pass `assessmentId` to pin the download to a specific result. Without it
+ * the backend falls back to "latest assessment by submitted_at", which can
+ * be an abandoned attempt with no report (404) — callers showing a specific
+ * result on screen should always pass its assessment_id.
  *
  * Throws an Error with `.status` on any non-OK response so callers can
  * surface a user-facing message.
  */
-export async function downloadScorecardPdf(studentId, locale = "en") {
+export async function downloadScorecardPdf(studentId, locale = "en", assessmentId = null) {
   if (!studentId) throw new Error("studentId is required");
 
-  const url = `${apiBase()}/v1/reports/scorecard/${studentId}?format=pdf&locale=${encodeURIComponent(
+  let url = `${apiBase()}/v1/reports/scorecard/${studentId}?format=pdf&locale=${encodeURIComponent(
     locale || "en"
   )}`;
+  if (assessmentId != null) {
+    url += `&assessment_id=${encodeURIComponent(assessmentId)}`;
+  }
 
   const fetchPdf = (token) =>
     fetch(url, {
