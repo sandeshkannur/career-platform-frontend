@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
-import { getStudentReport } from "../../api/reports";
+import { getStudentReport, downloadScorecardPdf } from "../../api/reports";
 import { useContent } from "../../locales/LanguageProvider";
 
 function downloadJson(filename, data) {
@@ -24,7 +24,7 @@ function downloadJson(filename, data) {
 
 export default function StudentReportPage() {
   const params = useParams();
-  const { t } = useContent();
+  const { t, language } = useContent();
 
   const studentId = useMemo(() => {
     // Route is /student/reports/:reportId (which is actually student_id)
@@ -41,6 +41,9 @@ export default function StudentReportPage() {
   const [unsupported, setUnsupported] = useState(false); // 400
 
   const [error, setError] = useState(null);
+
+  const [pdfDownloading, setPdfDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +96,25 @@ export default function StudentReportPage() {
 
   const canDownloadJson = !!report && !loading;
 
+  async function handleDownloadPdf() {
+    if (!studentId || pdfDownloading) return;
+    setPdfDownloading(true);
+    setPdfError("");
+    try {
+      await downloadScorecardPdf(studentId, language || "en");
+    } catch (e) {
+      setPdfError(
+        e?.message ||
+          t(
+            "student.report.errors.pdfDownloadFailed",
+            "Could not download the PDF. Please try again."
+          )
+      );
+    } finally {
+      setPdfDownloading(false);
+    }
+  }
+
   return (
     <SkeletonPage
       title={t("student.report.title", "Assessment Report")}
@@ -110,10 +132,20 @@ export default function StudentReportPage() {
             {t("student.report.actions.downloadJson", "Download JSON")}
           </Button>
 
-          {/* PDF is explicitly out-of-scope now */}
-          <Button disabled title={t("student.report.actions.pdfPlannedTitle", "PDF generation is planned later")}>
-            {t("student.report.actions.downloadPdf", "Download PDF")}
+          <Button
+            disabled={!studentId || pdfDownloading}
+            onClick={handleDownloadPdf}
+          >
+            {pdfDownloading
+              ? t("student.report.actions.generatingPdf", "Generating…")
+              : t("student.report.actions.downloadPdf", "Download PDF")}
           </Button>
+
+          {pdfError && (
+            <span style={{ fontSize: 12, color: "var(--color-error, #E02424)" }}>
+              {pdfError}
+            </span>
+          )}
         </>
       }
     >
