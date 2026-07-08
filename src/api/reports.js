@@ -18,6 +18,26 @@ export async function getStudentReport(studentId) {
   return apiGet(`/v1/reports/${studentId}`);
 }
 
+/**
+ * GET /v1/reports/scorecard/{student_id}?format=json&locale={locale}
+ * Canonical report endpoint (same resolver as the PDF download, so what this
+ * returns and what the PDF renders can never disagree). Response is a
+ * ReportResponse envelope; `report_payload` carries the student-safe
+ * ReportDocument: { report_meta: { assessment_id, … }, sections: [{ title,
+ * blocks: [{ kind, text, items, … }] }] }.
+ *
+ * `format=json` uses the builder's default variant ("full"); no variant
+ * param exists or is needed.
+ */
+export async function getScorecardReportJson(studentId, locale = "en") {
+  if (!studentId) throw new Error("studentId is required");
+  return apiGet(
+    `/v1/reports/scorecard/${studentId}?format=json&locale=${encodeURIComponent(
+      locale || "en"
+    )}`
+  );
+}
+
 // ── PDF scorecard download ────────────────────────────────────────────────
 // apiClient's apiRequest parses bodies as JSON/text, so the binary PDF goes
 // through a plain fetch here — same base URL (auth.apiBase), same bearer
@@ -58,19 +78,27 @@ function filenameFromContentDisposition(header) {
 }
 
 /**
- * GET /v1/reports/scorecard/{student_id}?format=pdf&locale={locale}
+ * GET /v1/reports/scorecard/{student_id}?format=pdf&locale={locale}[&assessment_id={id}]
  * Fetches the PDF scorecard and triggers a browser download.
  * Tier gating (free=5 careers, paid=9) is applied server-side.
+ *
+ * Pass `assessmentId` to pin the download to a specific result. Without it
+ * the backend falls back to "latest assessment by submitted_at", which can
+ * be an abandoned attempt with no report (404) — callers showing a specific
+ * result on screen should always pass its assessment_id.
  *
  * Throws an Error with `.status` on any non-OK response so callers can
  * surface a user-facing message.
  */
-export async function downloadScorecardPdf(studentId, locale = "en") {
+export async function downloadScorecardPdf(studentId, locale = "en", assessmentId = null) {
   if (!studentId) throw new Error("studentId is required");
 
-  const url = `${apiBase()}/v1/reports/scorecard/${studentId}?format=pdf&locale=${encodeURIComponent(
+  let url = `${apiBase()}/v1/reports/scorecard/${studentId}?format=pdf&locale=${encodeURIComponent(
     locale || "en"
   )}`;
+  if (assessmentId != null) {
+    url += `&assessment_id=${encodeURIComponent(assessmentId)}`;
+  }
 
   const fetchPdf = (token) =>
     fetch(url, {
