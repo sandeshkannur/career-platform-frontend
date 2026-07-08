@@ -18,6 +18,26 @@ export async function getStudentReport(studentId) {
   return apiGet(`/v1/reports/${studentId}`);
 }
 
+/**
+ * GET /v1/reports/scorecard/{student_id}?format=json&locale={locale}
+ * Canonical report endpoint (same resolver as the PDF download, so what this
+ * returns and what the PDF renders can never disagree). Response is a
+ * ReportResponse envelope; `report_payload` carries the student-safe
+ * ReportDocument: { report_meta: { assessment_id, … }, sections: [{ title,
+ * blocks: [{ kind, text, items, … }] }] }.
+ *
+ * `format=json` uses the builder's default variant ("full"); no variant
+ * param exists or is needed.
+ */
+export async function getScorecardReportJson(studentId, locale = "en") {
+  if (!studentId) throw new Error("studentId is required");
+  return apiGet(
+    `/v1/reports/scorecard/${studentId}?format=json&locale=${encodeURIComponent(
+      locale || "en"
+    )}`
+  );
+}
+
 // ── PDF scorecard download ────────────────────────────────────────────────
 // apiClient's apiRequest parses bodies as JSON/text, so the binary PDF goes
 // through a plain fetch here — same base URL (auth.apiBase), same bearer

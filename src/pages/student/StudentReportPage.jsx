@@ -1,11 +1,10 @@
 // src/pages/student/StudentReportPage.jsx
-// src/pages/student/StudentReportPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
-import { getStudentReport, downloadScorecardPdf } from "../../api/reports";
+import { getScorecardReportJson, downloadScorecardPdf } from "../../api/reports";
 import { useContent } from "../../locales/LanguageProvider";
 
 function downloadJson(filename, data) {
@@ -20,6 +19,94 @@ function downloadJson(filename, data) {
   a.click();
 
   URL.revokeObjectURL(url);
+}
+
+// True when a block carries anything the UI can show. Explainability blocks
+// arrive with explanation_text=null when the CMS has no copy for a key yet.
+function blockHasContent(block) {
+  return Boolean(
+    block?.text ||
+      block?.explanation_text ||
+      (Array.isArray(block?.items) && block.items.length > 0) ||
+      block?.career_title ||
+      block?.description
+  );
+}
+
+// Renders one ReportBlock by its `kind`:
+//   paragraph → prose (text, or CMS explanation_text)
+//   callout   → soft highlighted box
+//   bullets | cluster_list | career_list → list of item strings
+//   career_card → title/fit/cluster/description card (PDF variant only today;
+//                 rendered defensively in case json output adopts it)
+// Unknown kinds fall back to whatever text/items they carry.
+function ReportBlockView({ block }) {
+  const kind = block?.kind;
+  const text = block?.text ?? block?.explanation_text ?? "";
+  const items = Array.isArray(block?.items) ? block.items : [];
+
+  if (kind === "callout" && text) {
+    return (
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 14,
+          lineHeight: 1.6,
+        }}
+      >
+        {text}
+      </div>
+    );
+  }
+
+  if (kind === "career_card") {
+    return (
+      <div style={{ border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 12px" }}>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>
+          {block?.career_title || ""}
+          {block?.indian_job_title ? (
+            <span style={{ fontWeight: 400, color: "#64748b" }}>
+              {" "}— {block.indian_job_title}
+            </span>
+          ) : null}
+        </div>
+        {block?.fit_band_label && (
+          <div style={{ fontSize: 12, color: "#166534", marginTop: 2 }}>
+            {block.fit_band_label}
+          </div>
+        )}
+        {block?.cluster_name && (
+          <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+            {block.cluster_name}
+          </div>
+        )}
+        {block?.description && (
+          <div style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5 }}>
+            {block.description}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (items.length > 0) {
+    return (
+      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.7 }}>
+        {items.map((it, i) => (
+          <li key={i}>{it}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (text) {
+    return <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{text}</p>;
+  }
+
+  return null;
 }
 
 export default function StudentReportPage() {
@@ -58,7 +145,7 @@ export default function StudentReportPage() {
       setError(null);
 
       try {
-        const data = await getStudentReport(studentId);
+        const data = await getScorecardReportJson(studentId, language || "en");
         if (cancelled) return;
         setReport(data);
       } catch (e) {
@@ -92,16 +179,20 @@ export default function StudentReportPage() {
     return () => {
       cancelled = true;
     };
-  }, [studentId, t]);
+  }, [studentId, language, t]);
 
   const canDownloadJson = !!report && !loading;
 
   // The route param (:reportId) is the student_id, not an assessment id — the
-  // only id tied to the report being displayed is in the fetched payload
-  // itself. Pass it when present so the PDF is pinned to this exact report;
-  // if the payload has no assessment_id the backend resolves "latest" as
-  // before.
-  const reportAssessmentId = report?.assessment_id ?? null;
+  // report being displayed identifies its own source assessment in the
+  // ReportDocument's meta. Pinning the PDF to it means the download can never
+  // resolve to a different (e.g. newer, abandoned) assessment than the one on
+  // screen.
+  const reportAssessmentId = report?.report_payload?.report_meta?.assessment_id ?? null;
+
+  const sections = Array.isArray(report?.report_payload?.sections)
+    ? report.report_payload.sections
+    : [];
 
   async function handleDownloadPdf() {
     if (!studentId || !report || pdfDownloading) return;
@@ -220,14 +311,49 @@ export default function StudentReportPage() {
       )}
 
       {studentId && report && !loading && (
-        <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>
-            {t("student.report.previewTitle", "Report JSON (temporary preview)")}
+        <>
+          {sections
+            .map((s) => ({
+              ...s,
+              blocks: (Array.isArray(s?.blocks) ? s.blocks : []).filter(blockHasContent),
+            }))
+            .filter((s) => s.blocks.length > 0)
+            .map((s, i) => (
+              <div
+                key={s.type || i}
+                style={{
+                  padding: 12,
+                  border: "1px solid #ddd",
+                  borderRadius: 8,
+                  marginBottom: 10,
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>{s.title}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {s.blocks.map((b, j) => (
+                    <ReportBlockView key={j} block={b} />
+                  ))}
+                </div>
+              </div>
+            ))}
+
+          {sections.length === 0 && (
+            <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8, marginBottom: 10 }}>
+              {t("student.report.emptySections", "No report content available yet.")}
+            </div>
+          )}
+
+          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+            <details>
+              <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                {t("student.report.previewTitle", "Report JSON (temporary preview)")}
+              </summary>
+              <pre style={{ margin: 0, padding: 10, overflowX: "auto" }}>
+                {JSON.stringify(report, null, 2)}
+              </pre>
+            </details>
           </div>
-          <pre style={{ margin: 0, padding: 10, overflowX: "auto" }}>
-            {JSON.stringify(report, null, 2)}
-          </pre>
-        </div>
+        </>
       )}
     </SkeletonPage>
   );
