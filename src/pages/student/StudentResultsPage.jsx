@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { apiGet, apiPost } from "../../apiClient";
+import { downloadScorecardPdf } from "../../api/reports";
 import SkeletonPage from "../../ui/SkeletonPage";
 import Button from "../../ui/Button";
 import { useSession } from "../../hooks/useSession";
@@ -609,6 +610,9 @@ export default function StudentResultsPage() {
   const [recsLoading, setRecsLoading] = useState(false);
   const [interestData, setInterestData] = useState(null);
 
+  const [pdfDownloading, setPdfDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
+
   const lastExplainSigRef = useRef("");
   const lastDeepSigRef = useRef("");
 
@@ -628,6 +632,25 @@ export default function StudentResultsPage() {
   }, [location?.state, location?.search]);
 
   const studentId = sessionUser?.student_profile?.student_id ?? null;
+
+  async function handleDownloadReport() {
+    if (!studentId || pdfDownloading) return;
+    setPdfDownloading(true);
+    setPdfError("");
+    try {
+      await downloadScorecardPdf(studentId, contentLang || lang || "en");
+    } catch (e) {
+      setPdfError(
+        e?.message ||
+          t(
+            "studentResults.errors.reportDownloadFailed",
+            "Could not download the report. Please try again."
+          )
+      );
+    } finally {
+      setPdfDownloading(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -942,10 +965,22 @@ export default function StudentResultsPage() {
             {t("studentResults.actions.viewHistory", "View History")}
           </Button>
 
-          <Button variant="secondary" disabled>
-            {t("studentResults.actions.downloadReport", "Download Report")}
+          <Button
+            variant="secondary"
+            disabled={!studentId || pdfDownloading}
+            onClick={handleDownloadReport}
+          >
+            {pdfDownloading
+              ? t("studentResults.actions.generatingReport", "Generating…")
+              : t("studentResults.actions.downloadReport", "Download Report")}
           </Button>
         </div>
+
+        {pdfError && (
+          <div style={{ fontSize: 12, color: "var(--color-error, #E02424)" }}>
+            {pdfError}
+          </div>
+        )}
 
         {loading && <p>{t("studentResults.loading", "Loading results…")}</p>}
 
