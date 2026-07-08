@@ -9,6 +9,10 @@ export async function getStudentAnalytics(studentId) {
   return apiGet(`/v1/admin-student-analytics/${studentId}`);
 }
 
+export async function getStudentReportDownloads(studentId, { limit = 25, offset = 0 } = {}) {
+  return apiGet(`/v1/admin-student-analytics/${studentId}/report-downloads?limit=${limit}&offset=${offset}`);
+}
+
 export async function getAQInfluence(studentId) {
   return apiGet(`/v1/student-graph-analytics/${studentId}/aq-influence`);
 }
