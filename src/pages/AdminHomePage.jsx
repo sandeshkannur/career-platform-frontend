@@ -23,6 +23,12 @@ const SECTIONS = [
     ],
   },
   {
+    label: "Counselling Operations",
+    items: [
+      { label: "Counsellors", route: "/admin/counsellors", desc: "Manage counsellor accounts, download activity and caseloads" },
+    ],
+  },
+  {
     label: "Scoring Engine Configuration",
     items: [
       { label: "Associated Qualities (AQs)", route: "/admin/aqs",            desc: "Reference view of the 25 measured qualities" },
