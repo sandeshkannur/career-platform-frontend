@@ -45,6 +45,7 @@ const AdminCareerWizardPage = lazy(() => import("./pages/admin/AdminCareerWizard
 const AdminSimulatorPage = lazy(() => import("./pages/admin/AdminSimulatorPage"));
 const AdminCareerWeightsPage = lazy(() => import("./pages/admin/AdminCareerWeightsPage"));
 const AdminWeightReviewPage = lazy(() => import("./pages/admin/AdminWeightReviewPage"));
+const AdminCounsellorsPage = lazy(() => import("./pages/admin/AdminCounsellorsPage"));
 
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
@@ -295,6 +296,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminWeightReviewPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/counsellors"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminCounsellorsPage />
             </ProtectedRoute>
           }
         />
