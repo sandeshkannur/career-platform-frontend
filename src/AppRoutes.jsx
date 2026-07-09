@@ -47,6 +47,11 @@ const AdminCareerWeightsPage = lazy(() => import("./pages/admin/AdminCareerWeigh
 const AdminWeightReviewPage = lazy(() => import("./pages/admin/AdminWeightReviewPage"));
 const AdminCounsellorsPage = lazy(() => import("./pages/admin/AdminCounsellorsPage"));
 
+/** Counsellor pages */
+const CounsellorLayout = lazy(() => import("./layouts/CounsellorLayout"));
+const CounsellorCaseloadPage = lazy(() => import("./pages/counsellor/CounsellorCaseloadPage"));
+const CounsellorStudentDetailPage = lazy(() => import("./pages/counsellor/CounsellorStudentDetailPage"));
+
 /** Student pages */
 const StudentDashboardPage = lazy(() => import("./pages/StudentDashboardPage"));
 const StudentConsentPage = lazy(() => import("./pages/StudentConsentPage"));
@@ -308,6 +313,22 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        {/* ======================
+           Counsellor Routes
+           ====================== */}
+        <Route
+          path="/counsellor"
+          element={
+            <ProtectedRoute allowRoles={["counsellor"]}>
+              <CounsellorLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/counsellor/caseload" replace />} />
+          <Route path="caseload" element={<CounsellorCaseloadPage />} />
+          <Route path="students/:studentId" element={<CounsellorStudentDetailPage />} />
+        </Route>
 
         {/* ======================
            Student Routes
