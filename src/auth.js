@@ -50,6 +50,12 @@ export function routeFromSession(user, currentPath = "") {
     return "/student/dashboard";
   }
 
+  if (user.role === "counsellor") {
+    // stay on counsellor pages if already there
+    if (currentPath.startsWith("/counsellor")) return currentPath;
+    return "/counsellor/caseload";
+  }
+
   return "/login";
 }
 
