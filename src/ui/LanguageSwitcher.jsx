@@ -1,7 +1,7 @@
 // src/ui/LanguageSwitcher.jsx
 import { useContent } from "../locales/LanguageProvider";
 
-const SUPPORTED_LANGS = [
+export const SUPPORTED_LANGS = [
   { code: "en", label: "English" },
   { code: "kn", label: "ಕನ್ನಡ (Kannada)" },
 ];

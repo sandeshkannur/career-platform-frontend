@@ -82,6 +82,8 @@
   "consent.page.verify.tokenLabel": "Token",
   "consent.page.verify.tokenPlaceholder": "Paste consent token",
   "consent.page.verify.otpPlaceholder": "Enter OTP",
+  "consent.page.guardianLocale.label": "What language does your parent or guardian read?",
+  "consent.page.guardianLocale.hint": "We'll send the consent email in this language. You can change it if needed.",
   "consent.page.actions.sendConsentRequest": "Send Consent Request",
   "consent.page.actions.verifyOtpToken": "Verify OTP / Token",
   "consent.page.actions.verify": "Verify",

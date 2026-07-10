@@ -6,6 +6,7 @@ import Input from "../ui/Input";
 import { useSession } from "../hooks/useSession";
 import { useNavigate } from "react-router-dom";
 import { useContent } from "../locales/LanguageProvider";
+import { SUPPORTED_LANGS } from "../ui/LanguageSwitcher";
 
 import { requestConsent, getConsentStatus, verifyConsent } from "../api/consent";
 
@@ -14,7 +15,11 @@ const DEV_BYPASS_KEY = "__DEV_BYPASS_CONSENT__";
 export default function StudentConsentPage() {
   const { logout, sessionUser, refreshSession } = useSession();
   const navigate = useNavigate();
-  const { t } = useContent();
+  const { t, language } = useContent();
+
+  // Guardian's reading language for the consent email (defaults to the
+  // student's own UI locale as a starting guess; independently changeable).
+  const [guardianLocale, setGuardianLocale] = useState(language);
 
   // DEV guard (Vite)
   const DEV_ONLY = !import.meta.env.PROD;
@@ -120,8 +125,9 @@ export default function StudentConsentPage() {
         return;
       }
 
-      // Backend derives guardian_email from the authenticated student session (no payload needed).
-      const data = await requestConsent();
+      // Backend derives guardian_email from the authenticated student session;
+      // guardian_locale tells it which language to send the consent email in.
+      const data = await requestConsent({ guardian_locale: guardianLocale });
       setRequestData(data);
 
       // After requesting, refresh derived status
@@ -289,6 +295,37 @@ export default function StudentConsentPage() {
           </div>
         )}
       </div>
+
+      {/* Guardian locale selector */}
+      {!consentVerified ? (
+        <div style={{ marginTop: 16 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            {t("consent.page.guardianLocale.label", "What language does your parent or guardian read?")}
+          </label>
+          <select
+            value={guardianLocale}
+            onChange={(e) => setGuardianLocale(e.target.value)}
+            disabled={requestLoading}
+            style={{
+              padding: "8px 10px",
+              borderRadius: 10,
+              border: "1px solid var(--border)",
+              background: "var(--bg-card)",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            {SUPPORTED_LANGS.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+          <div style={{ marginTop: 6, fontSize: 12, color: "#666" }}>
+            {t("consent.page.guardianLocale.hint", "We'll send the consent email in this language. You can change it if needed.")}
+          </div>
+        </div>
+      ) : null}
 
       {/* Actions */}
       <div style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>

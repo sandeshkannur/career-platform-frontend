@@ -10,10 +10,12 @@ import { apiGet, apiPost } from "../apiClient";
  * Student initiates guardian consent request.
  *
  * Typical payload (optional depending on backend rules):
- * { guardian_email: "guardian@example.com" }
+ * { guardian_email: "guardian@example.com", guardian_locale: "en" | "kn" }
  *
- * Backend may derive guardian_email from /auth/me or stored profile,
- * so we keep payload flexible.
+ * Backend may derive guardian_email from /auth/me or stored profile.
+ * guardian_locale is optional and defaults to "en" server-side when absent;
+ * it controls which language the guardian consent email is sent in.
+ * We keep the payload flexible rather than requiring either field.
  *
  * Returns:
  * { consent_id, delivery, expires_at, dev?: { token, otp } }
