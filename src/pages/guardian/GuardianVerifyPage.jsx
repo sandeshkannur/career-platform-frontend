@@ -1,8 +1,10 @@
 // src/pages/guardian/GuardianVerifyPage.jsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useContent } from "../../locales/LanguageProvider";
-import LanguageSwitcher from "../../ui/LanguageSwitcher";
+import LanguageSwitcher, { SUPPORTED_LANGS } from "../../ui/LanguageSwitcher";
+
+const SUPPORTED_LOCALE_CODES = SUPPORTED_LANGS.map((l) => l.code);
 
 /**
  * Best-effort decode JWT payload (for display only).
@@ -36,7 +38,7 @@ function buildApiUrl(path) {
 
 export default function GuardianVerifyPage() {
   const [searchParams] = useSearchParams();
-  const { t } = useContent();
+  const { t, language, setLanguage } = useContent();
   const tokenFromUrl = searchParams.get("token") || "";
 
   // ✅ NEW: allow token to be pasted manually (prevents URL truncation issues)
@@ -57,6 +59,30 @@ export default function GuardianVerifyPage() {
       "guardian.verify.guardianFallback",
       "(will confirm after verification)"
     );
+
+  /**
+   * Resolve which language to render the guardian-facing form in, without an
+   * extra API call:
+   *   1) a locale claim on the consent JWT itself, if the backend ever adds one
+   *   2) a ?locale= query param on the verification URL
+   * Neither is guaranteed to be present today, so this only overrides the
+   * default when a supported value is actually found. The LanguageSwitcher
+   * dropdown remains so the guardian can always change it manually.
+   */
+  const localeFromToken = decoded?.guardian_locale || decoded?.locale || null;
+  const localeFromQuery = searchParams.get("locale");
+  const resolvedLocale = [localeFromToken, localeFromQuery].find((code) =>
+    SUPPORTED_LOCALE_CODES.includes(code)
+  );
+
+  const autoAppliedRef = useRef(false);
+  useEffect(() => {
+    if (autoAppliedRef.current) return;
+    if (resolvedLocale && resolvedLocale !== language) {
+      setLanguage(resolvedLocale);
+    }
+    if (resolvedLocale) autoAppliedRef.current = true;
+  }, [resolvedLocale, language, setLanguage]);
 
   const [otp, setOtp] = useState("");
   const [submitting, setSubmitting] = useState(false);

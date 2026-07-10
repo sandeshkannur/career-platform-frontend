@@ -82,6 +82,8 @@
   "consent.page.verify.tokenLabel": "ಟೋಕನ್",
   "consent.page.verify.tokenPlaceholder": "ಅನುಮತಿ ಟೋಕನ್ ಅಂಟಿಸಿ",
   "consent.page.verify.otpPlaceholder": "OTP ನಮೂದಿಸಿ",
+  "consent.page.guardianLocale.label": "ನಿಮ್ಮ ಪೋಷಕರು ಅಥವಾ ಪಾಲಕರು ಯಾವ ಭಾಷೆಯನ್ನು ಓದುತ್ತಾರೆ?",
+  "consent.page.guardianLocale.hint": "ನಾವು ಈ ಭಾಷೆಯಲ್ಲಿ ಅನುಮತಿ ಇಮೇಲ್ ಕಳುಹಿಸುತ್ತೇವೆ. ಅಗತ್ಯವಿದ್ದರೆ ನೀವು ಇದನ್ನು ಬದಲಾಯಿಸಬಹುದು.",
   "consent.page.actions.sendConsentRequest": "ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಿ",
   "consent.page.actions.verifyOtpToken": "OTP / ಟೋಕನ್ ಪರಿಶೀಲಿಸಿ",
   "consent.page.actions.verify": "ಪರಿಶೀಲಿಸಿ",
