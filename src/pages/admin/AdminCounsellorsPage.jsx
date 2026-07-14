@@ -348,6 +348,188 @@ function CounsellorDrillDown({ counsellor }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   RESET PASSWORD PANEL — POST /v1/admin/users/{id}/reset-password/trigger|direct
+────────────────────────────────────────────────────────────────────────── */
+function ResetPasswordPanel({ counsellor, onCancel, onDone }) {
+  const [mode, setMode] = useState(null); // null | "trigger" | "direct"
+  const [confirming, setConfirming] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [panelError, setPanelError] = useState("");
+
+  const [channel, setChannel] = useState("email");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const chooseMode = (next) => {
+    setMode(next);
+    setConfirming(false);
+    setPanelError("");
+    setChannel("email");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const requestConfirm = () => {
+    setPanelError("");
+    if (mode === "direct") {
+      if (!newPassword || newPassword.length < 8) {
+        setPanelError("New password must be at least 8 characters.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setPanelError("New password and confirmation do not match.");
+        return;
+      }
+    }
+    setConfirming(true);
+  };
+
+  const handleTrigger = async () => {
+    setSubmitting(true);
+    setPanelError("");
+    try {
+      const res = await apiPost(`/v1/admin/users/${counsellor.id}/reset-password/trigger`, { channel });
+      onDone(res?.message || `Reset link sent to ${counsellor.full_name} via ${channel}.`);
+    } catch (e) {
+      setPanelError(e.message || "Failed to send reset link.");
+      setConfirming(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDirect = async () => {
+    setSubmitting(true);
+    setPanelError("");
+    try {
+      await apiPost(`/v1/admin/users/${counsellor.id}/reset-password/direct`, { new_password: newPassword });
+      onDone(`Password set directly for ${counsellor.full_name}.`);
+    } catch (e) {
+      setPanelError(e.message || "Failed to set password.");
+      setConfirming(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Card className="mb-6">
+      <h2 style={{ margin: "0 0 4px", fontSize: "var(--font-size-lg)", fontWeight: 700 }}>
+        Reset Password — {counsellor.full_name}
+      </h2>
+      <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--text-muted)" }}>
+        {counsellor.email}
+      </p>
+
+      {mode === null && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Button onClick={() => chooseMode("trigger")}>Send reset link</Button>
+          <Button variant="secondary" onClick={() => chooseMode("direct")}>Set password directly</Button>
+          <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+        </div>
+      )}
+
+      {mode === "trigger" && !confirming && (
+        <div>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+            Send the reset link to this user's own
+          </label>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+              <input type="radio" name="channel" checked={channel === "email"} onChange={() => setChannel("email")} />
+              Email
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+              <input type="radio" name="channel" checked={channel === "mobile"} onChange={() => setChannel("mobile")} />
+              Mobile
+            </label>
+          </div>
+          {panelError && <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{panelError}</p>}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={requestConfirm}>Send reset link</Button>
+            <Button variant="secondary" onClick={() => chooseMode(null)}>Back</Button>
+          </div>
+        </div>
+      )}
+
+      {mode === "direct" && !confirming && (
+        <div>
+          <div style={{
+            padding: "10px 14px", borderRadius: 8, marginBottom: 16,
+            background: "#fff7ed", border: "1px solid #fed7aa",
+            fontSize: 13, color: "#9a3412",
+          }}>
+            ⚠ Setting a password directly bypasses OTP verification and is a broader-trust operation —
+            the user will not confirm this change themselves. Use only when the user cannot receive a
+            reset link (e.g. no working email/mobile on file).
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>New password</label>
+              <input
+                type="password"
+                className={INPUT_CLS}
+                style={{ width: "100%" }}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Min. 8 characters"
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Confirm password</label>
+              <input
+                type="password"
+                className={INPUT_CLS}
+                style={{ width: "100%" }}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+              />
+            </div>
+          </div>
+          {panelError && <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{panelError}</p>}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="danger" onClick={requestConfirm}>Set password</Button>
+            <Button variant="secondary" onClick={() => chooseMode(null)}>Back</Button>
+          </div>
+        </div>
+      )}
+
+      {confirming && mode === "trigger" && (
+        <div>
+          <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--text-primary)" }}>
+            Send a password reset link to <strong>{counsellor.full_name}</strong>'s {channel} on file?
+          </p>
+          {panelError && <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{panelError}</p>}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={handleTrigger} disabled={submitting}>
+              {submitting ? "Sending…" : "Yes, send it"}
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>Cancel</Button>
+          </div>
+        </div>
+      )}
+
+      {confirming && mode === "direct" && (
+        <div>
+          <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--text-primary)" }}>
+            Are you sure you want to directly set a new password for <strong>{counsellor.full_name}</strong>?
+            This bypasses OTP verification.
+          </p>
+          {panelError && <p style={{ margin: "0 0 12px", fontSize: 13, color: "#dc2626" }}>{panelError}</p>}
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="danger" onClick={handleDirect} disabled={submitting}>
+              {submitting ? "Setting…" : "Yes, set password"}
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>Cancel</Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    PAGE
 ────────────────────────────────────────────────────────────────────────── */
 export default function AdminCounsellorsPage() {
@@ -368,6 +550,8 @@ export default function AdminCounsellorsPage() {
 
   const [deactivatingId, setDeactivatingId] = useState(null);
   const [deactivating, setDeactivating] = useState(false);
+
+  const [resetPasswordTarget, setResetPasswordTarget] = useState(null);
 
   /* ─── load list ─── */
   const loadCounsellors = useCallback(async (nextOffset = 0) => {
@@ -394,6 +578,7 @@ export default function AdminCounsellorsPage() {
     setNotice("");
     setFormMode("create");
     setExpandedId(null);
+    setResetPasswordTarget(null);
   };
 
   const openEdit = (counsellor) => {
@@ -407,6 +592,20 @@ export default function AdminCounsellorsPage() {
     setNotice("");
     setFormMode(counsellor);
     setExpandedId(null);
+    setResetPasswordTarget(null);
+  };
+
+  const openResetPassword = (counsellor) => {
+    setFormMode(null);
+    setDeactivatingId(null);
+    setNotice("");
+    setResetPasswordTarget(counsellor);
+    setExpandedId(null);
+  };
+
+  const handleResetPasswordDone = (message) => {
+    setResetPasswordTarget(null);
+    setNotice(message);
   };
 
   const closeForm = () => {
@@ -511,7 +710,7 @@ export default function AdminCounsellorsPage() {
       onRetry={() => loadCounsellors(offset)}
       actions={
         !error && (
-          <Button onClick={openCreate} disabled={formMode !== null || loading}>
+          <Button onClick={openCreate} disabled={formMode !== null || loading || resetPasswordTarget !== null}>
             + New Counsellor
           </Button>
         )
@@ -601,6 +800,15 @@ export default function AdminCounsellorsPage() {
         </Card>
       )}
 
+      {/* ── Reset password ── */}
+      {resetPasswordTarget !== null && (
+        <ResetPasswordPanel
+          counsellor={resetPasswordTarget}
+          onCancel={() => setResetPasswordTarget(null)}
+          onDone={handleResetPasswordDone}
+        />
+      )}
+
       {/* ── Table ── */}
       {counsellors.length === 0 && !loading ? (
         <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
@@ -668,16 +876,21 @@ export default function AdminCounsellorsPage() {
                       </td>
 
                       <td style={{ padding: "9px 10px" }}>
-                        <div style={{ display: "flex", gap: 6 }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           <Button size="sm" variant="secondary"
                             onClick={() => openEdit(c)}
-                            disabled={formMode !== null || deactivatingId !== null}>
+                            disabled={formMode !== null || deactivatingId !== null || resetPasswordTarget !== null}>
                             Edit
+                          </Button>
+                          <Button size="sm" variant="secondary"
+                            onClick={() => openResetPassword(c)}
+                            disabled={formMode !== null || deactivatingId !== null || resetPasswordTarget !== null}>
+                            Reset Password
                           </Button>
                           {!isInactive && (
                             <Button size="sm" variant="danger"
-                              onClick={() => { setDeactivatingId(c.id); setNotice(""); }}
-                              disabled={formMode !== null || deactivatingId !== null}>
+                              onClick={() => { setDeactivatingId(c.id); setNotice(""); setResetPasswordTarget(null); }}
+                              disabled={formMode !== null || deactivatingId !== null || resetPasswordTarget !== null}>
                               Deactivate
                             </Button>
                           )}
