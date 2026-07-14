@@ -1,8 +1,13 @@
 // src/pages/guardian/GuardianVerifyPage.jsx
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import Page from "../../ui/Page";
+import Card from "../../ui/Card";
+import AuthHeader from "../../ui/AuthHeader";
+import Input from "../../ui/Input";
+import Button from "../../ui/Button";
 import { useContent } from "../../locales/LanguageProvider";
-import LanguageSwitcher, { SUPPORTED_LANGS } from "../../ui/LanguageSwitcher";
+import { SUPPORTED_LANGS } from "../../ui/LanguageSwitcher";
 
 const SUPPORTED_LOCALE_CODES = SUPPORTED_LANGS.map((l) => l.code);
 
@@ -41,7 +46,7 @@ export default function GuardianVerifyPage() {
   const { t, language, setLanguage } = useContent();
   const tokenFromUrl = searchParams.get("token") || "";
 
-  // ✅ NEW: allow token to be pasted manually (prevents URL truncation issues)
+  // Allow token to be pasted manually (prevents URL truncation issues)
   const [token, setToken] = useState(tokenFromUrl);
 
   // Keep token in sync if page is opened with a token in URL
@@ -167,120 +172,119 @@ export default function GuardianVerifyPage() {
   }
 
   return (
-    <div style={{ maxWidth: 620, margin: "40px auto", padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <LanguageSwitcher compact />
-      </div>
+    <div className="min-h-screen bg-[var(--bg)]">
+      <Page maxWidth="920px">
+        <div className="mx-auto grid min-h-screen items-center gap-10 py-10 md:grid-cols-[1fr_420px]">
+          <div className="hidden md:block">
+            <AuthHeader variant="minimal" />
+          </div>
 
-      <h1 style={{ fontSize: 22, marginBottom: 8 }}>
-        {t("guardian.verify.title", "Guardian Consent Verification")}
-      </h1>
-      <p style={{ marginTop: 0, opacity: 0.85 }}>
-        {t(
-          "guardian.verify.subtitle",
-          "Enter the OTP you received to verify consent for the student."
-        )}
-      </p>
+          <div className="w-full max-w-[420px] justify-self-center md:justify-self-end">
+            <div className="md:hidden">
+              <AuthHeader variant="minimal" />
+            </div>
 
-      <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, opacity: 0.8 }}>
-          {t("guardian.verify.labels.guardian", "Guardian")}
-        </div>
-        <div style={{ fontWeight: 600 }}>{guardianEmail}</div>
+            <Card>
+              <div className="space-y-1">
+                <h1 className="m-0 text-xl font-semibold text-[var(--text)]">
+                  {t("guardian.verify.title", "Guardian Consent Verification")}
+                </h1>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {t(
+                    "guardian.verify.subtitle",
+                    "Enter the OTP you received to verify consent for the student."
+                  )}
+                </p>
+              </div>
 
-        <div style={{ fontSize: 13, opacity: 0.8, marginTop: 12 }}>
-          {t("guardian.verify.labels.verificationLink", "Verification link")}
-        </div>
-        <div style={{ fontSize: 13, marginTop: 6 }}>
-          {tokenLooksValid ? (
-            <span>{t("guardian.verify.status.tokenPresent", "Token present ✅")}</span>
-          ) : (
-            <span style={{ color: "#b23" }}>
-              {t(
-                "guardian.verify.status.tokenMissing",
-                "Token missing or incomplete ❌ (paste token below)"
-              )}
-            </span>
-          )}
-        </div>
+              <div className="mt-5 space-y-1 rounded-lg border border-[var(--border)] px-3 py-3">
+                <div className="text-xs text-[var(--text-muted)]">
+                  {t("guardian.verify.labels.guardian", "Guardian")}
+                </div>
+                <div className="text-sm font-semibold text-[var(--text)]">{guardianEmail}</div>
 
-        <div style={{ fontSize: 13, opacity: 0.8, marginTop: 12 }}>
-          {t("guardian.verify.labels.tokenFull", "Token (paste full token if needed)")}
-        </div>
-        <textarea
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder={t(
-            "guardian.verify.placeholders.tokenFull",
-            "Paste the full consent token here (if the URL token is missing/truncated)"
-          )}
-          rows={4}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "1px solid #ccc",
-            marginTop: 6,
-            fontSize: 12,
-            fontFamily: "monospace",
-          }}
-        />
-      </div>
+                <div className="mt-3 text-xs text-[var(--text-muted)]">
+                  {t("guardian.verify.labels.verificationLink", "Verification link")}
+                </div>
+                <div className="text-sm">
+                  {tokenLooksValid ? (
+                    <span className="text-green-700">
+                      {t("guardian.verify.status.tokenPresent", "Token present ✅")}
+                    </span>
+                  ) : (
+                    <span className="text-red-700">
+                      {t(
+                        "guardian.verify.status.tokenMissing",
+                        "Token missing or incomplete ❌ (paste token below)"
+                      )}
+                    </span>
+                  )}
+                </div>
 
-      <form onSubmit={onSubmit}>
-        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
-          {t("guardian.verify.labels.otp", "OTP")}
-        </label>
-        <input
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          placeholder={t("guardian.verify.placeholders.otp", "Enter OTP")}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "1px solid #ccc",
-            marginBottom: 12,
-          }}
-        />
+                <div className="mt-3">
+                  <label className="block text-xs font-medium text-[var(--text-muted)]">
+                    {t("guardian.verify.labels.tokenFull", "Token (paste full token if needed)")}
+                  </label>
+                  <textarea
+                    value={token}
+                    onChange={(e) => setToken(e.target.value)}
+                    placeholder={t(
+                      "guardian.verify.placeholders.tokenFull",
+                      "Paste the full consent token here (if the URL token is missing/truncated)"
+                    )}
+                    rows={4}
+                    className="mt-2 w-full rounded-lg border border-[var(--border)] bg-[var(--color-surface,#fff)] px-3 py-2 font-mono text-xs text-[var(--text)]"
+                  />
+                </div>
+              </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "none",
-            cursor: submitting ? "not-allowed" : "pointer",
-          }}
-        >
-          {submitting
-            ? t("guardian.verify.actions.verifying", "Verifying...")
-            : t("guardian.verify.actions.verifyConsent", "Verify Consent")}
-        </button>
-      </form>
+              <form onSubmit={onSubmit} className="mt-5 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text)]">
+                    {t("guardian.verify.labels.otp", "OTP")}
+                  </label>
+                  <div className="mt-2">
+                    <Input
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder={t("guardian.verify.placeholders.otp", "Enter OTP")}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                    />
+                  </div>
+                </div>
 
-      {status === "success" && (
-        <div style={{ marginTop: 16, padding: 12, borderRadius: 8, border: "1px solid #cfe9cf" }}>
-          ✅ {message}
-          <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-            {t("guardian.verify.success.closeWindow", "You can safely close this tab/window now.")}
+                {status === "error" ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {message}
+                    <div className="mt-2 text-xs opacity-90">
+                      {t(
+                        "guardian.verify.error.tipLongLink",
+                        "Tip: If you copied a long link, the token might be truncated. Paste the full token above and try again."
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {status === "success" ? (
+                  <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-3 text-sm text-green-800">
+                    {message}
+                    <div className="mt-2 text-xs opacity-90">
+                      {t("guardian.verify.success.closeWindow", "You can safely close this tab/window now.")}
+                    </div>
+                  </div>
+                ) : (
+                  <Button type="submit" disabled={submitting} style={{ width: "100%" }}>
+                    {submitting
+                      ? t("guardian.verify.actions.verifying", "Verifying...")
+                      : t("guardian.verify.actions.verifyConsent", "Verify Consent")}
+                  </Button>
+                )}
+              </form>
+            </Card>
           </div>
         </div>
-      )}
-
-      {status === "error" && (
-        <div style={{ marginTop: 16, padding: 12, borderRadius: 8, border: "1px solid #f3c2c2" }}>
-          ❌ {message}
-          <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-            {t(
-              "guardian.verify.error.tipLongLink",
-              "Tip: If you copied a long link, the token might be truncated. Paste the full token above and try again."
-            )}
-          </div>
-        </div>
-      )}
+      </Page>
     </div>
   );
 }
