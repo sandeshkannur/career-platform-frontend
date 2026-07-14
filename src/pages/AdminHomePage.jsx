@@ -52,6 +52,7 @@ const SECTIONS = [
       { label: "Platform Analytics", route: "/admin/analytics",     desc: "Usage and operational metrics" },
       { label: "DPDP Compliance",    route: "/admin/compliance",    desc: "Consent rates and data-protection status" },
       { label: "Audit Trail",        route: "/admin/audit-trail",   desc: "Append-only log of admin actions" },
+      { label: "Password Reset Logs", route: "/admin/password-reset-logs", desc: "Append-only log of password reset activity" },
     ],
   },
 ];
