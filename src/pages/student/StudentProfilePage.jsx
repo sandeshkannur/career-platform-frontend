@@ -1,6 +1,7 @@
 import { useContent } from "../../locales/LanguageProvider";
 import { useSession } from "../../hooks/useSession";
 import Button from "../../ui/Button";
+import ChangePasswordForm from "../../components/auth/ChangePasswordForm";
 
 export default function StudentProfilePage() {
   const { t } = useContent();
@@ -130,15 +131,8 @@ export default function StudentProfilePage() {
         </div>
       )}
 
-      {/* Coming soon card */}
-      <div style={{ background: "var(--color-surface, #FFFFFF)", border: "1px solid var(--color-border, #6B7280)", borderRadius: 14, padding: 20 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
-          {t("student.profile.comingSoonTitle", "More settings coming soon")}
-        </div>
-        <p style={{ fontSize: 13, color: "var(--color-ink-500, #6B7280)", margin: 0 }}>
-          {t("student.profile.comingSoonBody", "Profile editing, notification preferences, and more will be available in a future release.")}
-        </p>
-      </div>
+      {/* Change password */}
+      <ChangePasswordForm />
 
       {/* Sign out */}
       <div>
