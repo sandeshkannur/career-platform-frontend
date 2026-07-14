@@ -49,10 +49,10 @@ export default function ForgotPasswordPage() {
 
     setSubmitting(true);
     try {
-      const body =
-        channel === "email"
-          ? { channel: "email", email: email.trim() }
-          : { channel: "mobile", phone_number: phone.trim() };
+      const body = {
+        channel,
+        identifier: channel === "email" ? email.trim() : phone.trim(),
+      };
 
       const res = await fetch(buildApiUrl("/v1/auth/forgot-password/request"), {
         method: "POST",
