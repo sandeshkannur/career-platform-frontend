@@ -17,6 +17,8 @@ const HomePage = lazy(() => import("./pages/HomePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordVerifyPage = lazy(() => import("./pages/ResetPasswordVerifyPage"));
 
 /** Admin pages */
 const AdminHomePage = lazy(() => import("./pages/AdminHomePage"));
@@ -118,6 +120,8 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
         <Route path="/guardian/verify" element={<GuardianVerifyPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordVerifyPage />} />
         
         {/* Added standalone route path configuration: */}
         <Route path="/language" element={<LanguageSelectScreen />} />
