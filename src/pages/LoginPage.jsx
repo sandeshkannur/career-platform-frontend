@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const redirectTo = location.state?.from?.pathname;
+  const successMessage = location.state?.successMessage || "";
 
   async function handleEmailSubmit(e) {
     e.preventDefault();
@@ -118,6 +119,12 @@ export default function LoginPage() {
                 </p>
               </div>
 
+              {successMessage ? (
+                <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                  {successMessage}
+                </div>
+              ) : null}
+
               <div className="mt-4 flex gap-2 rounded-lg border border-[var(--border)] p-1">
                 <button
                   type="button"
@@ -162,9 +169,17 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text)]">
-                      {t("auth.login.passwordLabel", "Password")}
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-[var(--text)]">
+                        {t("auth.login.passwordLabel", "Password")}
+                      </label>
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm text-[var(--brand)] hover:underline"
+                      >
+                        {t("auth.login.forgotPasswordLink", "Forgot password?")}
+                      </Link>
+                    </div>
                     <div className="mt-2">
                       <Input
                         type="password"
