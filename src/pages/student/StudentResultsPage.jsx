@@ -206,9 +206,9 @@ function InlineLanguageToggle({ lang, onChange, t }) {
           key={l.code}
           onClick={() => onChange(l.code)}
           style={{
-            padding: "3px 10px", borderRadius: 999,
+            minHeight: 40, padding: "0 14px", borderRadius: 999,
             border: "none", cursor: "pointer",
-            fontSize: 11, fontWeight: 600,
+            fontSize: 12, fontWeight: 600,
             background: lang === l.code ? "var(--color-primary, #2540D9)" : "transparent",
             color: lang === l.code ? "#fff" : "#475569",
             transition: "all .15s",

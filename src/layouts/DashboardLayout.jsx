@@ -55,7 +55,8 @@ export default function DashboardLayout() {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
+            aria-label={t("common.dashboardlayout.openMenu", "Open menu")}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-base"
           >
             ☰
           </button>

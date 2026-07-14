@@ -24,13 +24,13 @@ export default function SkeletonPage({
   return (
     <Page maxWidth={maxWidth}>
       <Card>
-        <div style={styles.headerRow}>
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div style={{ minWidth: 0 }}>
             <h1 style={styles.title}>{title}</h1>
             {subtitle ? <p style={styles.subtitle}>{subtitle}</p> : null}
           </div>
 
-          <div style={styles.actions}>{actions}</div>
+          <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">{actions}</div>
         </div>
 
         <div style={styles.divider} />
@@ -84,12 +84,6 @@ export default function SkeletonPage({
 }
 
 const styles = {
-  headerRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
   title: {
     margin: 0,
     fontSize: "var(--font-size-2xl)",
@@ -101,13 +95,6 @@ const styles = {
     color: "var(--text-muted)",
     fontSize: "var(--font-size-base)",
     lineHeight: "20px",
-  },
-  actions: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
   },
   divider: {
     height: 1,

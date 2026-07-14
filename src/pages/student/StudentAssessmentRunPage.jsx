@@ -806,7 +806,7 @@ export default function StudentAssessmentRunPage() {
       {!showIntro && (
         <>
           {/* Header — Back + Save + Language. NO Next/Submit here. */}
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
             <div className="min-w-0">
               <h1 className="text-xl font-semibold">
                 {t("student.assessmentRun.title", "Assessment")}
@@ -815,7 +815,7 @@ export default function StudentAssessmentRunPage() {
                 {t("student.assessmentRun.subtitle", "Answer honestly. There are no right or wrong answers.")}
               </p>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 md:shrink-0">
               <select
                 value={lang}
                 onChange={handleLangChange}
