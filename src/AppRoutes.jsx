@@ -48,6 +48,7 @@ const AdminSimulatorPage = lazy(() => import("./pages/admin/AdminSimulatorPage")
 const AdminCareerWeightsPage = lazy(() => import("./pages/admin/AdminCareerWeightsPage"));
 const AdminWeightReviewPage = lazy(() => import("./pages/admin/AdminWeightReviewPage"));
 const AdminCounsellorsPage = lazy(() => import("./pages/admin/AdminCounsellorsPage"));
+const AdminPasswordResetLogsPage = lazy(() => import("./pages/admin/AdminPasswordResetLogsPage"));
 
 /** Counsellor pages */
 const CounsellorLayout = lazy(() => import("./layouts/CounsellorLayout"));
@@ -314,6 +315,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowRoles={["admin"]}>
               <AdminCounsellorsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/password-reset-logs"
+          element={
+            <ProtectedRoute allowRoles={["admin"]}>
+              <AdminPasswordResetLogsPage />
             </ProtectedRoute>
           }
         />
