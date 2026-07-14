@@ -289,7 +289,7 @@ export default function StudentConsentPage() {
             {t("consent.page.expired.body", "The consent request your guardian received is no longer valid. Send a new one below.")}
           </div>
         </div>
-      ) : (
+      ) : statusData?.state === "sent" ? (
         <div
           style={{
             marginTop: 12,
@@ -312,6 +312,20 @@ export default function StudentConsentPage() {
               {t("consent.page.waiting.connectionTrouble", "Having trouble checking — we'll keep trying.")}
             </div>
           ) : null}
+        </div>
+      ) : (
+        <div
+          style={{
+            marginTop: 12,
+            padding: 12,
+            border: "1px solid #e2e8f0",
+            background: "#f8fafc",
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ fontSize: 14 }}>
+            {t("consent.page.idle.body", "You haven't requested guardian consent yet. Use \"Send Consent Request\" below to email your guardian.")}
+          </div>
         </div>
       )}
 
