@@ -7,10 +7,12 @@ import { useSession } from "../hooks/useSession";
 import { useNavigate } from "react-router-dom";
 import { useContent } from "../locales/LanguageProvider";
 import { SUPPORTED_LANGS } from "../ui/LanguageSwitcher";
+import usePollUntilStatus from "../hooks/usePollUntilStatus";
 
 import { requestConsent, getConsentStatus, verifyConsent } from "../api/consent";
 
 const DEV_BYPASS_KEY = "__DEV_BYPASS_CONSENT__";
+const VERIFIED_REDIRECT_DELAY_MS = 1500;
 
 export default function StudentConsentPage() {
   const { logout, sessionUser, refreshSession } = useSession();
@@ -28,16 +30,15 @@ export default function StudentConsentPage() {
   const devBypassOn =
     DEV_ONLY && sessionStorage.getItem(DEV_BYPASS_KEY) === "1";
 
-  // Consent data
-  const [statusLoading, setStatusLoading] = useState(false);
+  // Consent request (not status-polling) data
   const [requestLoading, setRequestLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [statusData, setStatusData] = useState(null);
   const [requestData, setRequestData] = useState(null);
+  const [consentExpiresAt, setConsentExpiresAt] = useState(null);
 
-  // Student-side verification helper (optional). Primary flow remains the public guardian page.
+  // Student-side verification helper (DEV/TEST only). Primary flow remains the public guardian page.
   const [showVerifyPanel, setShowVerifyPanel] = useState(false);
   const [verifyToken, setVerifyToken] = useState("");
   const [verifyOtp, setVerifyOtp] = useState("");
@@ -45,6 +46,46 @@ export default function StudentConsentPage() {
   const guardianEmail = useMemo(() => {
     return sessionUser?.guardian_email || null;
   }, [sessionUser]);
+
+  /**
+   * Single place to land once consent is confirmed verified (either via the
+   * automatic status poll or the DEV verify helper). Mirrors the existing
+   * refreshSession-if-available pattern: without a real session refresh
+   * available, a client-side navigate would bounce right back to this page
+   * because ProtectedRoute reads a (now stale) cached session — so the
+   * reliable fallback is a hard navigation, which forces a fresh session
+   * bootstrap.
+   */
+  async function goToDashboardAfterVerified() {
+    if (typeof refreshSession === "function") {
+      await refreshSession();
+      navigate("/student/dashboard", { replace: true });
+    } else {
+      window.location.assign("/student/dashboard");
+    }
+  }
+
+  const {
+    status: statusData,
+    checkNow,
+    hasConnectionTrouble,
+    isExpired: expiredByClock,
+  } = usePollUntilStatus({
+    checkFn: getConsentStatus,
+    isSuccess: (s) => s?.state === "verified",
+    isTerminalFailure: (s) => s?.state === "expired",
+    expiresAt: consentExpiresAt,
+  });
+
+  // Feed the latest known expires_at back into the poller so it can detect
+  // expiry client-side too, and so a fresh "Send Consent Request" (which
+  // returns a new expires_at) makes the poller resume automatically.
+  useEffect(() => {
+    if (statusData?.expires_at && statusData.expires_at !== consentExpiresAt) {
+      setConsentExpiresAt(statusData.expires_at);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusData]);
 
   /**
    * Treat consent as verified if either:
@@ -59,6 +100,8 @@ export default function StudentConsentPage() {
     if (statusData?.state === "verified") return true;
     return false;
   }, [sessionUser, statusData]);
+
+  const isExpired = !consentVerified && (expiredByClock || statusData?.state === "expired");
 
   /**
    * Guardian public verify URL (DEV/TEST convenience).
@@ -89,23 +132,6 @@ export default function StudentConsentPage() {
     alert("Dev bypass disabled. You will be gated again as a minor.");
   }
 
-  async function refreshStatus() {
-    setStatusLoading(true);
-    setError(null);
-    try {
-      const data = await getConsentStatus();
-      setStatusData(data);
-    } catch (e) {
-      setError({
-        status: e?.status,
-        message: e?.message || "Failed to load consent status.",
-        raw: e,
-      });
-    } finally {
-      setStatusLoading(false);
-    }
-  }
-
   async function handleRequestConsent() {
     setRequestLoading(true);
     setError(null);
@@ -130,8 +156,8 @@ export default function StudentConsentPage() {
       const data = await requestConsent({ guardian_locale: guardianLocale });
       setRequestData(data);
 
-      // After requesting, refresh derived status
-      await refreshStatus();
+      if (data?.expires_at) setConsentExpiresAt(data.expires_at);
+      checkNow();
     } catch (e) {
       setError({
         status: e?.status,
@@ -144,9 +170,10 @@ export default function StudentConsentPage() {
   }
 
   /**
-   * Optional helper: allow student/dev tester to verify using token + OTP.
+   * DEV/TEST helper: allow student/dev tester to verify using token + OTP.
    * - Primary flow remains guardian public verify page.
-   * - On success, refresh status + session and redirect to dashboard.
+   * - On success, redirect to dashboard (the status poll will also pick this
+   *   up on its own, but there's no reason to wait for the next tick here).
    */
   async function handleVerifyConsent() {
     setVerifyLoading(true);
@@ -169,16 +196,8 @@ export default function StudentConsentPage() {
         otp: verifyOtp.trim(),
       });
 
-      await refreshStatus();
-
-      // Refresh session so consent_verified reflects immediately in routing.
-      if (typeof refreshSession === "function") {
-        await refreshSession();
-        navigate("/student/dashboard", { replace: true });
-      } else {
-        // Safe fallback if the hook doesn't expose refreshSession
-        window.location.reload();
-      }
+      checkNow();
+      await goToDashboardAfterVerified();
     } catch (e) {
       setError({
         status: e?.status,
@@ -190,12 +209,6 @@ export default function StudentConsentPage() {
     }
   }
 
-  // Load status once on entry
-  useEffect(() => {
-    refreshStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // DEV convenience: auto-fill verify inputs from dev payload, if present.
   useEffect(() => {
     if (requestData?.dev?.token) setVerifyToken(requestData.dev.token);
@@ -205,6 +218,19 @@ export default function StudentConsentPage() {
   // If consent becomes verified, hide the helper panel (clean UX)
   useEffect(() => {
     if (consentVerified) setShowVerifyPanel(false);
+  }, [consentVerified]);
+
+  // Consent just got verified (via the automatic poll) -> brief confirmation,
+  // then redirect. Runs once per transition into "verified".
+  useEffect(() => {
+    if (!consentVerified) return undefined;
+
+    const timer = setTimeout(() => {
+      goToDashboardAfterVerified();
+    }, VERIFIED_REDIRECT_DELAY_MS);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [consentVerified]);
 
   return (
@@ -238,27 +264,61 @@ export default function StudentConsentPage() {
             {t("consent.verified.title", "Parental consent verified ✅")}
           </div>
           <div style={{ marginTop: 6, fontSize: 14, color: "#2b6b3f" }}>
-            {t("consent.page.verifiedContinue", "You may continue to the dashboard.")}
+            {t("consent.page.status.redirecting", "Guardian consent verified! Redirecting…")}
           </div>
           <div style={{ marginTop: 10 }}>
-            <Button onClick={() => navigate("/student/dashboard", { replace: true })}>
+            <Button onClick={goToDashboardAfterVerified}>
               {t("consent.page.actions.goToDashboard", "Go to Dashboard")}
             </Button>
           </div>
         </div>
-      ) : null}
+      ) : isExpired ? (
+        <div
+          style={{
+            marginTop: 12,
+            padding: 12,
+            border: "1px solid #f0d38a",
+            background: "#fffaf0",
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ fontWeight: 800 }}>
+            {t("consent.page.expired.title", "This link has expired")}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 14, color: "#8a6d1f" }}>
+            {t("consent.page.expired.body", "The consent request your guardian received is no longer valid. Send a new one below.")}
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            marginTop: 12,
+            padding: 12,
+            border: "1px solid #cfe0f5",
+            background: "#f5f9ff",
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ fontSize: 14 }}>
+            {t("consent.page.waiting.body", "We've emailed your guardian. This can take a few minutes if they're not near their phone right now.")}
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <Button variant="secondary" onClick={checkNow}>
+              {t("consent.page.actions.checkNow", "Check now")}
+            </Button>
+          </div>
+          {hasConnectionTrouble ? (
+            <div style={{ marginTop: 8, fontSize: 13, color: "#8a6d1f" }}>
+              {t("consent.page.waiting.connectionTrouble", "Having trouble checking — we'll keep trying.")}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {/* Status panel */}
       <div style={{ marginTop: 14, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 800 }}>
-            {t("consent.page.status.statusTitle", "Consent Status")}
-          </div>
-          <Button variant="secondary" onClick={refreshStatus} disabled={statusLoading}>
-            {statusLoading
-              ? t("consent.page.status.refreshing", "Refreshing…")
-              : t("consent.page.status.refresh", "Refresh")}
-          </Button>
+        <div style={{ fontWeight: 800 }}>
+          {t("consent.page.status.statusTitle", "Consent Status")}
         </div>
 
         <div style={{ marginTop: 8, fontSize: 14, color: "#555" }}>
@@ -283,17 +343,11 @@ export default function StudentConsentPage() {
           </div>
         ) : null}
 
-        {statusData ? (
+        {DEV_ONLY && statusData ? (
           <pre style={{ marginTop: 10, marginBottom: 0, padding: 10, overflowX: "auto" }}>
             {JSON.stringify(statusData, null, 2)}
           </pre>
-        ) : (
-          <div style={{ marginTop: 10, color: "#777" }}>
-            {statusLoading
-              ? t("consent.page.status.loading", "Loading…")
-              : t("consent.page.status.empty", "No status loaded yet.")}
-          </div>
-        )}
+        ) : null}
       </div>
 
       {/* Guardian locale selector */}
@@ -338,17 +392,19 @@ export default function StudentConsentPage() {
             : t("consent.page.actions.sendConsentRequest", "Send Consent Request")}
         </Button>
 
-        <Button
-          variant="secondary"
-          onClick={() => setShowVerifyPanel((v) => !v)}
-          disabled={consentVerified}
-        >
-          {t("consent.page.actions.verifyOtpToken", "Verify OTP / Token")}
-        </Button>
+        {DEV_ONLY ? (
+          <Button
+            variant="secondary"
+            onClick={() => setShowVerifyPanel((v) => !v)}
+            disabled={consentVerified}
+          >
+            {t("consent.page.actions.verifyOtpToken", "Verify OTP / Token")}
+          </Button>
+        ) : null}
       </div>
 
-      {/* Optional student-side verify helper */}
-      {showVerifyPanel ? (
+      {/* Optional student-side verify helper (DEV/TEST only) */}
+      {DEV_ONLY && showVerifyPanel ? (
         <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>
             {t("consent.page.verify.helperTitle", "Verify Consent (Helper)")}
