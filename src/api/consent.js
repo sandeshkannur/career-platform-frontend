@@ -29,7 +29,7 @@ export async function requestConsent(payload = {}) {
  * Student checks derived status from consent_logs.
  *
  * Returns a derived state like:
- * { status: "idle" | "sent" | "verified" | "expired", ... }
+ * { state: "idle" | "sent" | "verified" | "expired", expires_at }
  */
 export async function getConsentStatus() {
   return apiGet("/v1/consent/status");
